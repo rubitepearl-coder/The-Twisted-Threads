@@ -19,12 +19,12 @@ const flowerData = [
     imageEmoji: "🌷",
   },
   {
-    name: "Sunflower",
-    description: "Bright and cheerful",
+    name: "Carnation",
+    description: "Ruffled and romantic",
     category: "flower",
-    price: 5.0,
+    price: 4.0,
     inStock: true,
-    imageEmoji: "🌻",
+    imageEmoji: "🌸",
   },
   {
     name: "Daisy",
@@ -100,6 +100,14 @@ const finishedGoodsData = [
     price: 28.0,
     inStock: false,
     imageEmoji: "🏺",
+  },
+  {
+    name: "K-Pop Amigurumi Idol",
+    description: "Chibi crochet idol doll inspired by K-pop aesthetics — pastel outfit, mic in hand",
+    category: "finished_good",
+    price: 42.0,
+    inStock: true,
+    imageEmoji: "🎤",
   },
 ];
 
