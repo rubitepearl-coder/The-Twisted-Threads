@@ -1,0 +1,708 @@
+"use client";
+
+import { useState } from "react";
+
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  inStock: boolean;
+  imageEmoji: string;
+};
+
+type WrapperColor = {
+  id: number;
+  name: string;
+  colorHex: string;
+  inStock: boolean;
+};
+
+type Props = {
+  initialProducts: Product[];
+  initialColors: WrapperColor[];
+};
+
+export default function InventoryClient({
+  initialProducts,
+  initialColors,
+}: Props) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [colors, setColors] = useState<WrapperColor[]>(initialColors);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Product>>({});
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    description: "",
+    category: "flower",
+    price: "",
+    imageEmoji: "🌸",
+  });
+  const [activeTab, setActiveTab] = useState<"products" | "colors">("products");
+
+  const showMessage = (msg: string) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const startEdit = (product: Product) => {
+    setEditingId(product.id);
+    setEditForm({ ...product });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
+
+  const saveEdit = async () => {
+    if (!editingId) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/products/${editingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      const updated = await res.json();
+      setProducts((prev) =>
+        prev.map((p) => (p.id === editingId ? { ...p, ...updated } : p))
+      );
+      setEditingId(null);
+      showMessage("✅ Product updated!");
+    } catch {
+      showMessage("❌ Failed to update product");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleStock = async (product: Product) => {
+    try {
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inStock: !product.inStock }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === product.id ? { ...p, inStock: !p.inStock } : p
+        )
+      );
+      showMessage(
+        `✅ ${product.name} marked as ${!product.inStock ? "In Stock" : "Out of Stock"}`
+      );
+    } catch {
+      showMessage("❌ Failed to update stock");
+    }
+  };
+
+  const deleteProduct = async (id: number, name: string) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      showMessage(`✅ "${name}" deleted`);
+    } catch {
+      showMessage("❌ Failed to delete product");
+    }
+  };
+
+  const addProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newProduct,
+          price: parseFloat(newProduct.price),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to add");
+      const created = await res.json();
+      setProducts((prev) => [...prev, created]);
+      setNewProduct({
+        name: "",
+        description: "",
+        category: "flower",
+        price: "",
+        imageEmoji: "🌸",
+      });
+      setShowAddForm(false);
+      showMessage("✅ Product added!");
+    } catch {
+      showMessage("❌ Failed to add product");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const flowers = products.filter((p) => p.category === "flower");
+  const finishedGoods = products.filter((p) => p.category === "finished_good");
+
+  return (
+    <div>
+      {/* Message Toast */}
+      {message && (
+        <div className="fixed top-4 right-4 bg-[#2d1f14] border border-[#7a4f2e] text-[#f5ede0] px-4 py-3 rounded-xl shadow-lg z-50 text-sm">
+          {message}
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab("products")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeTab === "products"
+              ? "bg-[#7a4f2e] text-white"
+              : "bg-[#2d1f14] text-[#c4a882] hover:text-[#f5ede0] border border-[#5c3a1e]"
+          }`}
+        >
+          Products ({products.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("colors")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeTab === "colors"
+              ? "bg-[#7a4f2e] text-white"
+              : "bg-[#2d1f14] text-[#c4a882] hover:text-[#f5ede0] border border-[#5c3a1e]"
+          }`}
+        >
+          Wrapper Colors ({colors.length})
+        </button>
+      </div>
+
+      {activeTab === "products" && (
+        <div>
+          {/* Add Product Button */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-[#7a4f2e] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#5c3a1e] transition-colors"
+            >
+              {showAddForm ? "Cancel" : "+ Add Product"}
+            </button>
+          </div>
+
+          {/* Add Product Form */}
+          {showAddForm && (
+            <form
+              onSubmit={addProduct}
+              className="bg-[#2d1f14] rounded-2xl p-6 border border-[#7a4f2e] mb-6"
+            >
+              <h3 className="text-[#f5ede0] font-bold mb-4">
+                Add New Product
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.name}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, name: e.target.value }))
+                    }
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Price ($) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={newProduct.price}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, price: e.target.value }))
+                    }
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={newProduct.category}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, category: e.target.value }))
+                    }
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  >
+                    <option value="flower">Flower (stem)</option>
+                    <option value="finished_good">Finished Good</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Emoji
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.imageEmoji}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({
+                        ...p,
+                        imageEmoji: e.target.value,
+                      }))
+                    }
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.description}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({
+                        ...p,
+                        description: e.target.value,
+                      }))
+                    }
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="mt-4 bg-[#7a4f2e] text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-[#5c3a1e] transition-colors disabled:opacity-50"
+              >
+                {saving ? "Adding..." : "Add Product"}
+              </button>
+            </form>
+          )}
+
+          {/* Flowers */}
+          {flowers.length > 0 && (
+            <section className="mb-8">
+              <h3 className="text-[#c4a882] text-sm font-medium uppercase tracking-wider mb-3">
+                🌸 Flower Stems ({flowers.length})
+              </h3>
+              <ProductTable
+                products={flowers}
+                editingId={editingId}
+                editForm={editForm}
+                saving={saving}
+                onEdit={startEdit}
+                onCancel={cancelEdit}
+                onSave={saveEdit}
+                onToggleStock={toggleStock}
+                onDelete={deleteProduct}
+                onEditFormChange={(field, value) =>
+                  setEditForm((prev) => ({ ...prev, [field]: value }))
+                }
+              />
+            </section>
+          )}
+
+          {/* Finished Goods */}
+          {finishedGoods.length > 0 && (
+            <section className="mb-8">
+              <h3 className="text-[#c4a882] text-sm font-medium uppercase tracking-wider mb-3">
+                🎁 Finished Goods ({finishedGoods.length})
+              </h3>
+              <ProductTable
+                products={finishedGoods}
+                editingId={editingId}
+                editForm={editForm}
+                saving={saving}
+                onEdit={startEdit}
+                onCancel={cancelEdit}
+                onSave={saveEdit}
+                onToggleStock={toggleStock}
+                onDelete={deleteProduct}
+                onEditFormChange={(field, value) =>
+                  setEditForm((prev) => ({ ...prev, [field]: value }))
+                }
+              />
+            </section>
+          )}
+
+          {products.length === 0 && (
+            <div className="bg-[#2d1f14] rounded-2xl p-8 text-center border border-[#5c3a1e]">
+              <p className="text-[#7a5c3e]">
+                No products yet. Add your first product above!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "colors" && (
+        <WrapperColorsTab colors={colors} setColors={setColors} showMessage={showMessage} />
+      )}
+    </div>
+  );
+}
+
+function ProductTable({
+  products,
+  editingId,
+  editForm,
+  saving,
+  onEdit,
+  onCancel,
+  onSave,
+  onToggleStock,
+  onDelete,
+  onEditFormChange,
+}: {
+  products: Product[];
+  editingId: number | null;
+  editForm: Partial<Product>;
+  saving: boolean;
+  onEdit: (p: Product) => void;
+  onCancel: () => void;
+  onSave: () => void;
+  onToggleStock: (p: Product) => void;
+  onDelete: (id: number, name: string) => void;
+  onEditFormChange: (field: string, value: string | number | boolean) => void;
+}) {
+  return (
+    <div className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] overflow-hidden">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-[#5c3a1e]">
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Product
+            </th>
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Price
+            </th>
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Stock
+            </th>
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product) => (
+            <tr
+              key={product.id}
+              className="border-b border-[#3d2c1e] last:border-0"
+            >
+              {editingId === product.id ? (
+                <>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editForm.imageEmoji ?? ""}
+                        onChange={(e) =>
+                          onEditFormChange("imageEmoji", e.target.value)
+                        }
+                        className="w-12 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm text-center"
+                      />
+                      <input
+                        type="text"
+                        value={editForm.name ?? ""}
+                        onChange={(e) =>
+                          onEditFormChange("name", e.target.value)
+                        }
+                        className="flex-1 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={editForm.description ?? ""}
+                      onChange={(e) =>
+                        onEditFormChange("description", e.target.value)
+                      }
+                      placeholder="Description"
+                      className="mt-1 w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#c4a882] text-xs"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={editForm.price ?? ""}
+                      onChange={(e) =>
+                        onEditFormChange("price", parseFloat(e.target.value))
+                      }
+                      className="w-24 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-[#c4a882] text-sm">
+                      {product.inStock ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={onSave}
+                        disabled={saving}
+                        className="text-xs bg-green-800 text-green-200 px-3 py-1 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50"
+                      >
+                        {saving ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        onClick={onCancel}
+                        className="text-xs bg-[#3d2c1e] text-[#c4a882] px-3 py-1 rounded-full hover:bg-[#5c3a1e] transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{product.imageEmoji}</span>
+                      <div>
+                        <p className="text-[#f5ede0] text-sm font-medium">
+                          {product.name}
+                        </p>
+                        {product.description && (
+                          <p className="text-[#7a5c3e] text-xs">
+                            {product.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-[#c4a882] text-sm font-medium">
+                    ${product.price.toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => onToggleStock(product)}
+                      className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+                        product.inStock
+                          ? "bg-green-900/40 text-green-300 border-green-700 hover:bg-green-900/60"
+                          : "bg-red-900/40 text-red-300 border-red-700 hover:bg-red-900/60"
+                      }`}
+                    >
+                      {product.inStock ? "✓ In Stock" : "✗ Out of Stock"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onEdit(product)}
+                        className="text-xs bg-[#3d2c1e] text-[#c4a882] px-3 py-1 rounded-full hover:bg-[#5c3a1e] transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => onDelete(product.id, product.name)}
+                        className="text-xs bg-red-900/30 text-red-400 px-3 py-1 rounded-full hover:bg-red-900/50 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function WrapperColorsTab({
+  colors,
+  setColors,
+  showMessage,
+}: {
+  colors: WrapperColor[];
+  setColors: React.Dispatch<React.SetStateAction<WrapperColor[]>>;
+  showMessage: (msg: string) => void;
+}) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [newColor, setNewColor] = useState({ name: "", colorHex: "#ffffff" });
+  const [saving, setSaving] = useState(false);
+
+  const toggleColorStock = async (color: WrapperColor) => {
+    try {
+      const res = await fetch(`/api/wrapper-colors/${color.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inStock: !color.inStock }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setColors((prev) =>
+        prev.map((c) =>
+          c.id === color.id ? { ...c, inStock: !c.inStock } : c
+        )
+      );
+      showMessage(`✅ ${color.name} updated`);
+    } catch {
+      showMessage("❌ Failed to update");
+    }
+  };
+
+  const addColor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch("/api/wrapper-colors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newColor),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const created = await res.json();
+      setColors((prev) => [...prev, created]);
+      setNewColor({ name: "", colorHex: "#ffffff" });
+      setShowAdd(false);
+      showMessage("✅ Color added!");
+    } catch {
+      showMessage("❌ Failed to add color");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setShowAdd(!showAdd)}
+          className="bg-[#7a4f2e] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#5c3a1e] transition-colors"
+        >
+          {showAdd ? "Cancel" : "+ Add Color"}
+        </button>
+      </div>
+
+      {showAdd && (
+        <form
+          onSubmit={addColor}
+          className="bg-[#2d1f14] rounded-2xl p-6 border border-[#7a4f2e] mb-6"
+        >
+          <h3 className="text-[#f5ede0] font-bold mb-4">Add Wrapper Color</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Color Name *
+              </label>
+              <input
+                type="text"
+                value={newColor.name}
+                onChange={(e) =>
+                  setNewColor((c) => ({ ...c, name: e.target.value }))
+                }
+                placeholder="e.g. Sage Green"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Color (hex)
+              </label>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="color"
+                  value={newColor.colorHex}
+                  onChange={(e) =>
+                    setNewColor((c) => ({ ...c, colorHex: e.target.value }))
+                  }
+                  className="w-10 h-10 rounded cursor-pointer border border-[#5c3a1e]"
+                />
+                <input
+                  type="text"
+                  value={newColor.colorHex}
+                  onChange={(e) =>
+                    setNewColor((c) => ({ ...c, colorHex: e.target.value }))
+                  }
+                  className="flex-1 bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="mt-4 bg-[#7a4f2e] text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-[#5c3a1e] transition-colors disabled:opacity-50"
+          >
+            {saving ? "Adding..." : "Add Color"}
+          </button>
+        </form>
+      )}
+
+      <div className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] overflow-hidden">
+        {colors.length === 0 ? (
+          <div className="p-8 text-center text-[#7a5c3e]">
+            No wrapper colors yet.
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#5c3a1e]">
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Color
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Stock
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {colors.map((color) => (
+                <tr
+                  key={color.id}
+                  className="border-b border-[#3d2c1e] last:border-0"
+                >
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="w-8 h-8 rounded-full border border-[#5c3a1e]"
+                        style={{ backgroundColor: color.colorHex }}
+                      />
+                      <div>
+                        <p className="text-[#f5ede0] text-sm font-medium">
+                          {color.name}
+                        </p>
+                        <p className="text-[#7a5c3e] text-xs">{color.colorHex}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => toggleColorStock(color)}
+                      className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+                        color.inStock
+                          ? "bg-green-900/40 text-green-300 border-green-700 hover:bg-green-900/60"
+                          : "bg-red-900/40 text-red-300 border-red-700 hover:bg-red-900/60"
+                      }`}
+                    >
+                      {color.inStock ? "✓ In Stock" : "✗ Out of Stock"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}

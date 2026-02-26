@@ -1,0 +1,50 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
+import { products } from "@/db/schema";
+
+export async function GET() {
+  try {
+    const allProducts = await db.select().from(products);
+    return NextResponse.json(allProducts);
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, description, category, price, inStock, imageEmoji } = body;
+
+    if (!name || price === undefined || price === null) {
+      return NextResponse.json(
+        { error: "Name and price are required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await db
+      .insert(products)
+      .values({
+        name,
+        description: description ?? "",
+        category: category ?? "flower",
+        price: parseFloat(price),
+        inStock: inStock ?? true,
+        imageEmoji: imageEmoji ?? "🌸",
+      })
+      .returning();
+
+    return NextResponse.json(result[0], { status: 201 });
+  } catch (error) {
+    console.error("Failed to create product:", error);
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
+  }
+}

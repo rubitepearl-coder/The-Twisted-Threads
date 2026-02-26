@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+:root {
+  --background: #faf7f2;
+  --foreground: #3d2c1e;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
