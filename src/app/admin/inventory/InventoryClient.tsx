@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 type Product = {
   id: number;
@@ -10,12 +11,14 @@ type Product = {
   price: number;
   inStock: boolean;
   imageEmoji: string;
+  imageUrl: string | null;
 };
 
 type WrapperColor = {
   id: number;
   name: string;
   colorHex: string;
+  imageUrl: string | null;
   inStock: boolean;
 };
 
@@ -41,6 +44,7 @@ export default function InventoryClient({
     category: "flower",
     price: "",
     imageEmoji: "🌸",
+    imageUrl: "",
   });
   const [activeTab, setActiveTab] = useState<"products" | "colors">("products");
 
@@ -136,6 +140,7 @@ export default function InventoryClient({
         category: "flower",
         price: "",
         imageEmoji: "🌸",
+        imageUrl: "",
       });
       setShowAddForm(false);
       showMessage("✅ Product added!");
@@ -251,7 +256,7 @@ export default function InventoryClient({
                 </div>
                 <div>
                   <label className="block text-xs text-[#c4a882] mb-1">
-                    Emoji
+                    Emoji (fallback)
                   </label>
                   <input
                     type="text"
@@ -264,6 +269,32 @@ export default function InventoryClient({
                     }
                     className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
                   />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Photo URL <span className="text-[#7a5c3e]">(square image, e.g. https://...)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={newProduct.imageUrl}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, imageUrl: e.target.value }))
+                    }
+                    placeholder="https://example.com/photo.jpg"
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                  {newProduct.imageUrl && (
+                    <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-[#5c3a1e]">
+                      <Image
+                        src={newProduct.imageUrl}
+                        alt="Preview"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-xs text-[#c4a882] mb-1">
@@ -387,6 +418,9 @@ function ProductTable({
               Product
             </th>
             <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Photo URL
+            </th>
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
               Price
             </th>
             <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
@@ -414,6 +448,7 @@ function ProductTable({
                           onEditFormChange("imageEmoji", e.target.value)
                         }
                         className="w-12 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm text-center"
+                        title="Emoji"
                       />
                       <input
                         type="text"
@@ -433,6 +468,29 @@ function ProductTable({
                       placeholder="Description"
                       className="mt-1 w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#c4a882] text-xs"
                     />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="url"
+                      value={editForm.imageUrl ?? ""}
+                      onChange={(e) =>
+                        onEditFormChange("imageUrl", e.target.value)
+                      }
+                      placeholder="https://..."
+                      className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
+                    />
+                    {editForm.imageUrl && (
+                      <div className="mt-1 w-10 h-10 rounded overflow-hidden border border-[#5c3a1e]">
+                        <Image
+                          src={editForm.imageUrl}
+                          alt="Preview"
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <input
@@ -473,7 +531,20 @@ function ProductTable({
                 <>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl">{product.imageEmoji}</span>
+                      {product.imageUrl ? (
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-[#5c3a1e] flex-shrink-0">
+                          <Image
+                            src={product.imageUrl}
+                            alt={product.name}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-2xl">{product.imageEmoji}</span>
+                      )}
                       <div>
                         <p className="text-[#f5ede0] text-sm font-medium">
                           {product.name}
@@ -485,6 +556,15 @@ function ProductTable({
                         )}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {product.imageUrl ? (
+                      <span className="text-[#7a5c3e] text-xs truncate max-w-[120px] block" title={product.imageUrl}>
+                        ✓ Set
+                      </span>
+                    ) : (
+                      <span className="text-[#5c3a1e] text-xs italic">No photo</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-[#c4a882] text-sm font-medium">
                     ${product.price.toFixed(2)}
@@ -537,8 +617,10 @@ function WrapperColorsTab({
   showMessage: (msg: string) => void;
 }) {
   const [showAdd, setShowAdd] = useState(false);
-  const [newColor, setNewColor] = useState({ name: "", colorHex: "#ffffff" });
+  const [newColor, setNewColor] = useState({ name: "", colorHex: "#ffffff", imageUrl: "" });
   const [saving, setSaving] = useState(false);
+  const [editingColorId, setEditingColorId] = useState<number | null>(null);
+  const [editColorForm, setEditColorForm] = useState<Partial<WrapperColor>>({});
 
   const toggleColorStock = async (color: WrapperColor) => {
     try {
@@ -559,6 +641,51 @@ function WrapperColorsTab({
     }
   };
 
+  const startEditColor = (color: WrapperColor) => {
+    setEditingColorId(color.id);
+    setEditColorForm({ ...color });
+  };
+
+  const cancelEditColor = () => {
+    setEditingColorId(null);
+    setEditColorForm({});
+  };
+
+  const saveEditColor = async () => {
+    if (!editingColorId) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/wrapper-colors/${editingColorId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editColorForm),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const updated = await res.json();
+      setColors((prev) =>
+        prev.map((c) => (c.id === editingColorId ? { ...c, ...updated } : c))
+      );
+      setEditingColorId(null);
+      showMessage("✅ Color updated!");
+    } catch {
+      showMessage("❌ Failed to update color");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteColor = async (id: number, name: string) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/wrapper-colors/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed");
+      setColors((prev) => prev.filter((c) => c.id !== id));
+      showMessage(`✅ "${name}" deleted`);
+    } catch {
+      showMessage("❌ Failed to delete color");
+    }
+  };
+
   const addColor = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -571,7 +698,7 @@ function WrapperColorsTab({
       if (!res.ok) throw new Error("Failed");
       const created = await res.json();
       setColors((prev) => [...prev, created]);
-      setNewColor({ name: "", colorHex: "#ffffff" });
+      setNewColor({ name: "", colorHex: "#ffffff", imageUrl: "" });
       setShowAdd(false);
       showMessage("✅ Color added!");
     } catch {
@@ -637,6 +764,32 @@ function WrapperColorsTab({
                 />
               </div>
             </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Photo URL <span className="text-[#7a5c3e]">(square image of the wrapper)</span>
+              </label>
+              <input
+                type="url"
+                value={newColor.imageUrl}
+                onChange={(e) =>
+                  setNewColor((c) => ({ ...c, imageUrl: e.target.value }))
+                }
+                placeholder="https://example.com/wrapper.jpg"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              />
+              {newColor.imageUrl && (
+                <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-[#5c3a1e]">
+                  <Image
+                    src={newColor.imageUrl}
+                    alt="Preview"
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <button
             type="submit"
@@ -661,7 +814,13 @@ function WrapperColorsTab({
                   Color
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Photo URL
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
                   Stock
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -671,32 +830,140 @@ function WrapperColorsTab({
                   key={color.id}
                   className="border-b border-[#3d2c1e] last:border-0"
                 >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="w-8 h-8 rounded-full border border-[#5c3a1e]"
-                        style={{ backgroundColor: color.colorHex }}
-                      />
-                      <div>
-                        <p className="text-[#f5ede0] text-sm font-medium">
-                          {color.name}
-                        </p>
-                        <p className="text-[#7a5c3e] text-xs">{color.colorHex}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => toggleColorStock(color)}
-                      className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
-                        color.inStock
-                          ? "bg-green-900/40 text-green-300 border-green-700 hover:bg-green-900/60"
-                          : "bg-red-900/40 text-red-300 border-red-700 hover:bg-red-900/60"
-                      }`}
-                    >
-                      {color.inStock ? "✓ In Stock" : "✗ Out of Stock"}
-                    </button>
-                  </td>
+                  {editingColorId === color.id ? (
+                    <>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={editColorForm.colorHex ?? "#ffffff"}
+                            onChange={(e) =>
+                              setEditColorForm((f) => ({ ...f, colorHex: e.target.value }))
+                            }
+                            className="w-8 h-8 rounded cursor-pointer border border-[#5c3a1e]"
+                          />
+                          <input
+                            type="text"
+                            value={editColorForm.name ?? ""}
+                            onChange={(e) =>
+                              setEditColorForm((f) => ({ ...f, name: e.target.value }))
+                            }
+                            className="flex-1 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="url"
+                          value={editColorForm.imageUrl ?? ""}
+                          onChange={(e) =>
+                            setEditColorForm((f) => ({ ...f, imageUrl: e.target.value }))
+                          }
+                          placeholder="https://..."
+                          className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
+                        />
+                        {editColorForm.imageUrl && (
+                          <div className="mt-1 w-10 h-10 rounded overflow-hidden border border-[#5c3a1e]">
+                            <Image
+                              src={editColorForm.imageUrl}
+                              alt="Preview"
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[#c4a882] text-sm">
+                          {color.inStock ? "In Stock" : "Out of Stock"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={saveEditColor}
+                            disabled={saving}
+                            className="text-xs bg-green-800 text-green-200 px-3 py-1 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50"
+                          >
+                            {saving ? "Saving..." : "Save"}
+                          </button>
+                          <button
+                            onClick={cancelEditColor}
+                            className="text-xs bg-[#3d2c1e] text-[#c4a882] px-3 py-1 rounded-full hover:bg-[#5c3a1e] transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {color.imageUrl ? (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-[#5c3a1e] flex-shrink-0">
+                              <Image
+                                src={color.imageUrl}
+                                alt={color.name}
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-cover"
+                                unoptimized
+                              />
+                            </div>
+                          ) : (
+                            <span
+                              className="w-8 h-8 rounded-full border border-[#5c3a1e] flex-shrink-0"
+                              style={{ backgroundColor: color.colorHex }}
+                            />
+                          )}
+                          <div>
+                            <p className="text-[#f5ede0] text-sm font-medium">
+                              {color.name}
+                            </p>
+                            <p className="text-[#7a5c3e] text-xs">{color.colorHex}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {color.imageUrl ? (
+                          <span className="text-[#7a5c3e] text-xs">✓ Set</span>
+                        ) : (
+                          <span className="text-[#5c3a1e] text-xs italic">No photo</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => toggleColorStock(color)}
+                          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+                            color.inStock
+                              ? "bg-green-900/40 text-green-300 border-green-700 hover:bg-green-900/60"
+                              : "bg-red-900/40 text-red-300 border-red-700 hover:bg-red-900/60"
+                          }`}
+                        >
+                          {color.inStock ? "✓ In Stock" : "✗ Out of Stock"}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startEditColor(color)}
+                            className="text-xs bg-[#3d2c1e] text-[#c4a882] px-3 py-1 rounded-full hover:bg-[#5c3a1e] transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteColor(color.id, color.name)}
+                            className="text-xs bg-red-900/30 text-red-400 px-3 py-1 rounded-full hover:bg-red-900/50 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>

@@ -8,6 +8,7 @@ export const products = sqliteTable("products", {
   price: real("price").notNull(),
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
   imageEmoji: text("image_emoji").notNull().default("🌸"),
+  imageUrl: text("image_url").default(""),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
@@ -16,6 +17,7 @@ export const wrapperColors = sqliteTable("wrapper_colors", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   colorHex: text("color_hex").notNull(),
+  imageUrl: text("image_url").default(""),
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
 });
 
@@ -23,10 +25,13 @@ export const orders = sqliteTable("orders", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
+  customerAddress: text("customer_address").notNull().default(""),
   orderType: text("order_type").notNull().default("bouquet"), // 'bouquet' | 'shop'
-  bouquetItems: text("bouquet_items").notNull().default("[]"), // JSON array of {productId, name, quantity}
+  bouquetItems: text("bouquet_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl}
   wrapperColorId: integer("wrapper_color_id"),
   wrapperColorName: text("wrapper_color_name"),
+  wrapperColorHex: text("wrapper_color_hex"),
+  wrapperColorImageUrl: text("wrapper_color_image_url"),
   totalPrice: real("total_price").notNull(),
   status: text("status").notNull().default("pending"), // 'pending' | 'in_progress' | 'completed' | 'cancelled'
   notes: text("notes").default(""),

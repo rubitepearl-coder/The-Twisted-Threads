@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 type Order = {
   id: number;
   customerName: string;
   customerEmail: string;
+  customerAddress: string | null;
   orderType: string;
   bouquetItems: string;
   wrapperColorName: string | null;
+  wrapperColorHex: string | null;
+  wrapperColorImageUrl: string | null;
   totalPrice: number;
   status: string;
   notes: string | null;
@@ -19,6 +23,8 @@ type BouquetItem = {
   name: string;
   quantity: number;
   price: number;
+  imageEmoji?: string;
+  imageUrl?: string;
 };
 
 export default function OrdersClient({
@@ -144,6 +150,11 @@ export default function OrdersClient({
                       <p className="text-[#c4a882] text-sm">
                         {order.customerName} · {order.customerEmail}
                       </p>
+                      {order.customerAddress && (
+                        <p className="text-[#7a5c3e] text-xs mt-0.5 truncate max-w-xs">
+                          📍 {order.customerAddress.split("\n")[0]}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -162,9 +173,9 @@ export default function OrdersClient({
                 {/* Expanded Details */}
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-[#3d2c1e]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                      {/* Bouquet Recipe */}
-                      <div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                      {/* Bouquet Recipe with thumbnails */}
+                      <div className="md:col-span-2">
                         <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
                           🌸 Bouquet Recipe
                         </h4>
@@ -173,54 +184,128 @@ export default function OrdersClient({
                             No items recorded
                           </p>
                         ) : (
-                          <ul className="space-y-1">
+                          <div className="space-y-2">
                             {items.map((item, i) => (
-                              <li
-                                key={i}
-                                className="flex justify-between text-sm"
-                              >
-                                <span className="text-[#e8d5be]">
-                                  {item.name} × {item.quantity}
-                                </span>
-                                <span className="text-[#c4a882]">
+                              <div key={i} className="flex items-center gap-3">
+                                {/* Square thumbnail */}
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
+                                  {item.imageUrl ? (
+                                    <Image
+                                      src={item.imageUrl}
+                                      alt={item.name}
+                                      width={40}
+                                      height={40}
+                                      className="w-full h-full object-cover"
+                                      unoptimized
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                      {item.imageEmoji ?? "🌸"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <span className="text-[#e8d5be] text-sm font-medium">
+                                    {item.name}
+                                  </span>
+                                  <span className="text-[#7a5c3e] text-xs ml-2">
+                                    × {item.quantity}
+                                  </span>
+                                </div>
+                                <span className="text-[#c4a882] text-sm flex-shrink-0">
                                   ${(item.price * item.quantity).toFixed(2)}
                                 </span>
-                              </li>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         )}
+
+                        {/* Wrapper color */}
                         {order.wrapperColorName && (
-                          <p className="text-sm text-[#7a5c3e] mt-2 pt-2 border-t border-[#3d2c1e]">
-                            Wrapper: {order.wrapperColorName}
-                          </p>
+                          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#3d2c1e]">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e]">
+                              {order.wrapperColorImageUrl ? (
+                                <Image
+                                  src={order.wrapperColorImageUrl}
+                                  alt={order.wrapperColorName}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div
+                                  className="w-full h-full"
+                                  style={{ backgroundColor: order.wrapperColorHex ?? "#e8d5be" }}
+                                />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-[#e8d5be] text-sm font-medium">
+                                {order.wrapperColorName}
+                              </p>
+                              <p className="text-[#7a5c3e] text-xs">Wrapper color</p>
+                            </div>
+                          </div>
                         )}
+
+                        {/* Total */}
+                        <div className="mt-3 pt-3 border-t border-[#3d2c1e] flex justify-between">
+                          <span className="text-[#c4a882] text-sm">Total</span>
+                          <span className="text-[#f5ede0] font-bold">
+                            ${order.totalPrice.toFixed(2)}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Status Update */}
-                      <div>
-                        <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
-                          Update Status
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {[
-                            { value: "pending", label: "Pending" },
-                            { value: "in_progress", label: "In Progress" },
-                            { value: "completed", label: "Completed" },
-                            { value: "cancelled", label: "Cancelled" },
-                          ].map((s) => (
-                            <button
-                              key={s.value}
-                              onClick={() => updateStatus(order.id, s.value)}
-                              disabled={order.status === s.value}
-                              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                                order.status === s.value
-                                  ? "bg-[#7a4f2e] text-white border-[#7a4f2e]"
-                                  : "bg-[#1e1410] text-[#c4a882] border-[#5c3a1e] hover:border-[#7a4f2e] hover:text-[#f5ede0]"
-                              }`}
-                            >
-                              {s.label}
-                            </button>
-                          ))}
+                      {/* Right column: Customer info + Status */}
+                      <div className="space-y-4">
+                        {/* Customer / Shipping Info */}
+                        <div>
+                          <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
+                            📦 Ship To
+                          </h4>
+                          <div className="space-y-1.5">
+                            <p className="text-[#f5ede0] text-sm font-medium">
+                              {order.customerName}
+                            </p>
+                            <p className="text-[#c4a882] text-xs">
+                              {order.customerEmail}
+                            </p>
+                            {order.customerAddress && (
+                              <p className="text-[#e8d5be] text-sm whitespace-pre-line mt-1 bg-[#1e1410] rounded-lg p-2 border border-[#3d2c1e]">
+                                {order.customerAddress}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status Update */}
+                        <div>
+                          <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
+                            Update Status
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { value: "pending", label: "Pending" },
+                              { value: "in_progress", label: "In Progress" },
+                              { value: "completed", label: "Completed" },
+                              { value: "cancelled", label: "Cancelled" },
+                            ].map((s) => (
+                              <button
+                                key={s.value}
+                                onClick={() => updateStatus(order.id, s.value)}
+                                disabled={order.status === s.value}
+                                className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                                  order.status === s.value
+                                    ? "bg-[#7a4f2e] text-white border-[#7a4f2e]"
+                                    : "bg-[#1e1410] text-[#c4a882] border-[#5c3a1e] hover:border-[#7a4f2e] hover:text-[#f5ede0]"
+                                }`}
+                              >
+                                {s.label}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>

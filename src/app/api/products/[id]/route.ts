@@ -18,6 +18,7 @@ export async function PATCH(
     if (body.price !== undefined) updateData.price = parseFloat(body.price);
     if (body.inStock !== undefined) updateData.inStock = body.inStock;
     if (body.imageEmoji !== undefined) updateData.imageEmoji = body.imageEmoji;
+    if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
     if (body.category !== undefined) updateData.category = body.category;
 
     updateData.updatedAt = new Date();

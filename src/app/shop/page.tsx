@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function ShopPage() {
   let finishedGoods: typeof products.$inferSelect[] = [];
@@ -89,29 +90,47 @@ export default async function ShopPage() {
                   {flowers.map((flower) => (
                     <div
                       key={flower.id}
-                      className="bg-white rounded-2xl p-4 text-center border border-[#e8d5be] hover:shadow-md transition-shadow"
+                      className="bg-white rounded-2xl overflow-hidden border border-[#e8d5be] hover:shadow-md transition-shadow"
                     >
-                      <div className="text-5xl mb-3">{flower.imageEmoji}</div>
-                      <h3 className="font-semibold text-[#3d2c1e] mb-1">
-                        {flower.name}
-                      </h3>
-                      {flower.description && (
-                        <p className="text-xs text-[#a07850] mb-2">
-                          {flower.description}
+                      {/* Square image */}
+                      <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]">
+                        {flower.imageUrl ? (
+                          <Image
+                            src={flower.imageUrl}
+                            alt={flower.name}
+                            width={300}
+                            height={300}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-5xl">
+                            {flower.imageEmoji}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 text-center">
+                        <h3 className="font-semibold text-[#3d2c1e] mb-1 text-sm">
+                          {flower.name}
+                        </h3>
+                        {flower.description && (
+                          <p className="text-xs text-[#a07850] mb-2 line-clamp-2">
+                            {flower.description}
+                          </p>
+                        )}
+                        <p className="text-[#7a4f2e] font-bold text-sm">
+                          ${flower.price.toFixed(2)}
+                          <span className="text-xs font-normal text-[#a07850]">
+                            {" "}
+                            / stem
+                          </span>
                         </p>
-                      )}
-                      <p className="text-[#7a4f2e] font-bold">
-                        ${flower.price.toFixed(2)}
-                        <span className="text-xs font-normal text-[#a07850]">
-                          {" "}
-                          / stem
-                        </span>
-                      </p>
-                      {!flower.inStock && (
-                        <span className="inline-block mt-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                          Out of Stock
-                        </span>
-                      )}
+                        {!flower.inStock && (
+                          <span className="inline-block mt-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                            Out of Stock
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -148,8 +167,22 @@ function ProductCard({
 }) {
   return (
     <div className="bg-white rounded-2xl border border-[#e8d5be] overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="bg-[#f5ede0] h-40 flex items-center justify-center text-7xl">
-        {product.imageEmoji}
+      {/* Square image */}
+      <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]">
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            width={400}
+            height={400}
+            className="w-full h-full object-cover"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-7xl">
+            {product.imageEmoji}
+          </div>
+        )}
       </div>
       <div className="p-5">
         <h3 className="font-bold text-[#3d2c1e] text-lg mb-1">

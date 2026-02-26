@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type Flower = {
   id: number;
@@ -9,6 +10,7 @@ type Flower = {
   price: number;
   inStock: boolean;
   imageEmoji: string;
+  imageUrl: string | null;
   description: string;
 };
 
@@ -16,6 +18,7 @@ type WrapperColor = {
   id: number;
   name: string;
   colorHex: string;
+  imageUrl: string | null;
   inStock: boolean;
 };
 
@@ -32,6 +35,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   );
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,6 +71,10 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
       setError("Please enter your name and email.");
       return;
     }
+    if (!customerAddress.trim()) {
+      setError("Please enter your delivery address.");
+      return;
+    }
 
     setSubmitting(true);
     setError("");
@@ -77,6 +85,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
         name: f.name,
         quantity: quantities[f.id],
         price: f.price,
+        imageEmoji: f.imageEmoji,
+        imageUrl: f.imageUrl ?? "",
       }));
 
       const res = await fetch("/api/orders", {
@@ -85,10 +95,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
         body: JSON.stringify({
           customerName: customerName.trim(),
           customerEmail: customerEmail.trim(),
+          customerAddress: customerAddress.trim(),
           orderType: "bouquet",
           bouquetItems,
           wrapperColorId: selectedWrapper,
           wrapperColorName: selectedWrapperObj?.name,
+          wrapperColorHex: selectedWrapperObj?.colorHex,
+          wrapperColorImageUrl: selectedWrapperObj?.imageUrl ?? "",
           totalPrice,
         }),
       });
@@ -152,8 +165,22 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-4xl">{flower.imageEmoji}</span>
-                        <div className="flex-1">
+                        {/* Square image or emoji fallback */}
+                        {flower.imageUrl ? (
+                          <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be]">
+                            <Image
+                              src={flower.imageUrl}
+                              alt={flower.name}
+                              width={56}
+                              height={56}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-4xl flex-shrink-0">{flower.imageEmoji}</span>
+                        )}
+                        <div className="flex-1 min-w-0">
                           <p className="font-semibold text-[#3d2c1e]">
                             {flower.name}
                           </p>
@@ -161,12 +188,12 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                             ${flower.price.toFixed(2)} / stem
                           </p>
                           {flower.description && (
-                            <p className="text-xs text-[#a07850] mt-0.5">
+                            <p className="text-xs text-[#a07850] mt-0.5 truncate">
                               {flower.description}
                             </p>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           <button
                             type="button"
                             onClick={() => updateQuantity(flower.id, -1)}
@@ -218,16 +245,29 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                         key={color.id}
                         type="button"
                         onClick={() => setSelectedWrapper(color.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all font-medium text-sm ${
+                        className={`flex items-center gap-2 px-3 py-2 rounded-2xl border-2 transition-all font-medium text-sm ${
                           selectedWrapper === color.id
                             ? "border-[#7a4f2e] bg-[#f5ede0] text-[#3d2c1e] shadow-md"
                             : "border-[#e8d5be] bg-white text-[#6b4c30] hover:border-[#c4a882]"
                         }`}
                       >
-                        <span
-                          className="w-5 h-5 rounded-full border border-gray-200 inline-block"
-                          style={{ backgroundColor: color.colorHex }}
-                        />
+                        {color.imageUrl ? (
+                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                            <Image
+                              src={color.imageUrl}
+                              alt={color.name}
+                              width={32}
+                              height={32}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <span
+                            className="w-5 h-5 rounded-full border border-gray-200 inline-block flex-shrink-0"
+                            style={{ backgroundColor: color.colorHex }}
+                          />
+                        )}
                         {color.name}
                       </button>
                     ))}
@@ -244,12 +284,12 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                 Your Details
               </h2>
               <p className="text-[#6b4c30] text-sm mb-5 ml-10">
-                So we can reach you about your order.
+                So we know where to send your bouquet.
               </p>
               <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Your Name
+                    Your Name *
                   </label>
                   <input
                     type="text"
@@ -262,7 +302,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Email Address
+                    Email Address *
                   </label>
                   <input
                     type="email"
@@ -270,6 +310,19 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="jane@example.com"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                    Delivery Address *
+                  </label>
+                  <textarea
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    placeholder="123 Main St, Apt 4B&#10;Springfield, IL 62701"
+                    rows={3}
+                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent resize-none"
                     required
                   />
                 </div>
@@ -293,12 +346,26 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                   {selectedItems.map((f) => (
                     <li
                       key={f.id}
-                      className="flex items-center justify-between text-sm"
+                      className="flex items-center justify-between text-sm gap-2"
                     >
-                      <span className="text-[#3d2c1e]">
-                        {f.imageEmoji} {f.name} × {quantities[f.id]}
+                      <span className="flex items-center gap-1.5 text-[#3d2c1e]">
+                        {f.imageUrl ? (
+                          <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0">
+                            <Image
+                              src={f.imageUrl}
+                              alt={f.name}
+                              width={24}
+                              height={24}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <span>{f.imageEmoji}</span>
+                        )}
+                        {f.name} × {quantities[f.id]}
                       </span>
-                      <span className="text-[#7a4f2e] font-medium">
+                      <span className="text-[#7a4f2e] font-medium flex-shrink-0">
                         ${((quantities[f.id] ?? 0) * f.price).toFixed(2)}
                       </span>
                     </li>
@@ -308,10 +375,23 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
 
               {selectedWrapperObj && (
                 <div className="flex items-center gap-2 text-sm text-[#6b4c30] mb-4 pb-4 border-b border-[#e8d5be]">
-                  <span
-                    className="w-4 h-4 rounded-full border border-gray-200"
-                    style={{ backgroundColor: selectedWrapperObj.colorHex }}
-                  />
+                  {selectedWrapperObj.imageUrl ? (
+                    <div className="w-5 h-5 rounded overflow-hidden border border-gray-200 flex-shrink-0">
+                      <Image
+                        src={selectedWrapperObj.imageUrl}
+                        alt={selectedWrapperObj.name}
+                        width={20}
+                        height={20}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <span
+                      className="w-4 h-4 rounded-full border border-gray-200 flex-shrink-0"
+                      style={{ backgroundColor: selectedWrapperObj.colorHex }}
+                    />
+                  )}
                   <span>{selectedWrapperObj.name} wrapper</span>
                 </div>
               )}

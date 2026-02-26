@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, colorHex } = body;
+    const { name, colorHex, imageUrl } = body;
 
     if (!name || !colorHex) {
       return NextResponse.json(
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const result = await db
       .insert(wrapperColors)
-      .values({ name, colorHex, inStock: true })
+      .values({ name, colorHex, imageUrl: imageUrl ?? "", inStock: true })
       .returning();
 
     return NextResponse.json(result[0], { status: 201 });

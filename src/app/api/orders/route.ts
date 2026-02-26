@@ -25,10 +25,13 @@ export async function POST(request: NextRequest) {
     const {
       customerName,
       customerEmail,
+      customerAddress,
       orderType,
       bouquetItems,
       wrapperColorId,
       wrapperColorName,
+      wrapperColorHex,
+      wrapperColorImageUrl,
       totalPrice,
     } = body;
 
@@ -44,10 +47,13 @@ export async function POST(request: NextRequest) {
       .values({
         customerName,
         customerEmail,
+        customerAddress: customerAddress ?? "",
         orderType: orderType ?? "bouquet",
         bouquetItems: JSON.stringify(bouquetItems ?? []),
         wrapperColorId: wrapperColorId ?? null,
         wrapperColorName: wrapperColorName ?? null,
+        wrapperColorHex: wrapperColorHex ?? null,
+        wrapperColorImageUrl: wrapperColorImageUrl ?? null,
         totalPrice,
         status: "pending",
       })
