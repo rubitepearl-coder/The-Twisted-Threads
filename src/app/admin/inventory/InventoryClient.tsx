@@ -225,7 +225,7 @@ export default function InventoryClient({
                 </div>
                 <div>
                   <label className="block text-xs text-[#c4a882] mb-1">
-                    Price ($) *
+                    Price (₱) *
                   </label>
                   <input
                     type="number"
@@ -567,7 +567,7 @@ function ProductTable({
                     )}
                   </td>
                   <td className="px-4 py-3 text-[#c4a882] text-sm font-medium">
-                    ${product.price.toFixed(2)}
+                    ₱{product.price.toFixed(2)}
                   </td>
                   <td className="px-4 py-3">
                     <button

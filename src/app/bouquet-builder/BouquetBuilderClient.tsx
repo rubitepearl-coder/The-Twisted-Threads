@@ -185,7 +185,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                             {flower.name}
                           </p>
                           <p className="text-[#7a4f2e] text-sm font-medium">
-                            ${flower.price.toFixed(2)} / stem
+                            ₱{flower.price.toFixed(2)} / stem
                           </p>
                           {flower.description && (
                             <p className="text-xs text-[#a07850] mt-0.5 truncate">
@@ -366,7 +366,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                         {f.name} × {quantities[f.id]}
                       </span>
                       <span className="text-[#7a4f2e] font-medium flex-shrink-0">
-                        ${((quantities[f.id] ?? 0) * f.price).toFixed(2)}
+                        ₱{((quantities[f.id] ?? 0) * f.price).toFixed(2)}
                       </span>
                     </li>
                   ))}
@@ -401,7 +401,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                   {totalStems} stem{totalStems !== 1 ? "s" : ""}
                 </span>
                 <span className="text-2xl font-bold text-[#3d2c1e]">
-                  ${totalPrice.toFixed(2)}
+                  ₱{totalPrice.toFixed(2)}
                 </span>
               </div>
 

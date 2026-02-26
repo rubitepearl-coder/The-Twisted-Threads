@@ -114,7 +114,7 @@ export default async function HomePage() {
                     {flower.name}
                   </p>
                   <p className="text-[#7a4f2e] text-sm font-medium">
-                    ${flower.price.toFixed(2)}
+                    ₱{flower.price.toFixed(2)}
                   </p>
                   {!flower.inStock && (
                     <span className="text-xs text-red-500">Out of stock</span>

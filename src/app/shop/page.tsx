@@ -119,7 +119,7 @@ export default async function ShopPage() {
                           </p>
                         )}
                         <p className="text-[#7a4f2e] font-bold text-sm">
-                          ${flower.price.toFixed(2)}
+                          ₱{flower.price.toFixed(2)}
                           <span className="text-xs font-normal text-[#a07850]">
                             {" "}
                             / stem
@@ -193,7 +193,7 @@ function ProductCard({
         )}
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-[#7a4f2e]">
-            ${product.price.toFixed(2)}
+            ₱{product.price.toFixed(2)}
           </span>
           {product.inStock ? (
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">

@@ -169,7 +169,7 @@ export default async function AdminDashboardPage() {
                         {order.customerName}
                       </td>
                       <td className="px-4 py-3 text-[#c4a882] text-sm font-medium">
-                        ${order.totalPrice.toFixed(2)}
+                        ₱{order.totalPrice.toFixed(2)}
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={order.status} />

@@ -160,7 +160,7 @@ export default function OrdersClient({
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p className="text-[#f5ede0] font-bold">
-                        ${order.totalPrice.toFixed(2)}
+                        ₱{order.totalPrice.toFixed(2)}
                       </p>
                       <p className="text-[#7a5c3e] text-xs">{date}</p>
                     </div>
@@ -213,7 +213,7 @@ export default function OrdersClient({
                                   </span>
                                 </div>
                                 <span className="text-[#c4a882] text-sm flex-shrink-0">
-                                  ${(item.price * item.quantity).toFixed(2)}
+                                  ₱{(item.price * item.quantity).toFixed(2)}
                                 </span>
                               </div>
                             ))}
@@ -253,7 +253,7 @@ export default function OrdersClient({
                         <div className="mt-3 pt-3 border-t border-[#3d2c1e] flex justify-between">
                           <span className="text-[#c4a882] text-sm">Total</span>
                           <span className="text-[#f5ede0] font-bold">
-                            ${order.totalPrice.toFixed(2)}
+                            ₱{order.totalPrice.toFixed(2)}
                           </span>
                         </div>
                       </div>

@@ -96,11 +96,11 @@ export default async function OrderConfirmationPage({
                         </p>
                         <p className="text-sm text-[#a07850]">
                           {item.quantity} stem{item.quantity !== 1 ? "s" : ""} ×
-                          ${item.price.toFixed(2)}
+                          ₱{item.price.toFixed(2)}
                         </p>
                       </div>
                       <span className="text-[#7a4f2e] font-bold flex-shrink-0">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ₱{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -142,7 +142,7 @@ export default async function OrderConfirmationPage({
               <div className="mt-4 pt-4 border-t border-[#e8d5be] flex justify-between items-center">
                 <span className="text-[#6b4c30] font-medium">Order Total</span>
                 <span className="text-2xl font-bold text-[#3d2c1e]">
-                  ${order.totalPrice.toFixed(2)}
+                  ₱{order.totalPrice.toFixed(2)}
                 </span>
               </div>
             </div>
