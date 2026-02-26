@@ -74,3 +74,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 |------|---------|
 | Initial | Template created with base setup |
 | 2026-02-26 | Full e-commerce site built: The Petal Loop crochet florist boutique |
+| 2026-02-26 | Bug fix: Added `src/instrumentation.ts` to auto-run DB migrations on server startup, fixing admin login 500 error caused by missing tables |
