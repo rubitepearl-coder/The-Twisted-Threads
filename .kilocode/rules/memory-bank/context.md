@@ -2,7 +2,7 @@
 
 ## Current State
 
-**Project Status**: ✅ Full e-commerce site built and ready for deployment
+**Project Status**: ✅ Full e-commerce site built with visual overhaul
 
 The template has been fully expanded into "The Petal Loop" — a custom crochet florist and boutique e-commerce site with a bouquet builder, shop, and admin dashboard.
 
@@ -29,6 +29,11 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 - [x] API routes: /api/orders, /api/products, /api/wrapper-colors, /api/admin/login, /api/admin/logout, /api/seed
 - [x] Seed data: 8 flowers, 4 finished goods, 7 wrapper colors
 - [x] Admin auth via cookie-based sessions (token stored in adminSessions table)
+- [x] Visual overhaul: 1:1 square aspect ratio images using object-fit: cover on all products, flowers, and wrapper colors
+- [x] Admin can upload/edit photo URLs for products and wrapper colors in inventory
+- [x] Bouquet Builder collects customer delivery address at checkout
+- [x] Personalized Thank You page with order summary, flower thumbnails, and shipping details
+- [x] Admin Orders page shows customer name, address, flower thumbnails, and wrapper color for fulfillment
 
 ## Current Structure
 
@@ -36,9 +41,9 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 |----------------|---------|--------|
 | `src/app/page.tsx` | Home page | ✅ Ready |
 | `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/bouquet-builder/` | Custom bouquet builder | ✅ Ready |
-| `src/app/shop/` | Product catalog | ✅ Ready |
-| `src/app/order-confirmation/` | Post-order page | ✅ Ready |
+| `src/app/bouquet-builder/` | Custom bouquet builder with square images + address collection | ✅ Ready |
+| `src/app/shop/` | Product catalog with square images | ✅ Ready |
+| `src/app/order-confirmation/` | Personalized thank you page with order details | ✅ Ready |
 | `src/app/admin/` | Admin dashboard (login, inventory, orders) | ✅ Ready |
 | `src/app/api/` | REST API routes | ✅ Ready |
 | `src/db/` | Drizzle ORM schema, migrations, seed | ✅ Ready |
@@ -56,9 +61,9 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 
 | Table | Purpose |
 |-------|---------|
-| `products` | Flowers and finished goods with price, stock, emoji |
-| `wrapper_colors` | Bouquet wrapper color options |
-| `orders` | Customer orders with bouquet recipe JSON |
+| `products` | Flowers and finished goods with price, stock, emoji, imageUrl |
+| `wrapper_colors` | Bouquet wrapper color options with imageUrl |
+| `orders` | Customer orders with bouquet recipe JSON, customerName, customerAddress, wrapper color info |
 | `admin_sessions` | Auth tokens for admin login |
 
 ## Seed Data
@@ -75,3 +80,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 | Initial | Template created with base setup |
 | 2026-02-26 | Full e-commerce site built: The Petal Loop crochet florist boutique |
 | 2026-02-26 | Bug fix: Added `src/instrumentation.ts` to auto-run DB migrations on server startup, fixing admin login 500 error caused by missing tables |
+| 2026-02-26 | Visual overhaul: Square images (1:1 aspect ratio), address collection in bouquet builder, personalized thank you page, enhanced admin order fulfillment view |
