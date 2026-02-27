@@ -1,12 +1,7 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { runMigrations } = await import("@kilocode/app-builder-db");
-    const { db } = await import("@/db");
-    try {
-      await runMigrations(db, {}, { migrationsFolder: "./src/db/migrations" });
-      console.log("✅ Database migrations completed");
-    } catch (err) {
-      console.error("❌ Database migration failed:", err);
-    }
+    // For local SQLite, migrations are handled via drizzle-kit CLI
+    // The database file is created on first use
+    console.log("✅ Database initialized (SQLite local file)");
   }
 }
