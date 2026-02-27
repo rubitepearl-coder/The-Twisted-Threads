@@ -1,7 +1,17 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    // For local SQLite, migrations are handled via drizzle-kit CLI
-    // The database file is created on first use
-    console.log("✅ Database initialized (SQLite local file)");
+    // Run migrations on server startup using libsql client
+    const { createClient } = await import("@libsql/client");
+    const { drizzle } = await import("drizzle-orm/libsql");
+    const { migrate } = await import("drizzle-orm/libsql/migrator");
+    
+    const libsql = createClient({
+      url: process.env.TURSO_DATABASE_URL || "file:petals.db",
+      authToken: process.env.TURSO_AUTH_TOKEN
+    });
+    const db = drizzle(libsql);
+    
+    await migrate(db, { migrationsFolder: "./src/db/migrations" });
+    console.log("✅ Database migrations completed on startup");
   }
 }
