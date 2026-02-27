@@ -13,8 +13,7 @@
     "db:seed": "bun run src/db/seed.ts"
   },
   "dependencies": {
-    "@libsql/client": "^0.14.0",
-    "better-sqlite3": "^12.6.2",
+    "@kilocode/app-builder-db": "github:Kilo-Org/app-builder-db#main",
     "drizzle-orm": "^0.45.1",
     "next": "^16.1.3",
     "react": "^19.2.3",

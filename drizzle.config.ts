@@ -5,7 +5,7 @@ export default defineConfig({
   out: "./src/db/migrations",
   dialect: "sqlite",
   dbCredentials: {
-    url: process.env.TURSO_DATABASE_URL || "file:petals.db",
-    token: process.env.TURSO_AUTH_TOKEN
+    url: process.env.DB_URL || "file:local.db",
+    token: process.env.DB_TOKEN
   }
 });
