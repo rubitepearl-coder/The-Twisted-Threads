@@ -38,6 +38,12 @@ export default function Header() {
               Build a Bouquet
             </Link>
             <Link
+              href="/mini-pot-builder"
+              className="text-[#5c3a1e] hover:text-[#7a4f2e] font-medium transition-colors"
+            >
+              Build a Mini Pot
+            </Link>
+            <Link
               href="/shop"
               className="text-[#5c3a1e] hover:text-[#7a4f2e] font-medium transition-colors"
             >
@@ -98,6 +104,13 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
             >
               Build a Bouquet
+            </Link>
+            <Link
+              href="/mini-pot-builder"
+              className="text-[#5c3a1e] hover:text-[#7a4f2e] font-medium"
+              onClick={() => setMenuOpen(false)}
+            >
+              Build a Mini Pot
             </Link>
             <Link
               href="/shop"

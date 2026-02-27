@@ -10,6 +10,10 @@ type Order = {
   customerAddress: string | null;
   orderType: string;
   bouquetItems: string;
+  miniPotItems: string;
+  potId: number | null;
+  potName: string | null;
+  potImageUrl: string | null;
   wrapperColorName: string | null;
   wrapperColorHex: string | null;
   wrapperColorImageUrl: string | null;
@@ -19,7 +23,7 @@ type Order = {
   createdAt: Date | null;
 };
 
-type BouquetItem = {
+type OrderItem = {
   name: string;
   quantity: number;
   price: number;
@@ -115,7 +119,9 @@ export default function OrdersClient({
       ) : (
         <div className="space-y-4">
           {filteredOrders.map((order) => {
-            const items: BouquetItem[] = JSON.parse(order.bouquetItems || "[]");
+            const items: OrderItem[] = JSON.parse(order.bouquetItems || "[]");
+            const miniPotItems: OrderItem[] = JSON.parse(order.miniPotItems || "[]");
+            const isMiniPotOrder = order.orderType === "mini_pot";
             const isExpanded = expandedId === order.id;
             const date = order.createdAt
               ? new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -146,6 +152,11 @@ export default function OrdersClient({
                           #{order.id}
                         </span>
                         <StatusBadge status={order.status} />
+                        {isMiniPotOrder && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/40 text-green-300 border border-green-700">
+                            🪴 Mini Pot
+                          </span>
+                        )}
                       </div>
                       <p className="text-[#c4a882] text-sm">
                         {order.customerName} · {order.customerEmail}
@@ -174,18 +185,48 @@ export default function OrdersClient({
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-[#3d2c1e]">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                      {/* Bouquet Recipe with thumbnails */}
+                      {/* Order Recipe with thumbnails */}
                       <div className="md:col-span-2">
                         <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
-                          🌸 Bouquet Recipe
+                          {isMiniPotOrder ? "🪴 Mini Pot Order" : "🌸 Bouquet Recipe"}
                         </h4>
-                        {items.length === 0 ? (
+                        
+                        {/* Mini Pot: Show pot first */}
+                        {isMiniPotOrder && order.potName && (
+                          <div className="flex items-center gap-3 pb-3 mb-3 border-b border-[#3d2c1e]">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
+                              {order.potImageUrl ? (
+                                <Image
+                                  src={order.potImageUrl}
+                                  alt={order.potName}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-lg">
+                                  🪴
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-[#e8d5be] text-sm font-medium">
+                                {order.potName}
+                              </p>
+                              <p className="text-[#7a5c3e] text-xs">Mini Pot</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Then show items */}
+                        {(isMiniPotOrder ? miniPotItems : items).length === 0 ? (
                           <p className="text-[#7a5c3e] text-sm">
                             No items recorded
                           </p>
                         ) : (
                           <div className="space-y-2">
-                            {items.map((item, i) => (
+                            {(isMiniPotOrder ? miniPotItems : items).map((item, i) => (
                               <div key={i} className="flex items-center gap-3">
                                 {/* Square thumbnail */}
                                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
@@ -220,8 +261,8 @@ export default function OrdersClient({
                           </div>
                         )}
 
-                        {/* Wrapper color */}
-                        {order.wrapperColorName && (
+                        {/* Wrapper color for bouquets */}
+                        {!isMiniPotOrder && order.wrapperColorName && (
                           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#3d2c1e]">
                             <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e]">
                               {order.wrapperColorImageUrl ? (

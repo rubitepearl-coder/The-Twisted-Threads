@@ -15,6 +15,13 @@
       "when": 1772119042485,
       "tag": "0001_thin_risque",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1772196292084,
+      "tag": "0002_new_steve_rogers",
+      "breakpoints": true
     }
   ]
 }

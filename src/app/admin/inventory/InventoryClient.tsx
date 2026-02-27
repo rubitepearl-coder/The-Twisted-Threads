@@ -9,6 +9,8 @@ type Product = {
   description: string;
   category: string;
   price: number;
+  salePrice: number | null;
+  stockQuantity: number;
   inStock: boolean;
   imageEmoji: string;
   imageUrl: string | null;
@@ -43,6 +45,8 @@ export default function InventoryClient({
     description: "",
     category: "flower",
     price: "",
+    salePrice: "",
+    stockQuantity: "",
     imageEmoji: "🌸",
     imageUrl: "",
   });
@@ -129,6 +133,8 @@ export default function InventoryClient({
         body: JSON.stringify({
           ...newProduct,
           price: parseFloat(newProduct.price),
+          salePrice: newProduct.salePrice ? parseFloat(newProduct.salePrice) : null,
+          stockQuantity: newProduct.stockQuantity ? parseInt(newProduct.stockQuantity) : 0,
         }),
       });
       if (!res.ok) throw new Error("Failed to add");
@@ -139,6 +145,8 @@ export default function InventoryClient({
         description: "",
         category: "flower",
         price: "",
+        salePrice: "",
+        stockQuantity: "",
         imageEmoji: "🌸",
         imageUrl: "",
       });
@@ -153,6 +161,8 @@ export default function InventoryClient({
 
   const flowers = products.filter((p) => p.category === "flower");
   const finishedGoods = products.filter((p) => p.category === "finished_good");
+  const pots = products.filter((p) => p.category === "pot");
+  const fuzzyFlowers = products.filter((p) => p.category === "fuzzy_wire_flower");
 
   return (
     <div>
@@ -252,6 +262,8 @@ export default function InventoryClient({
                   >
                     <option value="flower">Flower (stem)</option>
                     <option value="finished_good">Finished Good</option>
+                    <option value="pot">Mini Pot</option>
+                    <option value="fuzzy_wire_flower">Fuzzy Wire Flower</option>
                   </select>
                 </div>
                 <div>
@@ -354,6 +366,52 @@ export default function InventoryClient({
               </h3>
               <ProductTable
                 products={finishedGoods}
+                editingId={editingId}
+                editForm={editForm}
+                saving={saving}
+                onEdit={startEdit}
+                onCancel={cancelEdit}
+                onSave={saveEdit}
+                onToggleStock={toggleStock}
+                onDelete={deleteProduct}
+                onEditFormChange={(field, value) =>
+                  setEditForm((prev) => ({ ...prev, [field]: value }))
+                }
+              />
+            </section>
+          )}
+
+          {/* Pots */}
+          {pots.length > 0 && (
+            <section className="mb-8">
+              <h3 className="text-[#c4a882] text-sm font-medium uppercase tracking-wider mb-3">
+                🪴 Mini Pots ({pots.length})
+              </h3>
+              <ProductTable
+                products={pots}
+                editingId={editingId}
+                editForm={editForm}
+                saving={saving}
+                onEdit={startEdit}
+                onCancel={cancelEdit}
+                onSave={saveEdit}
+                onToggleStock={toggleStock}
+                onDelete={deleteProduct}
+                onEditFormChange={(field, value) =>
+                  setEditForm((prev) => ({ ...prev, [field]: value }))
+                }
+              />
+            </section>
+          )}
+
+          {/* Fuzzy Wire Flowers */}
+          {fuzzyFlowers.length > 0 && (
+            <section className="mb-8">
+              <h3 className="text-[#c4a882] text-sm font-medium uppercase tracking-wider mb-3">
+                🌼 Fuzzy Wire Flowers ({fuzzyFlowers.length})
+              </h3>
+              <ProductTable
+                products={fuzzyFlowers}
                 editingId={editingId}
                 editForm={editForm}
                 saving={saving}

@@ -4,8 +4,10 @@ export const products = sqliteTable("products", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
-  category: text("category").notNull().default("flower"), // 'flower' | 'finished_good'
+  category: text("category").notNull().default("flower"), // 'flower' | 'finished_good' | 'pot' | 'fuzzy_wire_flower'
   price: real("price").notNull(),
+  salePrice: real("sale_price"),
+  stockQuantity: integer("stock_quantity").notNull().default(0),
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
   imageEmoji: text("image_emoji").notNull().default("🌸"),
   imageUrl: text("image_url").default(""),
@@ -26,8 +28,12 @@ export const orders = sqliteTable("orders", {
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   customerAddress: text("customer_address").notNull().default(""),
-  orderType: text("order_type").notNull().default("bouquet"), // 'bouquet' | 'shop'
+  orderType: text("order_type").notNull().default("bouquet"), // 'bouquet' | 'mini_pot' | 'shop'
   bouquetItems: text("bouquet_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl}
+  miniPotItems: text("mini_pot_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl} for fuzzy wire flowers
+  potId: integer("pot_id"), // Selected pot product ID
+  potName: text("pot_name"),
+  potImageUrl: text("pot_image_url"),
   wrapperColorId: integer("wrapper_color_id"),
   wrapperColorName: text("wrapper_color_name"),
   wrapperColorHex: text("wrapper_color_hex"),
