@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { desc } from "drizzle-orm";
+import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
 
 export async function GET() {
   try {
@@ -67,7 +68,34 @@ export async function POST(request: NextRequest) {
       })
       .returning({ id: orders.id });
 
-    return NextResponse.json({ orderId: result[0].id }, { status: 201 });
+    const orderId = result[0].id;
+
+    // Send order to Google Sheets if configured
+    if (isGoogleSheetsConfigured()) {
+      const sheetResult = await sendOrderToGoogleSheets({
+        customerName,
+        customerEmail,
+        customerAddress: customerAddress ?? "",
+        orderType: orderType ?? "bouquet",
+        bouquetItems: JSON.stringify(bouquetItems ?? []),
+        miniPotItems: JSON.stringify(miniPotItems ?? []),
+        potId: potId ?? null,
+        potName: potName ?? null,
+        wrapperColorId: wrapperColorId ?? null,
+        wrapperColorName: wrapperColorName ?? null,
+        totalPrice,
+        status: "pending",
+      });
+      
+      if (!sheetResult.success) {
+        console.error("Google Sheets sync failed:", sheetResult.error);
+        // Order still saved locally, just logging the sync failure
+      } else {
+        console.log("Order synced to Google Sheets:", sheetResult.orderId);
+      }
+    }
+
+    return NextResponse.json({ orderId }, { status: 201 });
   } catch (error) {
     console.error("Failed to create order:", error);
     return NextResponse.json(

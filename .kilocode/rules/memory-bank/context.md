@@ -34,6 +34,7 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 - [x] Bouquet Builder collects customer delivery address at checkout
 - [x] Personalized Thank You page with order summary, flower thumbnails, and shipping details
 - [x] Admin Orders page shows customer name, address, flower thumbnails, and wrapper color for fulfillment
+- [x] Google Sheets integration: External backend via Google Apps Script for order & inventory tracking
 
 ## Current Structure
 
@@ -50,6 +51,8 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 | `src/components/layout/` | Header, Footer | ✅ Ready |
 | `src/components/admin/` | AdminLogoutButton | ✅ Ready |
 | `src/lib/auth.ts` | Admin session auth helper | ✅ Ready |
+| `src/lib/googleSheets.ts` | Google Apps Script integration for external storage | ✅ Ready |
+| `google-apps-script/` | Google Apps Script backend code + setup instructions | ✅ Ready |
 
 ## Admin Access
 
@@ -81,3 +84,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-02-26 | Full e-commerce site built: The Petal Loop crochet florist boutique |
 | 2026-02-26 | Bug fix: Added `src/instrumentation.ts` to auto-run DB migrations on server startup, fixing admin login 500 error caused by missing tables |
 | 2026-02-26 | Visual overhaul: Square images (1:1 aspect ratio), address collection in bouquet builder, personalized thank you page, enhanced admin order fulfillment view |
+| 2026-02-27 | Google Sheets integration: Added Google Apps Script external backend for order & inventory tracking in Google Sheets (free, no Google Cloud required)
