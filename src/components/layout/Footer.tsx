@@ -10,7 +10,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-2xl">🧶</span>
               <span className="text-xl font-bold text-[#f5ede0]">
-                The Petal Loop
+                The Twisted Threads
               </span>
             </div>
             <p className="text-sm text-[#c4a882] leading-relaxed">
@@ -64,7 +64,7 @@ export default function Footer() {
 
         <div className="border-t border-[#5c3a1e] mt-8 pt-6 text-center text-xs text-[#a07850]">
           <p>
-            © {new Date().getFullYear()} The Petal Loop. Made with 🧶 and love.
+            © {new Date().getFullYear()} The Twisted Threads. Made with 🧶 and love.
           </p>
           <p className="mt-1">
             <Link

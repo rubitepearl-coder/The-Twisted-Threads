@@ -4,7 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "The Petal Loop – Custom Crochet Florist & Boutique",
+  title: "The Twisted Threads – Custom Crochet Florist & Boutique",
   description:
     "Design your own custom crochet bouquet or shop our handcrafted crochet goods. Cozy, lasting, and made with love.",
 };

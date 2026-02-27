@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin – The Petal Loop",
+  title: "Admin – The Twisted Threads",
   robots: "noindex, nofollow",
 };
 

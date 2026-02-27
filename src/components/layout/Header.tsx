@@ -15,7 +15,7 @@ export default function Header() {
             <span className="text-2xl">🧶</span>
             <div>
               <span className="text-xl font-bold text-[#7a4f2e] tracking-tight group-hover:text-[#5c3a1e] transition-colors">
-                The Petal Loop
+                The Twisted Threads
               </span>
               <p className="text-xs text-[#a07850] leading-none hidden sm:block">
                 Custom Crochet Florist

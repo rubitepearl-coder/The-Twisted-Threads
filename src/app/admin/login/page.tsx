@@ -15,7 +15,7 @@ export default async function AdminLoginPage() {
           <div className="text-5xl mb-3">🧶</div>
           <h1 className="text-3xl font-bold text-[#f5ede0]">Owner Login</h1>
           <p className="text-[#c4a882] mt-2">
-            The Petal Loop Admin Dashboard
+            The Twisted Threads Admin Dashboard
           </p>
         </div>
         <AdminLoginClient />

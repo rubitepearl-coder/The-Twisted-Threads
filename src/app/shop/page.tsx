@@ -29,7 +29,7 @@ export default async function ShopPage() {
       <div className="bg-gradient-to-r from-[#f5ede0] to-[#ede0d0] py-12 px-4 text-center border-b border-[#d4b896]">
         <div className="text-5xl mb-4">🛍️</div>
         <h1 className="text-4xl font-bold text-[#3d2c1e] mb-3">
-          The Petal Loop Shop
+          The Twisted Threads Shop
         </h1>
         <p className="text-[#6b4c30] text-lg max-w-xl mx-auto">
           Browse our handcrafted crochet goods — from individual stems to
