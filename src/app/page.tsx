@@ -37,6 +37,12 @@ export default async function HomePage() {
               🌺 Build Your Bouquet
             </Link>
             <Link
+              href="/mini-pot-builder"
+              className="bg-[#5c8a4d] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4a7039] transition-colors shadow-md"
+            >
+              🪴 Build a Mini Pot
+            </Link>
+            <Link
               href="/shop"
               className="bg-white text-[#7a4f2e] border-2 border-[#7a4f2e] px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#f5ede0] transition-colors"
             >
