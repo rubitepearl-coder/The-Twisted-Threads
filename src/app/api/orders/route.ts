@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { orders } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
 
 export async function GET() {
   try {
+    const db = getDb();
     const allOrders = await db
       .select()
       .from(orders)
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await db
+    const result = await getDb()
       .insert(orders)
       .values({
         customerName,

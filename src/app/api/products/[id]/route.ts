@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -23,7 +23,7 @@ export async function PATCH(
 
     updateData.updatedAt = new Date();
 
-    const result = await db
+    const result = await getDb()
       .update(products)
       .set(updateData)
       .where(eq(products.id, productId))
@@ -51,7 +51,7 @@ export async function DELETE(
     const { id } = await params;
     const productId = parseInt(id);
 
-    await db.delete(products).where(eq(products.id, productId));
+    await getDb().delete(products).where(eq(products.id, productId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { products, wrapperColors } from "@/db/schema";
 
 const flowerData = [
@@ -125,19 +125,19 @@ const colorData = [
 export async function POST() {
   try {
     // Check if already seeded
-    const existing = await db.select().from(products).limit(1);
+    const existing = await getDb().select().from(products).limit(1);
     if (existing.length > 0) {
       return NextResponse.json({ message: "Already seeded" });
     }
 
     for (const flower of flowerData) {
-      await db.insert(products).values(flower);
+      await getDb().insert(products).values(flower);
     }
     for (const good of finishedGoodsData) {
-      await db.insert(products).values(good);
+      await getDb().insert(products).values(good);
     }
     for (const color of colorData) {
-      await db.insert(wrapperColors).values(color);
+      await getDb().insert(wrapperColors).values(color);
     }
 
     return NextResponse.json({ message: "Seeded successfully" });

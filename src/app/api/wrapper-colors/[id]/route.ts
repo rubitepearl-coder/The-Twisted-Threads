@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { wrapperColors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -18,7 +18,7 @@ export async function PATCH(
     if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
     if (body.inStock !== undefined) updateData.inStock = body.inStock;
 
-    const result = await db
+    const result = await getDb()
       .update(wrapperColors)
       .set(updateData)
       .where(eq(wrapperColors.id, colorId))
@@ -46,7 +46,7 @@ export async function DELETE(
     const { id } = await params;
     const colorId = parseInt(id);
 
-    await db.delete(wrapperColors).where(eq(wrapperColors.id, colorId));
+    await getDb().delete(wrapperColors).where(eq(wrapperColors.id, colorId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

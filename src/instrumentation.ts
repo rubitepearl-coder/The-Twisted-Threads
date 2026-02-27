@@ -1,11 +1,12 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    // Run migrations on server startup using @kilocode/app-builder-db
-    const { runMigrations } = await import("@kilocode/app-builder-db");
-    const { getDb } = await import("@/db");
+    const url = process.env.TURSO_DATABASE_URL;
+    const token = process.env.TURSO_AUTH_TOKEN;
     
-    const db = getDb();
-    await runMigrations(db, {}, { migrationsFolder: "./src/db/migrations" });
-    console.log("✅ Database migrations completed on startup");
+    if (url && token) {
+      console.log("✅ Turso database configured");
+    } else {
+      console.warn("⚠️  Turso credentials not set - database features will not work");
+    }
   }
 }

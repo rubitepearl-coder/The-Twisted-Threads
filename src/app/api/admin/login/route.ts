@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { adminSessions } from "@/db/schema";
 import { randomBytes } from "crypto";
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    await db.insert(adminSessions).values({
+    await getDb().insert(adminSessions).values({
       token,
       expiresAt,
     });

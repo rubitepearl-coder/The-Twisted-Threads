@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { adminSessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -10,6 +10,7 @@ export async function isAdminAuthenticated(): Promise<boolean> {
 
     if (!token) return false;
 
+    const db = getDb();
     const session = await db
       .select()
       .from(adminSessions)

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { wrapperColors } from "@/db/schema";
 
 export async function GET() {
   try {
-    const colors = await db.select().from(wrapperColors);
+    const colors = await getDb().select().from(wrapperColors);
     return NextResponse.json(colors);
   } catch (error) {
     console.error("Failed to fetch wrapper colors:", error);
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await db
+    const result = await getDb()
       .insert(wrapperColors)
       .values({ name, colorHex, imageUrl: imageUrl ?? "", inStock: true })
       .returning();

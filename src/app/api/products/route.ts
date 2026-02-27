@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { products } from "@/db/schema";
 
 export async function GET() {
   try {
-    const allProducts = await db.select().from(products);
+    const allProducts = await getDb().select().from(products);
     return NextResponse.json(allProducts);
   } catch (error) {
     console.error("Failed to fetch products:", error);
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await db
+    const result = await getDb()
       .insert(products)
       .values({
         name,

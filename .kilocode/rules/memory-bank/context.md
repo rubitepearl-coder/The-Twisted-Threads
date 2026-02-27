@@ -35,6 +35,7 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 - [x] Personalized Thank You page with order summary, flower thumbnails, and shipping details
 - [x] Admin Orders page shows customer name, address, flower thumbnails, and wrapper color for fulfillment
 - [x] Google Sheets integration: External backend via Google Apps Script for order & inventory tracking
+- [x] Switched to @libsql/client + drizzle-orm with Turso cloud database (requires TURSO_DATABASE_URL and TURSO_AUTH_TOKEN env vars)
 
 ## Current Structure
 

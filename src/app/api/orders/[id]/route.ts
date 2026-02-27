@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -20,7 +20,7 @@ export async function PATCH(
       );
     }
 
-    await db
+    await getDb()
       .update(orders)
       .set({ status })
       .where(eq(orders.id, orderId));
