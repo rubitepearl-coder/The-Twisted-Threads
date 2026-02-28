@@ -67,7 +67,7 @@ export default function ShopPage() {
     fetchProducts();
   });
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, showCartAfterAdd: boolean = false) => {
     const existing = cart.find(item => item.product.id === product.id);
     if (existing) {
       if (existing.quantity < product.stockQuantity) {
@@ -81,6 +81,10 @@ export default function ShopPage() {
       if (product.stockQuantity > 0) {
         setCart([...cart, { product, quantity: 1 }]);
       }
+    }
+    // Show cart after adding if requested
+    if (showCartAfterAdd) {
+      setShowCart(true);
     }
   };
 
@@ -294,7 +298,7 @@ export default function ShopPage() {
                   {flowers.map((flower) => (
                     <div
                       key={flower.id}
-                      className="bg-white rounded-2xl overflow-hidden border border-[#e8d5be] hover:shadow-md transition-shadow"
+                      className="bg-white rounded-2xl overflow-hidden border border-[#e8d5be] hover:shadow-md transition-shadow flex flex-col"
                     >
                       {/* Square image */}
                       <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]">
@@ -313,7 +317,7 @@ export default function ShopPage() {
                           </div>
                         )}
                       </div>
-                      <div className="p-3 text-center">
+                      <div className="p-3 text-center flex-1 flex flex-col">
                         <h3 className="font-semibold text-[#3d2c1e] mb-1 text-sm">
                           {flower.name}
                         </h3>
@@ -346,7 +350,14 @@ export default function ShopPage() {
                           <span className="inline-block mt-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
                             Only {flower.stockQuantity} left!
                           </span>
-                        ) : null}
+                        ) : (
+                          <button
+                            onClick={() => addToCart(flower, true)}
+                            className="mt-2 bg-[#7a4f2e] text-white text-xs py-1.5 px-3 rounded-full font-semibold hover:bg-[#5c3a1e] transition-colors"
+                          >
+                            Add to Cart 🛒
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
