@@ -25,9 +25,14 @@ export const wrapperColors = sqliteTable("wrapper_colors", {
 
 export const orders = sqliteTable("orders", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id"), // For logged-in users
+  facebookId: text("facebook_id"), // Facebook account identifier
   customerName: text("customer_name").notNull(),
-  customerEmail: text("customer_email").notNull(),
+  customerEmail: text("customer_email"), // Now optional - can use facebook_id instead
   customerAddress: text("customer_address").notNull().default(""),
+  deliveryType: text("delivery_type").notNull().default("home"), // 'home' | 'pickup'
+  deliveryLocation: text("delivery_location"), // Location for delivery fee calculation
+  deliveryFee: real("delivery_fee").notNull().default(0), // ₱10 for Anini-y home delivery
   orderType: text("order_type").notNull().default("bouquet"), // 'bouquet' | 'mini_pot' | 'shop'
   bouquetItems: text("bouquet_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl}
   miniPotItems: text("mini_pot_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl} for fuzzy wire flowers

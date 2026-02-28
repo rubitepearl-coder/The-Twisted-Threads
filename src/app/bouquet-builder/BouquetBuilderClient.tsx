@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -37,7 +37,10 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   );
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [facebookId, setFacebookId] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
+  const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
+  const [deliveryLocation, setDeliveryLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -48,15 +51,26 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const updateQuantity = (id: number, delta: number) => {
     setQuantities((prev) => {
       const current = prev[id] ?? 0;
-      const next = Math.max(0, current + delta);
+      const flower = flowers.find(f => f.id === id);
+      const maxStock = flower?.stockQuantity ?? 999;
+      const next = Math.max(0, Math.min(current + delta, maxStock));
       return { ...prev, [id]: next };
     });
   };
 
   const totalStems = Object.values(quantities).reduce((a, b) => a + b, 0);
   const totalPrice = flowers.reduce((sum, flower) => {
-    return sum + (quantities[flower.id] ?? 0) * flower.price;
+    return sum + (quantities[flower.id] ?? 0) * (flower.salePrice || flower.price);
   }, 0);
+
+  // Calculate Anini-y delivery fee: ₱10 if home delivery in Anini-y
+  const deliveryFee = deliveryType === "home" && deliveryLocation 
+    ? (deliveryLocation.toLowerCase().includes("anini") || deliveryLocation.toLowerCase() === "anini-y")
+      ? 10 
+      : 0
+    : 0;
+
+  const finalTotal = totalPrice + deliveryFee;
 
   const selectedItems = flowers.filter((f) => (quantities[f.id] ?? 0) > 0);
   const selectedWrapperObj = wrapperColors.find((c) => c.id === selectedWrapper);
@@ -71,13 +85,31 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
       setError("Please select a wrapper color.");
       return;
     }
-    if (!customerName.trim() || !customerEmail.trim()) {
-      setError("Please enter your name and email.");
+    if (!customerName.trim()) {
+      setError("Please enter your name.");
       return;
     }
-    if (!customerAddress.trim()) {
+    // Email is optional if Facebook ID is provided
+    if (!customerEmail.trim() && !facebookId.trim()) {
+      setError("Please enter your email or Facebook account for contact.");
+      return;
+    }
+    if (deliveryType === "home" && !customerAddress.trim()) {
       setError("Please enter your delivery address.");
       return;
+    }
+    if (deliveryType === "home" && !deliveryLocation.trim()) {
+      setError("Please enter your location (municipality/barangay) for delivery fee calculation.");
+      return;
+    }
+
+    // Check stock availability before submitting
+    for (const item of selectedItems) {
+      const qty = quantities[item.id];
+      if (qty > item.stockQuantity) {
+        setError(`Not enough stock for ${item.name}. Only ${item.stockQuantity} available.`);
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -88,7 +120,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
         productId: f.id,
         name: f.name,
         quantity: quantities[f.id],
-        price: f.price,
+        price: f.salePrice || f.price,
         imageEmoji: f.imageEmoji,
         imageUrl: f.imageUrl ?? "",
       }));
@@ -98,15 +130,18 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName: customerName.trim(),
-          customerEmail: customerEmail.trim(),
+          customerEmail: customerEmail.trim() || null,
+          facebookId: facebookId.trim() || null,
           customerAddress: customerAddress.trim(),
+          deliveryType,
+          deliveryLocation: deliveryLocation.trim() || null,
           orderType: "bouquet",
           bouquetItems,
           wrapperColorId: selectedWrapper,
           wrapperColorName: selectedWrapperObj?.name,
           wrapperColorHex: selectedWrapperObj?.colorHex,
           wrapperColorImageUrl: selectedWrapperObj?.imageUrl ?? "",
-          totalPrice,
+          totalPrice: finalTotal,
         }),
       });
 
@@ -306,11 +341,77 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               )}
             </div>
 
-            {/* Step 3: Contact Info */}
+            {/* Step 3: Delivery Type */}
             <div>
               <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
                   3
+                </span>
+                Delivery Option
+              </h2>
+              <p className="text-[#6b4c30] text-sm mb-5 ml-10">
+                Choose how you want to receive your order.
+              </p>
+              <div className="ml-10 flex gap-4">
+                <label className={`flex items-center gap-2 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                  deliveryType === "home" 
+                    ? "border-[#7a4f2e] bg-[#f5ede0]" 
+                    : "border-[#e8d5be] hover:border-[#c4a882]"
+                }`}>
+                  <input
+                    type="radio"
+                    name="deliveryType"
+                    value="home"
+                    checked={deliveryType === "home"}
+                    onChange={() => setDeliveryType("home")}
+                    className="w-4 h-4 text-[#7a4f2e]"
+                  />
+                  <span className="text-[#3d2c1e] font-medium">🏠 Home Delivery</span>
+                </label>
+                <label className={`flex items-center gap-2 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                  deliveryType === "pickup" 
+                    ? "border-[#7a4f2e] bg-[#f5ede0]" 
+                    : "border-[#e8d5be] hover:border-[#c4a882]"
+                }`}>
+                  <input
+                    type="radio"
+                    name="deliveryType"
+                    value="pickup"
+                    checked={deliveryType === "pickup"}
+                    onChange={() => setDeliveryType("pickup")}
+                    className="w-4 h-4 text-[#7a4f2e]"
+                  />
+                  <span className="text-[#3d2c1e] font-medium">🏪 Pickup</span>
+                </label>
+              </div>
+              
+              {/* Show location field for delivery fee calculation */}
+              {deliveryType === "home" && (
+                <div className="ml-10 mt-4">
+                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                    Location (Municipality/Barangay) *
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryLocation}
+                    onChange={(e) => setDeliveryLocation(e.target.value)}
+                    placeholder="e.g., Anini-y, Sibalom, San Jose"
+                    className="w-full sm:w-80 border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
+                    required={deliveryType === "home"}
+                  />
+                  <p className="text-xs text-[#a07850] mt-1">
+                    Enter your municipality to calculate delivery fee. 
+                    ₱10 delivery fee applies for Anini-y.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Step 4: Contact Info */}
+            <div>
+              <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
+                <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  {deliveryType === "home" ? "5" : "4"}
                 </span>
                 Your Details
               </h2>
@@ -333,7 +434,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Email Address *
+                    Email Address {facebookId ? "(optional)" : "*"}
                   </label>
                   <input
                     type="email"
@@ -341,22 +442,40 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="jane@example.com"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                    required
+                    required={!facebookId}
                   />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Delivery Address *
+                    Facebook Account {customerEmail ? "(optional)" : "*"}
                   </label>
-                  <textarea
-                    value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                    placeholder="123 Main St, Apt 4B&#10;Springfield, IL 62701"
-                    rows={3}
-                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent resize-none"
-                    required
+                  <input
+                    type="text"
+                    value={facebookId}
+                    onChange={(e) => setFacebookId(e.target.value)}
+                    placeholder="facebook.com/jane.smith"
+                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
+                    required={!customerEmail}
                   />
+                  <p className="text-xs text-[#a07850] mt-1">
+                    Use Facebook for contact if no email
+                  </p>
                 </div>
+                {deliveryType === "home" && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                      Delivery Address *
+                    </label>
+                    <textarea
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      placeholder="123 Main St, Apt 4B&#10;Anini-y, Antique 5715"
+                      rows={3}
+                      className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent resize-none"
+                      required={deliveryType === "home"}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -397,7 +516,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                         {f.name} × {quantities[f.id]}
                       </span>
                       <span className="text-[#7a4f2e] font-medium flex-shrink-0">
-                        ₱{((quantities[f.id] ?? 0) * f.price).toFixed(2)}
+                        ₱{((quantities[f.id] ?? 0) * (f.salePrice || f.price)).toFixed(2)}
                       </span>
                     </li>
                   ))}
@@ -427,13 +546,33 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                 </div>
               )}
 
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[#6b4c30] text-sm">
-                  {totalStems} stem{totalStems !== 1 ? "s" : ""}
-                </span>
-                <span className="text-2xl font-bold text-[#3d2c1e]">
-                  ₱{totalPrice.toFixed(2)}
-                </span>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#6b4c30] text-sm">
+                    {totalStems} stem{totalStems !== 1 ? "s" : ""}
+                  </span>
+                  <span className="text-[#3d2c1e]">
+                    ₱{totalPrice.toFixed(2)}
+                  </span>
+                </div>
+                
+                {deliveryType === "home" && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[#6b4c30]">
+                      Delivery {deliveryLocation && deliveryLocation.toLowerCase().includes("anini") && "(Anini-y)"}
+                    </span>
+                    <span className={deliveryFee > 0 ? "text-[#7a4f2e]" : "text-green-600"}>
+                      {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Free"}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center pt-2 border-t border-[#e8d5be]">
+                  <span className="text-[#3d2c1e] font-bold">Total</span>
+                  <span className="text-2xl font-bold text-[#3d2c1e]">
+                    ₱{finalTotal.toFixed(2)}
+                  </span>
+                </div>
               </div>
 
               {error && (
@@ -451,7 +590,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               </button>
 
               <p className="text-xs text-[#a07850] text-center mt-3">
-                We&apos;ll confirm your order by email
+                We will confirm your order by {facebookId ? "Facebook" : "email"}
               </p>
             </div>
           </div>

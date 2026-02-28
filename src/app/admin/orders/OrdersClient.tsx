@@ -5,9 +5,14 @@ import Image from "next/image";
 
 type Order = {
   id: number;
+  userId: string | null;
+  facebookId: string | null;
   customerName: string;
-  customerEmail: string;
+  customerEmail: string | null;
   customerAddress: string | null;
+  deliveryType: string;
+  deliveryLocation: string | null;
+  deliveryFee: number;
   orderType: string;
   bouquetItems: string;
   miniPotItems: string;
@@ -157,9 +162,20 @@ export default function OrdersClient({
                             🪴 Mini Pot
                           </span>
                         )}
+                        {order.deliveryType === "pickup" && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-900/40 text-purple-300 border border-purple-700">
+                            🏪 Pickup
+                          </span>
+                        )}
                       </div>
                       <p className="text-[#c4a882] text-sm">
-                        {order.customerName} · {order.customerEmail}
+                        {order.customerName}
+                        {order.facebookId && (
+                          <span className="ml-2 text-blue-300">📘 {order.facebookId}</span>
+                        )}
+                        {order.customerEmail && (
+                          <span className="ml-2 text-[#7a5c3e]">· {order.customerEmail}</span>
+                        )}
                       </p>
                       {order.customerAddress && (
                         <p className="text-[#7a5c3e] text-xs mt-0.5 truncate max-w-xs">
@@ -297,6 +313,12 @@ export default function OrdersClient({
                             ₱{order.totalPrice.toFixed(2)}
                           </span>
                         </div>
+                        {order.deliveryFee > 0 && (
+                          <div className="flex justify-between text-xs">
+                            <span className="text-[#7a5c3e]">+ Delivery</span>
+                            <span className="text-orange-300">₱{order.deliveryFee.toFixed(2)}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Right column: Customer info + Status */}
@@ -304,18 +326,35 @@ export default function OrdersClient({
                         {/* Customer / Shipping Info */}
                         <div>
                           <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
-                            📦 Ship To
+                            {order.deliveryType === "pickup" ? "📤 Pickup Info" : "📦 Ship To"}
                           </h4>
                           <div className="space-y-1.5">
                             <p className="text-[#f5ede0] text-sm font-medium">
                               {order.customerName}
                             </p>
-                            <p className="text-[#c4a882] text-xs">
-                              {order.customerEmail}
-                            </p>
-                            {order.customerAddress && (
+                            {order.facebookId && (
+                              <p className="text-blue-300 text-xs">
+                                📘 {order.facebookId}
+                              </p>
+                            )}
+                            {order.customerEmail && (
+                              <p className="text-[#c4a882] text-xs">
+                                ✉️ {order.customerEmail}
+                              </p>
+                            )}
+                            {order.deliveryType === "home" && order.customerAddress && (
                               <p className="text-[#e8d5be] text-sm whitespace-pre-line mt-1 bg-[#1e1410] rounded-lg p-2 border border-[#3d2c1e]">
                                 {order.customerAddress}
+                              </p>
+                            )}
+                            {order.deliveryLocation && (
+                              <p className="text-[#7a5c3e] text-xs mt-1">
+                                📍 Location: {order.deliveryLocation}
+                              </p>
+                            )}
+                            {order.deliveryFee > 0 && (
+                              <p className="text-orange-300 text-xs mt-1">
+                                🚚 Delivery Fee: ₱{order.deliveryFee.toFixed(2)}
                               </p>
                             )}
                           </div>
