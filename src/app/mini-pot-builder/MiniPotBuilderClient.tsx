@@ -170,8 +170,20 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
         }),
       });
 
+      console.log("[MiniPotBuilder] Order submission data:", {
+        customerName: customerName.trim(),
+        customerEmail: customerEmail.trim() || null,
+        facebookId: facebookId.trim() || null,
+        customerAddress: customerAddress.trim(),
+        deliveryType,
+        deliveryLocation: deliveryLocation.trim() || null,
+        orderType: "mini_pot",
+        totalPrice: finalTotal,
+      });
+
       if (!res.ok) {
         const data = await res.json();
+        console.error("[MiniPotBuilder] Order failed response:", data);
         throw new Error(data.error || "Failed to place order");
       }
 
