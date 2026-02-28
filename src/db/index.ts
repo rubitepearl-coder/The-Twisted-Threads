@@ -3,22 +3,15 @@ import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 import { eq } from "drizzle-orm";
 
-// Create client using environment variables for Turso
-// TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set in .env.local
-const url = process.env.TURSO_DATABASE_URL;
-const token = process.env.TURSO_AUTH_TOKEN;
-
-if (!url || !token) {
-  console.warn("⚠️  Turso credentials not configured. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env.local");
-}
+// Use local file-based SQLite for development
+// This creates a local database file that persists
+const url = process.env.TURSO_DATABASE_URL || "file:local.db";
+const token = process.env.TURSO_AUTH_TOKEN || undefined;
 
 // Lazy initialization
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 function getDbInternal() {
-  if (!url || !token) {
-    throw new Error("Database not configured. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env.local");
-  }
   if (!_db) {
     const client = createClient({
       url,
