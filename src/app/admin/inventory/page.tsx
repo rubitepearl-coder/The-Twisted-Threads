@@ -16,10 +16,14 @@ export default async function AdminInventoryPage() {
   let allColors: typeof wrapperColors.$inferSelect[] = [];
 
   try {
+    console.log("[Inventory] Fetching products from database...");
     allProducts = await db.select().from(products);
     allColors = await db.select().from(wrapperColors);
-  } catch {
-    // DB not yet seeded
+    console.log("[Inventory] Found products:", allProducts.length);
+    console.log("[Inventory] Found colors:", allColors.length);
+  } catch (error) {
+    console.error("[Inventory] Error fetching data:", error);
+    // DB not yet seeded or connection failed
   }
 
   return (

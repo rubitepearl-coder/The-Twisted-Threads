@@ -16,11 +16,14 @@ export default async function AdminOrdersPage() {
   let allOrders: typeof orders.$inferSelect[] = [];
 
   try {
+    console.log("[Orders] Fetching orders from database...");
     allOrders = await db
       .select()
       .from(orders)
       .orderBy(desc(orders.createdAt));
-  } catch {
+    console.log("[Orders] Found orders:", allOrders.length);
+  } catch (error) {
+    console.error("[Orders] Error fetching data:", error);
     // DB not yet seeded
   }
 
