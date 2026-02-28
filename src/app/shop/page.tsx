@@ -119,17 +119,30 @@ export default async function ShopPage() {
                           </p>
                         )}
                         <p className="text-[#7a4f2e] font-bold text-sm">
-                          ₱{flower.price.toFixed(2)}
+                          {flower.salePrice ? (
+                            <span>
+                              <span className="text-green-600">₱{flower.salePrice.toFixed(2)}</span>
+                              <span className="text-xs font-normal text-[#a07850] line-through ml-1">
+                                ₱{flower.price.toFixed(2)}
+                              </span>
+                            </span>
+                          ) : (
+                            <span>₱{flower.price.toFixed(2)}</span>
+                          )}
                           <span className="text-xs font-normal text-[#a07850]">
                             {" "}
                             / stem
                           </span>
                         </p>
-                        {!flower.inStock && (
+                        {!flower.inStock || flower.stockQuantity === 0 ? (
                           <span className="inline-block mt-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                            Out of Stock
+                            Sold Out
                           </span>
-                        )}
+                        ) : flower.stockQuantity <= 5 ? (
+                          <span className="inline-block mt-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                            Only {flower.stockQuantity} left!
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                   ))}
@@ -192,16 +205,27 @@ function ProductCard({
           <p className="text-sm text-[#6b4c30] mb-3">{product.description}</p>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-[#7a4f2e]">
-            ₱{product.price.toFixed(2)}
-          </span>
-          {product.inStock ? (
+          {product.salePrice ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-green-600">
+                ₱{product.salePrice.toFixed(2)}
+              </span>
+              <span className="text-sm text-[#a07850] line-through">
+                ₱{product.price.toFixed(2)}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xl font-bold text-[#7a4f2e]">
+              ₱{product.price.toFixed(2)}
+            </span>
+          )}
+          {product.inStock && product.stockQuantity > 0 ? (
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
               In Stock
             </span>
           ) : (
             <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-medium">
-              Out of Stock
+              Sold Out
             </span>
           )}
         </div>

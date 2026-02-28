@@ -8,6 +8,8 @@ type Flower = {
   id: number;
   name: string;
   price: number;
+  salePrice: number | null;
+  stockQuantity: number;
   inStock: boolean;
   imageEmoji: string;
   imageUrl: string | null;
@@ -39,7 +41,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const availableFlowers = flowers.filter((f) => f.inStock);
+  const availableFlowers = flowers.filter((f) => f.inStock && f.stockQuantity > 0);
 
   const updateQuantity = (id: number, delta: number) => {
     setQuantities((prev) => {
@@ -185,8 +187,21 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                             {flower.name}
                           </p>
                           <p className="text-[#7a4f2e] text-sm font-medium">
-                            ₱{flower.price.toFixed(2)} / stem
+                            {flower.salePrice ? (
+                              <span>
+                                <span className="text-green-600">₱{flower.salePrice.toFixed(2)}</span>
+                                <span className="text-[#a07850] line-through text-xs ml-1">₱{flower.price.toFixed(2)}</span>
+                              </span>
+                            ) : (
+                              <span>₱{flower.price.toFixed(2)}</span>
+                            )}
+                            <span className="text-xs font-normal text-[#a07850]"> / stem</span>
                           </p>
+                          {flower.stockQuantity <= 5 && flower.stockQuantity > 0 && (
+                            <p className="text-xs text-orange-600 font-medium">
+                              Only {flower.stockQuantity} left!
+                            </p>
+                          )}
                           {flower.description && (
                             <p className="text-xs text-[#a07850] mt-0.5 truncate">
                               {flower.description}
@@ -208,7 +223,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                           <button
                             type="button"
                             onClick={() => updateQuantity(flower.id, 1)}
-                            className="w-8 h-8 rounded-full bg-[#7a4f2e] text-white font-bold text-lg flex items-center justify-center hover:bg-[#5c3a1e] transition-colors"
+                            disabled={qty >= flower.stockQuantity}
+                            className="w-8 h-8 rounded-full bg-[#7a4f2e] text-white font-bold text-lg flex items-center justify-center hover:bg-[#5c3a1e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                           >
                             +
                           </button>

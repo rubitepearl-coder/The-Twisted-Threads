@@ -251,6 +251,37 @@ export default function InventoryClient({
                 </div>
                 <div>
                   <label className="block text-xs text-[#c4a882] mb-1">
+                    Sale Price (₱)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={newProduct.salePrice}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, salePrice: e.target.value }))
+                    }
+                    placeholder="Leave empty for no sale"
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-[#c4a882] mb-1">
+                    Quantity in Stock
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={newProduct.stockQuantity}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, stockQuantity: e.target.value }))
+                    }
+                    placeholder="0"
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-[#c4a882] mb-1">
                     Category
                   </label>
                   <select
@@ -465,7 +496,7 @@ function ProductTable({
   onSave: () => void;
   onToggleStock: (p: Product) => void;
   onDelete: (id: number, name: string) => void;
-  onEditFormChange: (field: string, value: string | number | boolean) => void;
+  onEditFormChange: (field: string, value: string | number | boolean | null) => void;
 }) {
   return (
     <div className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] overflow-hidden">
@@ -476,13 +507,19 @@ function ProductTable({
               Product
             </th>
             <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
-              Photo URL
+              Photo
             </th>
             <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
               Price
             </th>
             <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
-              Stock
+              Sale
+            </th>
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Qty
+            </th>
+            <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+              Status
             </th>
             <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
               Actions
@@ -563,6 +600,30 @@ function ProductTable({
                     />
                   </td>
                   <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={editForm.salePrice ?? ""}
+                      onChange={(e) =>
+                        onEditFormChange("salePrice", e.target.value ? parseFloat(e.target.value) : null)
+                      }
+                      placeholder="No sale"
+                      className="w-24 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      min="0"
+                      value={editForm.stockQuantity ?? ""}
+                      onChange={(e) =>
+                        onEditFormChange("stockQuantity", parseInt(e.target.value))
+                      }
+                      className="w-20 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
                     <span className="text-[#c4a882] text-sm">
                       {product.inStock ? "In Stock" : "Out of Stock"}
                     </span>
@@ -625,7 +686,17 @@ function ProductTable({
                     )}
                   </td>
                   <td className="px-4 py-3 text-[#c4a882] text-sm font-medium">
-                    ₱{product.price.toFixed(2)}
+                    {product.salePrice ? (
+                      <div>
+                        <span className="text-green-400">₱{product.salePrice.toFixed(2)}</span>
+                        <span className="text-[#7a5c3e] line-through ml-1 text-xs">₱{product.price.toFixed(2)}</span>
+                      </div>
+                    ) : (
+                      <span>₱{product.price.toFixed(2)}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-[#c4a882] text-sm">
+                    {product.stockQuantity}
                   </td>
                   <td className="px-4 py-3">
                     <button
