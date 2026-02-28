@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { orders } from "@/db/schema";
-import { desc, eq, and, or } from "drizzle-orm";
+import { desc, like, or, sql } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,11 +17,12 @@ export async function GET(request: NextRequest) {
 
     const db = getDb();
 
-    // Match orders by customer name (Facebook name) - case-insensitive
+    // Match orders by customer name - case-insensitive using LOWER()
+    const searchTerm = customerName.trim().toLowerCase();
     const customerOrders = await db
       .select()
       .from(orders)
-      .where(eq(orders.customerName, customerName))
+      .where(sql`LOWER(${orders.customerName}) = ${searchTerm}`)
       .orderBy(desc(orders.createdAt));
 
     return NextResponse.json(customerOrders);
