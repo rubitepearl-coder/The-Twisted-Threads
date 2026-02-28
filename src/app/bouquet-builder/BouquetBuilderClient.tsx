@@ -37,7 +37,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   );
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [facebookId, setFacebookId] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
   const [deliveryLocation, setDeliveryLocation] = useState("");
@@ -104,11 +103,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
       return;
     }
     if (!customerName.trim()) {
-      setError("Please enter your name.");
-      return;
-    }
-    // Facebook Name is required, Email is optional
-    if (!facebookId.trim()) {
       setError("Please enter your Facebook name for contact.");
       return;
     }
@@ -149,7 +143,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
         body: JSON.stringify({
           customerName: customerName.trim(),
           customerEmail: customerEmail.trim() || null,
-          facebookId: facebookId.trim() || null,
           customerAddress: customerAddress.trim(),
           deliveryType,
           deliveryLocation: deliveryLocation.trim() || null,
@@ -442,13 +435,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Your Name * <span className="text-xs text-[#a07850] font-normal">(your full name)</span>
+                    Your Name * <span className="text-xs text-[#a07850] font-normal">(for contact)</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="e.g., Maria Garcia"
+                    placeholder="e.g., pearl.rubite"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required
                   />
@@ -464,22 +457,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     placeholder="jane@example.com"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Facebook Name {customerEmail ? "(optional)" : "*"}
-                  </label>
-                  <input
-                    type="text"
-                    value={facebookId}
-                    onChange={(e) => setFacebookId(e.target.value)}
-                    placeholder="jane.smith"
-                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                    required={!customerEmail}
-                  />
-                  <p className="text-xs text-[#a07850] mt-1">
-                    Your Facebook username for contact
-                  </p>
                 </div>
                 {deliveryType === "home" && (
                   <div className="sm:col-span-2">
@@ -612,7 +589,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               </button>
 
               <p className="text-xs text-[#a07850] text-center mt-3">
-                We will confirm your order by {facebookId ? "Facebook" : "email"}
+                We will confirm your order by email
               </p>
             </div>
           </div>

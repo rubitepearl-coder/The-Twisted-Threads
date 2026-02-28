@@ -63,7 +63,6 @@ export async function POST(request: NextRequest) {
     
     const {
       userId,
-      facebookId,
       customerName,
       customerEmail,
       customerAddress,
@@ -83,16 +82,12 @@ export async function POST(request: NextRequest) {
       totalPrice,
     } = body;
 
-    // Validate required fields - customerName is required, but email is optional if facebookId provided
-    console.log("[Orders API] Validation check:", { customerName, customerEmail, facebookId });
-    if (!customerName || (!customerEmail && !facebookId)) {
-      console.log("[Orders API] Validation FAILED:", { 
-        hasName: !!customerName, 
-        hasEmail: !!customerEmail, 
-        hasFacebook: !!facebookId 
-      });
+    // Validate required fields - customerName (Facebook name) is required
+    console.log("[Orders API] Validation check:", { customerName, customerEmail });
+    if (!customerName) {
+      console.log("[Orders API] Validation FAILED: No customer name");
       return NextResponse.json(
-        { error: "Name and Facebook name (or email) are required to place an order." },
+        { error: "Name is required to place an order." },
         { status: 400 }
       );
     }
@@ -127,7 +122,6 @@ export async function POST(request: NextRequest) {
     console.log("[Orders API] Validated values:", {
       customerName,
       customerEmail,
-      facebookId,
       customerAddress: customerAddress ?? "",
       deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
       deliveryLocation,
@@ -249,7 +243,6 @@ export async function POST(request: NextRequest) {
       // Note: Using explicit column mapping to ensure correct field assignment
       const orderData = {
         userId: userId || undefined,
-        facebookId: (facebookId && facebookId.toString().trim()) || undefined,
         customerName: (customerName && customerName.toString().trim()) || "Unknown",
         customerEmail: (customerEmail && customerEmail.toString().trim()) || undefined,
         customerAddress: (customerAddress && customerAddress.toString().trim()) || "",
@@ -272,8 +265,6 @@ export async function POST(request: NextRequest) {
       };
       
       console.log("[Orders API] Final order data:", JSON.stringify(orderData));
-      console.log("[Orders API] facebookId value:", orderData.facebookId);
-      console.log("[Orders API] customerName value:", orderData.customerName);
       
       // Insert with explicit column specification to ensure correct mapping
       const result = await tx

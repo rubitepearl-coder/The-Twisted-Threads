@@ -29,7 +29,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [facebookId, setFacebookId] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
   const [deliveryLocation, setDeliveryLocation] = useState("");
@@ -108,11 +107,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
       return;
     }
     if (!customerName.trim()) {
-      setError("Please enter your name.");
-      return;
-    }
-    // Facebook Name is required, Email is optional
-    if (!facebookId.trim()) {
       setError("Please enter your Facebook name for contact.");
       return;
     }
@@ -157,7 +151,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
         body: JSON.stringify({
           customerName: customerName.trim(),
           customerEmail: customerEmail.trim() || null,
-          facebookId: facebookId.trim() || null,
           customerAddress: customerAddress.trim(),
           deliveryType,
           deliveryLocation: deliveryLocation.trim() || null,
@@ -173,7 +166,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
       console.log("[MiniPotBuilder] Order submission data:", {
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim() || null,
-        facebookId: facebookId.trim() || null,
         customerAddress: customerAddress.trim(),
         deliveryType,
         deliveryLocation: deliveryLocation.trim() || null,
@@ -488,13 +480,13 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Your Name * <span className="text-xs text-[#a07850] font-normal">(your full name)</span>
+                    Your Name * <span className="text-xs text-[#a07850] font-normal">(for contact - your Facebook name)</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="e.g., Maria Garcia"
+                    placeholder="e.g., pearl.rubite"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required
                   />
@@ -509,19 +501,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="jane@example.com"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Facebook Name {customerEmail ? "(optional)" : "*"} <span className="text-xs text-[#a07850] font-normal">(e.g., maria.garcia)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={facebookId}
-                    onChange={(e) => setFacebookId(e.target.value)}
-                    placeholder="your.facebook.username"
-                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                    required={!customerEmail}
                   />
                 </div>
                 {deliveryType === "home" && (
@@ -677,7 +656,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               </button>
 
               <p className="text-xs text-[#a07850] text-center mt-3">
-                We will confirm your order by {facebookId ? "Facebook" : "email"}
+                We will confirm your order by email
               </p>
             </div>
           </div>

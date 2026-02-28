@@ -45,7 +45,6 @@ export default function ShopPage() {
   
   // Customer form state
   const [customerName, setCustomerName] = useState("");
-  const [facebookName, setFacebookName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [deliveryType, setDeliveryType] = useState<"pickup" | "home">("pickup");
   const [deliveryLocation, setDeliveryLocation] = useState("");
@@ -121,10 +120,6 @@ export default function ShopPage() {
     
     // Validation
     if (!customerName.trim()) {
-      setError("Please enter your full name.");
-      return;
-    }
-    if (!facebookName.trim()) {
       setError("Please enter your Facebook name for contact.");
       return;
     }
@@ -154,7 +149,6 @@ export default function ShopPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName: customerName.trim(),
-          facebookId: facebookName.trim(),
           customerEmail: customerEmail.trim() || undefined,
           customerAddress: customerAddress.trim(),
           deliveryType,
@@ -518,27 +512,14 @@ export default function ShopPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-[#3d2c1e] font-medium mb-1">
-                    Full Name <span className="text-red-500">*</span>
+                    Your Name <span className="text-red-500">*</span> <span className="text-xs text-[#a07850]">(for contact)</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full px-4 py-2 border border-[#d4b896] rounded-lg focus:outline-none focus:border-[#7a4f2e]"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[#3d2c1e] font-medium mb-1">
-                    Facebook Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={facebookName}
-                    onChange={(e) => setFacebookName(e.target.value)}
-                    className="w-full px-4 py-2 border border-[#d4b896] rounded-lg focus:outline-none focus:border-[#7a4f2e]"
-                    placeholder="Your Facebook name for contact"
+                    placeholder="e.g., pearl.rubite"
                   />
                 </div>
 
