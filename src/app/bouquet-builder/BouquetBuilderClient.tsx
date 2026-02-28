@@ -41,7 +41,9 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const availableFlowers = flowers.filter((f) => f.inStock && f.stockQuantity > 0);
+  // Show all flowers, but mark out-of-stock ones
+  // const availableFlowers = flowers.filter((f) => f.inStock && f.stockQuantity > 0);
+  const availableFlowers = flowers;
 
   const updateQuantity = (id: number, delta: number) => {
     setQuantities((prev) => {
@@ -157,12 +159,15 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {availableFlowers.map((flower) => {
                   const qty = quantities[flower.id] ?? 0;
+                  const isOutOfStock = !flower.inStock || flower.stockQuantity <= 0;
                   return (
                     <div
                       key={flower.id}
                       className={`bg-white rounded-2xl p-4 border-2 transition-all ${
                         qty > 0
                           ? "border-[#7a4f2e] shadow-md"
+                          : isOutOfStock
+                          ? "border-gray-200 opacity-60"
                           : "border-[#e8d5be] hover:border-[#c4a882]"
                       }`}
                     >
@@ -185,6 +190,11 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-[#3d2c1e]">
                             {flower.name}
+                            {isOutOfStock && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                Sold Out
+                              </span>
+                            )}
                           </p>
                           <p className="text-[#7a4f2e] text-sm font-medium">
                             {flower.salePrice ? (
@@ -202,7 +212,12 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                               Only {flower.stockQuantity} left!
                             </p>
                           )}
-                          {flower.description && (
+                          {isOutOfStock && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Available in shop
+                            </p>
+                          )}
+                          {flower.description && !isOutOfStock && (
                             <p className="text-xs text-[#a07850] mt-0.5 truncate">
                               {flower.description}
                             </p>
@@ -212,7 +227,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                           <button
                             type="button"
                             onClick={() => updateQuantity(flower.id, -1)}
-                            disabled={qty === 0}
+                            disabled={qty === 0 || isOutOfStock}
                             className="w-8 h-8 rounded-full bg-[#f5ede0] text-[#7a4f2e] font-bold text-lg flex items-center justify-center hover:bg-[#e8d5be] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                           >
                             −
@@ -223,7 +238,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                           <button
                             type="button"
                             onClick={() => updateQuantity(flower.id, 1)}
-                            disabled={qty >= flower.stockQuantity}
+                            disabled={isOutOfStock || qty >= flower.stockQuantity}
                             className="w-8 h-8 rounded-full bg-[#7a4f2e] text-white font-bold text-lg flex items-center justify-center hover:bg-[#5c3a1e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                           >
                             +
