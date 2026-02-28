@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Cloudinary is configured
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return NextResponse.json(
+        { error: "Cloudinary is not configured. Please add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to your environment variables." },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -31,29 +44,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create unique filename
+    // Convert file to base64 for Cloudinary
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const timestamp = Date.now();
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `product-${timestamp}.${ext}`;
+    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch {
-      // Directory might already exist
-    }
+    // Upload to Cloudinary
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader.upload(
+        base64,
+        {
+          folder: "petal-loop-products",
+          public_id: `product-${Date.now()}`,
+          transformation: [
+            { width: 800, height: 800, crop: "limit" }, // Limit size but maintain aspect ratio
+            { quality: "auto", fetch_format: "auto" } // Optimize quality and format
+          ]
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+    });
 
-    // Write file to public/uploads
-    const filePath = path.join(uploadsDir, filename);
-    await writeFile(filePath, buffer);
-
-    // Return the public URL
-    const url = `/uploads/${filename}`;
-
-    return NextResponse.json({ url, filename });
+    // Return the Cloudinary URL
+    return NextResponse.json({ 
+      url: uploadResult.secure_url,
+      filename: uploadResult.public_id
+    });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
