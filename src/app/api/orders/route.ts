@@ -113,16 +113,22 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Debug: Log the processed values
-    console.log("[Orders API] Processed values:", {
-      deliveryType,
-      deliveryLocation,
-      deliveryFee,
-      orderType
-    });
-
     // Calculate final total with delivery fee
     const finalTotal = totalPrice + deliveryFee;
+    
+    // Debug: Log the validated and processed values
+    console.log("[Orders API] Validated values:", {
+      customerName,
+      customerEmail,
+      facebookId,
+      customerAddress: customerAddress ?? "",
+      deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
+      deliveryLocation,
+      deliveryFee,
+      orderType,
+      totalPrice,
+      finalTotal
+    });
 
     // Start a transaction to ensure stock consistency
     const orderResult = await db.transaction(async (tx) => {
