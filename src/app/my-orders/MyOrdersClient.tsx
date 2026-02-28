@@ -17,7 +17,6 @@ type Order = {
   id: number;
   customerName: string;
   customerEmail: string | null;
-  facebookId: string | null;
   customerAddress: string;
   deliveryType: string;
   deliveryLocation: string | null;
@@ -41,7 +40,6 @@ type Order = {
 
 export default function MyOrdersClient() {
   const [customerName, setCustomerName] = useState("");
-  const [facebookName, setFacebookName] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,8 +59,8 @@ export default function MyOrdersClient() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName.trim() || !facebookName.trim()) {
-      setError("Please enter both your name and Facebook name to view your orders.");
+    if (!customerName.trim()) {
+      setError("Please enter your name to view your orders.");
       return;
     }
 
@@ -74,7 +72,6 @@ export default function MyOrdersClient() {
     try {
       const params = new URLSearchParams({
         customerName: customerName.trim(),
-        facebookName: facebookName.trim(),
       });
 
       const res = await fetch(`/api/orders/customer?${params}`);
@@ -151,7 +148,7 @@ export default function MyOrdersClient() {
           My Orders
         </h1>
         <p className="text-[#6b4c30] text-lg max-w-xl mx-auto">
-          View your past orders by entering your name and Facebook name.
+          View your past orders by entering your name.
         </p>
       </div>
 
@@ -162,34 +159,19 @@ export default function MyOrdersClient() {
             Find Your Orders
           </h2>
           <form onSubmit={handleSearch} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+            <div>
                 <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                  Your Name *
+                  Your Name * (for contact - your Facebook name)
                 </label>
                 <input
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Jane Smith"
+                  placeholder="e.g., pearl.rubite"
                   className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                  Facebook Name *
-                </label>
-                <input
-                  type="text"
-                  value={facebookName}
-                  onChange={(e) => setFacebookName(e.target.value)}
-                  placeholder="facebook.com/jane.smith"
-                  className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
             {error && (
               <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
                 {error}
@@ -216,10 +198,10 @@ export default function MyOrdersClient() {
               <div className="bg-white rounded-2xl border border-[#e8d5be] p-8 text-center">
                 <div className="text-4xl mb-3">🔍</div>
                 <p className="text-[#6b4c30] mb-4">
-                  No orders found with that name and Facebook name.
+                  No orders found with that name.
                 </p>
                 <p className="text-sm text-[#a07850]">
-                  Make sure you use the same name and Facebook name you used when placing your order.
+                  Make sure you use the same name you used when placing your order.
                 </p>
               </div>
             )}
