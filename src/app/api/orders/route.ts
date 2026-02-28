@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
     const {
       userId,
       customerName,
+      facebookName,
       customerEmail,
       customerAddress,
       deliveryType,
@@ -82,12 +83,20 @@ export async function POST(request: NextRequest) {
       totalPrice,
     } = body;
 
-    // Validate required fields - customerName (Facebook name) is required
-    console.log("[Orders API] Validation check:", { customerName, customerEmail });
+    // Validate required fields
+    // customerName (Full Name) is required, facebookName (for contact) is required
+    console.log("[Orders API] Validation check:", { customerName, facebookName, customerEmail });
     if (!customerName) {
-      console.log("[Orders API] Validation FAILED: No customer name");
+      console.log("[Orders API] Validation FAILED: No full name");
       return NextResponse.json(
-        { error: "Name is required to place an order." },
+        { error: "Full name is required to place an order." },
+        { status: 400 }
+      );
+    }
+    if (!facebookName) {
+      console.log("[Orders API] Validation FAILED: No Facebook name");
+      return NextResponse.json(
+        { error: "Facebook name is required for contact." },
         { status: 400 }
       );
     }
@@ -244,6 +253,7 @@ export async function POST(request: NextRequest) {
       const orderData = {
         userId: userId || undefined,
         customerName: (customerName && customerName.toString().trim()) || "Unknown",
+        facebookName: facebookName ? facebookName.toString().trim() : undefined,
         customerEmail: customerEmail ? customerEmail.toString().trim() || undefined : undefined,
         customerAddress: customerAddress && customerAddress.toString().trim() ? customerAddress.toString().trim() : undefined,
         deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",

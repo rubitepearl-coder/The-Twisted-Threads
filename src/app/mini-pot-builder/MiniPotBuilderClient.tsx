@@ -27,8 +27,9 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
     pots.find((p) => p.inStock && p.stockQuantity > 0)?.id ?? null
   );
   const [quantities, setQuantities] = useState<Record<number, number>>({});
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerName, setCustomerName] = useState(""); // Full legal name
+  const [facebookName, setFacebookName] = useState(""); // Facebook name for contact
+  const [customerEmail, setCustomerEmail] = useState(""); // Optional email
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
   const [deliveryLocation, setDeliveryLocation] = useState("");
@@ -107,6 +108,10 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
       return;
     }
     if (!customerName.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!facebookName.trim()) {
       setError("Please enter your Facebook name for contact.");
       return;
     }
@@ -150,6 +155,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName: customerName.trim(),
+          facebookName: facebookName.trim(),
           customerEmail: customerEmail.trim() || undefined,
           customerAddress: customerAddress.trim() || undefined,
           deliveryType,
@@ -480,15 +486,40 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Your Name * <span className="text-xs text-[#a07850] font-normal">(for contact - your Facebook name)</span>
+                    Full Name * <span className="text-xs text-[#a07850] font-normal">(for shipping records)</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="e.g., Juan dela Cruz"
+                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                    Facebook Name * <span className="text-xs text-[#a07850] font-normal">(for contact via Messenger)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={facebookName}
+                    onChange={(e) => setFacebookName(e.target.value)}
                     placeholder="e.g., pearl.rubite"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                    Email Address <span className="text-xs text-[#a07850] font-normal">(optional - for order confirmation)</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="e.g., juan@example.com"
+                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                   />
                 </div>
                 {deliveryType === "home" && (

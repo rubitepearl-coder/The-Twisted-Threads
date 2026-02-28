@@ -28,7 +28,8 @@ export const orders = sqliteTable("orders", {
   userId: text("user_id"), // For logged-in users
   facebookId: text("facebook_id"), // Facebook account identifier
   customerName: text("customer_name").notNull(),
-  customerEmail: text("customer_email"), // Now optional - can use facebook_id instead
+  facebookName: text("facebook_name"), // Facebook name for contact via Messenger
+  customerEmail: text("customer_email"), // Optional - can use facebook_name instead
   customerAddress: text("customer_address").notNull().default(""),
   deliveryType: text("delivery_type").notNull().default("home"), // 'home' | 'pickup'
   deliveryLocation: text("delivery_location"), // Location for delivery fee calculation
