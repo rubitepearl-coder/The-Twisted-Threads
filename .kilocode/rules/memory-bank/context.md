@@ -39,6 +39,10 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 - [x] Shop ordering: Full cart & checkout flow for finished goods (amigurumi, crochet items) with "Add to Cart" buttons, cart modal, and checkout form
 - [x] Added "Add More Items" button to cart modal for continue shopping
 - [x] Added built-in image upload feature to admin inventory (POST /api/upload)
+- [x] Cloudinary integration for permanent image storage (resolves Vercel ephemeral filesystem issue)
+- [x] Added "My Orders" page for customers to track orders by email
+- [x] Added Customer Login page with order lookup by email
+- [x] Fixed node-domexception deprecation warning in package.json
 
 ## Current Structure
 
@@ -89,3 +93,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-02-26 | Bug fix: Added `src/instrumentation.ts` to auto-run DB migrations on server startup, fixing admin login 500 error caused by missing tables |
 | 2026-02-26 | Visual overhaul: Square images (1:1 aspect ratio), address collection in bouquet builder, personalized thank you page, enhanced admin order fulfillment view |
 | 2026-02-27 | Switched to @libsql/client for cloud-compatible SQLite database (works with Turso or local file)
+| 2026-02-28 | Cloudinary integration for image uploads; Fixed node-domexception deprecation warning
