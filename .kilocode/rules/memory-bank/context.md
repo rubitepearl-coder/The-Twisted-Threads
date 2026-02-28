@@ -43,6 +43,7 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 - [x] Added "My Orders" page for customers to track orders by email
 - [x] Added Customer Login page with order lookup by email
 - [x] Fixed node-domexception deprecation warning in package.json
+- [x] Removed email field from all order forms - customers now order via Facebook name only (migration 0005)
 
 ## Current Structure
 
@@ -94,3 +95,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-02-26 | Visual overhaul: Square images (1:1 aspect ratio), address collection in bouquet builder, personalized thank you page, enhanced admin order fulfillment view |
 | 2026-02-27 | Switched to @libsql/client for cloud-compatible SQLite database (works with Turso or local file)
 | 2026-02-28 | Cloudinary integration for image uploads; Fixed node-domexception deprecation warning
+| 2026-02-28 | Removed email field from order forms - customers now order via Facebook name only (migration 0005)
