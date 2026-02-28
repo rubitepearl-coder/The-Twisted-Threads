@@ -63,11 +63,17 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
     return sum + (quantities[flower.id] ?? 0) * (flower.salePrice || flower.price);
   }, 0);
 
-  // Calculate Anini-y delivery fee: ₱10 if home delivery in Anini-y
+  // Calculate delivery fee:
+  // - ₱10 for Anini-y
+  // - FREE for San Francisco area (STHS, SFES, nearby houses)
+  // - ₱10 for other locations
   const deliveryFee = deliveryType === "home" && deliveryLocation 
-    ? (deliveryLocation.toLowerCase().includes("anini") || deliveryLocation.toLowerCase() === "anini-y")
-      ? 10 
-      : 0
+    ? (() => {
+        const loc = deliveryLocation.toLowerCase();
+        if (loc.includes("aniniy") || loc.includes("anini-y")) return 10; // Anini-y
+        if (loc.includes("san francisco") || loc.includes("sths") || loc.includes("sfes")) return 0; // Free
+        return 10; // Other locations
+      })()
     : 0;
 
   const finalTotal = totalPrice + deliveryFee;
@@ -400,8 +406,9 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     required={deliveryType === "home"}
                   />
                   <p className="text-xs text-[#a07850] mt-1">
-                    Enter your municipality to calculate delivery fee. 
-                    ₱10 delivery fee applies for Anini-y.
+                    Enter your municipality to calculate delivery fee.
+                    Free delivery for STHS, SFES, and San Francisco nearby.
+                    ₱10 for Anini-y and other areas.
                   </p>
                 </div>
               )}
@@ -559,7 +566,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                 {deliveryType === "home" && (
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-[#6b4c30]">
-                      Delivery {deliveryLocation && deliveryLocation.toLowerCase().includes("anini") && "(Anini-y)"}
+                      Delivery {deliveryLocation && (deliveryLocation.toLowerCase().includes("aniniy") || deliveryLocation.toLowerCase().includes("anini-y")) && "(Anini-y)"}
                     </span>
                     <span className={deliveryFee > 0 ? "text-[#7a4f2e]" : "text-green-600"}>
                       {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Free"}

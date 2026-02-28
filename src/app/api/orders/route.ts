@@ -75,11 +75,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate Anini-y delivery fee: ₱10 if home delivery in Anini-y
+    // Calculate delivery fee:
+    // - ₱10 for Anini-y
+    // - FREE for San Francisco area (STHS, SFES, nearby houses)
     let deliveryFee = 0;
     if (deliveryType === "home" && deliveryLocation) {
       const locationLower = deliveryLocation.toLowerCase();
-      if (locationLower.includes("anini") || locationLower === "anini-y") {
+      if (locationLower.includes("aniniy") || locationLower.includes("anini-y")) {
+        // Anini-y area: ₱10 delivery fee
+        deliveryFee = 10;
+      } else if (
+        locationLower.includes("san francisco") ||
+        locationLower.includes("sths") ||
+        locationLower.includes("sfes")
+      ) {
+        // San Francisco area (STHS, SFES, nearby): FREE delivery
+        deliveryFee = 0;
+      } else {
+        // Other locations: ₱10 delivery fee
         deliveryFee = 10;
       }
     }
