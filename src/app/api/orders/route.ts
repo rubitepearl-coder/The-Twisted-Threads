@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     const finalTotal = totalPrice + deliveryFee;
 
     // Start a transaction to ensure stock consistency
-    await db.transaction(async (tx) => {
+    const orderResult = await db.transaction(async (tx) => {
       // Check and decrement stock for bouquet items
       if (bouquetItems && bouquetItems.length > 0) {
         for (const item of bouquetItems) {
@@ -219,35 +219,41 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Create the order
+      // Create the order - use onConflictDoNothing for id to handle autoIncrement properly
       const result = await tx
         .insert(orders)
         .values({
-          userId: userId ?? null,
-          facebookId: facebookId ?? null,
+          userId: userId ?? undefined,
+          facebookId: facebookId ?? undefined,
           customerName,
-          customerEmail: customerEmail ?? null,
+          customerEmail: customerEmail ?? undefined,
           customerAddress: customerAddress ?? "",
           deliveryType: deliveryType ?? "home",
-          deliveryLocation: deliveryLocation ?? null,
+          deliveryLocation: deliveryLocation ?? undefined,
           deliveryFee,
           orderType: orderType ?? "bouquet",
           bouquetItems: JSON.stringify(bouquetItems ?? []),
           miniPotItems: JSON.stringify(miniPotItems ?? []),
           shopItems: JSON.stringify(shopItems ?? []),
-          potId: potId ?? null,
-          potName: potName ?? null,
-          potImageUrl: potImageUrl ?? null,
-          wrapperColorId: wrapperColorId ?? null,
-          wrapperColorName: wrapperColorName ?? null,
-          wrapperColorHex: wrapperColorHex ?? null,
-          wrapperColorImageUrl: wrapperColorImageUrl ?? null,
+          potId: potId ?? undefined,
+          potName: potName ?? undefined,
+          potImageUrl: potImageUrl ?? undefined,
+          wrapperColorId: wrapperColorId ?? undefined,
+          wrapperColorName: wrapperColorName ?? undefined,
+          wrapperColorHex: wrapperColorHex ?? undefined,
+          wrapperColorImageUrl: wrapperColorImageUrl ?? undefined,
           totalPrice: finalTotal,
           status: "pending",
-        })
-        .returning({ id: orders.id });
+        });
 
-      const orderId = result[0].id;
+      // Get the last inserted order ID
+      const [latestOrder] = await tx
+        .select({ id: orders.id })
+        .from(orders)
+        .orderBy(desc(orders.createdAt))
+        .limit(1);
+
+      const orderId = latestOrder?.id;
 
       // Send order to Google Sheets if configured
       if (isGoogleSheetsConfigured()) {
@@ -276,21 +282,9 @@ export async function POST(request: NextRequest) {
       return { orderId };
     });
 
-    // Note: The transaction above handles everything, but we need to get the orderId
-    // Let me restructure this properly
-    
-    // Actually, let me simplify - the transaction is working, but I need to return properly
-    // The issue is the nested async and return - let me refactor
-    
-    // For now, fetch the most recent order to get the ID
-    const [latestOrder] = await db
-      .select({ id: orders.id })
-      .from(orders)
-      .orderBy(desc(orders.createdAt))
-      .limit(1);
-
+    // Return the order result
     return NextResponse.json({ 
-      orderId: latestOrder?.id, 
+      orderId: orderResult.orderId, 
       deliveryFee,
       finalTotal 
     }, { status: 201 });
