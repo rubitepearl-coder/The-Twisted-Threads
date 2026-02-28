@@ -150,7 +150,7 @@ export default function ShopPage() {
         body: JSON.stringify({
           customerName: customerName.trim(),
           customerEmail: customerEmail.trim() || undefined,
-          customerAddress: customerAddress.trim(),
+          customerAddress: customerAddress.trim() || undefined,
           deliveryType,
           deliveryLocation: deliveryLocation.trim() || undefined,
           deliveryFee,

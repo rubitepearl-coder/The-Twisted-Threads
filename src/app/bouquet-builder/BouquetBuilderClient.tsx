@@ -142,8 +142,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName: customerName.trim(),
-          customerEmail: customerEmail.trim() || null,
-          customerAddress: customerAddress.trim(),
+          customerEmail: customerEmail.trim() || undefined,
+          customerAddress: customerAddress.trim() || undefined,
           deliveryType,
           deliveryLocation: deliveryLocation.trim() || null,
           orderType: "bouquet",

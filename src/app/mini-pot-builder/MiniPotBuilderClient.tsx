@@ -150,8 +150,8 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName: customerName.trim(),
-          customerEmail: customerEmail.trim() || null,
-          customerAddress: customerAddress.trim(),
+          customerEmail: customerEmail.trim() || undefined,
+          customerAddress: customerAddress.trim() || undefined,
           deliveryType,
           deliveryLocation: deliveryLocation.trim() || null,
           orderType: "mini_pot",
@@ -165,8 +165,8 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
 
       console.log("[MiniPotBuilder] Order submission data:", {
         customerName: customerName.trim(),
-        customerEmail: customerEmail.trim() || null,
-        customerAddress: customerAddress.trim(),
+        customerEmail: customerEmail.trim() || undefined,
+        customerAddress: customerAddress.trim() || undefined,
         deliveryType,
         deliveryLocation: deliveryLocation.trim() || null,
         orderType: "mini_pot",

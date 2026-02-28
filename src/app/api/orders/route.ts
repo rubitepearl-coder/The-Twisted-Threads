@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
         userId: userId || undefined,
         customerName: (customerName && customerName.toString().trim()) || "Unknown",
         customerEmail: customerEmail ? customerEmail.toString().trim() || undefined : undefined,
-        customerAddress: (customerAddress && customerAddress.toString().trim()) || "",
+        customerAddress: customerAddress && customerAddress.toString().trim() ? customerAddress.toString().trim() : undefined,
         deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
         deliveryLocation: (deliveryLocation && deliveryLocation.toString().trim()) || undefined,
         deliveryFee,
