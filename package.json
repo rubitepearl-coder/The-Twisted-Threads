@@ -2,6 +2,9 @@
   "name": "nextjs-template",
   "version": "0.1.0",
   "private": true,
+  "overrides": {
+    "node-domexception": "^2.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
