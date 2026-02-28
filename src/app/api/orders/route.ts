@@ -57,6 +57,10 @@ export async function POST(request: NextRequest) {
   try {
     db = getDb();
     const body = await request.json();
+    
+    // Debug: Log the incoming request body
+    console.log("[Orders API] Received body:", JSON.stringify(body));
+    
     const {
       userId,
       facebookId,
@@ -220,31 +224,35 @@ export async function POST(request: NextRequest) {
       }
 
       // Create the order - use onConflictDoNothing for id to handle autoIncrement properly
+      const orderData = {
+        userId: userId ?? undefined,
+        facebookId: facebookId ?? undefined,
+        customerName,
+        customerEmail: customerEmail ?? undefined,
+        customerAddress: customerAddress ?? "",
+        deliveryType: deliveryType ?? "home",
+        deliveryLocation: deliveryLocation ?? undefined,
+        deliveryFee,
+        orderType: orderType ?? "bouquet",
+        bouquetItems: JSON.stringify(bouquetItems ?? []),
+        miniPotItems: JSON.stringify(miniPotItems ?? []),
+        shopItems: JSON.stringify(shopItems ?? []),
+        potId: potId ?? undefined,
+        potName: potName ?? undefined,
+        potImageUrl: potImageUrl ?? undefined,
+        wrapperColorId: wrapperColorId ?? undefined,
+        wrapperColorName: wrapperColorName ?? undefined,
+        wrapperColorHex: wrapperColorHex ?? undefined,
+        wrapperColorImageUrl: wrapperColorImageUrl ?? undefined,
+        totalPrice: finalTotal,
+        status: "pending",
+      };
+      
+      console.log("[Orders API] Insert values:", JSON.stringify(orderData));
+      
       const result = await tx
         .insert(orders)
-        .values({
-          userId: userId ?? undefined,
-          facebookId: facebookId ?? undefined,
-          customerName,
-          customerEmail: customerEmail ?? undefined,
-          customerAddress: customerAddress ?? "",
-          deliveryType: deliveryType ?? "home",
-          deliveryLocation: deliveryLocation ?? undefined,
-          deliveryFee,
-          orderType: orderType ?? "bouquet",
-          bouquetItems: JSON.stringify(bouquetItems ?? []),
-          miniPotItems: JSON.stringify(miniPotItems ?? []),
-          shopItems: JSON.stringify(shopItems ?? []),
-          potId: potId ?? undefined,
-          potName: potName ?? undefined,
-          potImageUrl: potImageUrl ?? undefined,
-          wrapperColorId: wrapperColorId ?? undefined,
-          wrapperColorName: wrapperColorName ?? undefined,
-          wrapperColorHex: wrapperColorHex ?? undefined,
-          wrapperColorImageUrl: wrapperColorImageUrl ?? undefined,
-          totalPrice: finalTotal,
-          status: "pending",
-        });
+        .values(orderData);
 
       // Get the last inserted order ID
       const [latestOrder] = await tx
