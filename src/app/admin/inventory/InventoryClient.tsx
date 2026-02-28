@@ -40,6 +40,7 @@ export default function InventoryClient({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
     description: "",
@@ -55,6 +56,37 @@ export default function InventoryClient({
   const showMessage = (msg: string) => {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const { url } = await res.json();
+      
+      if (target === 'new') {
+        setNewProduct(p => ({ ...p, imageUrl: url }));
+      } else {
+        setEditForm(prev => ({ ...prev, imageUrl: url }));
+      }
+      showMessage('✅ Image uploaded!');
+    } catch {
+      showMessage('❌ Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const startEdit = (product: Product) => {
@@ -315,17 +347,31 @@ export default function InventoryClient({
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-xs text-[#c4a882] mb-1">
-                    Photo URL <span className="text-[#7a5c3e]">(square image, e.g. https://...)</span>
+                    Photo <span className="text-[#7a5c3e]">(square image)</span>
                   </label>
-                  <input
-                    type="url"
-                    value={newProduct.imageUrl}
-                    onChange={(e) =>
-                      setNewProduct((p) => ({ ...p, imageUrl: e.target.value }))
-                    }
-                    placeholder="https://example.com/photo.jpg"
-                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
-                  />
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <input
+                        type="url"
+                        value={newProduct.imageUrl}
+                        onChange={(e) =>
+                          setNewProduct((p) => ({ ...p, imageUrl: e.target.value }))
+                        }
+                        placeholder="Or paste image URL..."
+                        className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                      />
+                    </div>
+                    <label className="bg-[#7a4f2e] text-white px-3 py-2 rounded-lg cursor-pointer hover:bg-[#5c3a1e] transition-colors text-sm font-medium">
+                      {uploading ? 'Uploading...' : 'Upload'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload(e, 'new')}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
                   {newProduct.imageUrl && (
                     <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-[#5c3a1e]">
                       <Image
@@ -377,6 +423,7 @@ export default function InventoryClient({
                 editingId={editingId}
                 editForm={editForm}
                 saving={saving}
+                uploading={uploading}
                 onEdit={startEdit}
                 onCancel={cancelEdit}
                 onSave={saveEdit}
@@ -385,6 +432,7 @@ export default function InventoryClient({
                 onEditFormChange={(field, value) =>
                   setEditForm((prev) => ({ ...prev, [field]: value }))
                 }
+                onImageUpload={handleImageUpload}
               />
             </section>
           )}
@@ -400,6 +448,7 @@ export default function InventoryClient({
                 editingId={editingId}
                 editForm={editForm}
                 saving={saving}
+                uploading={uploading}
                 onEdit={startEdit}
                 onCancel={cancelEdit}
                 onSave={saveEdit}
@@ -408,6 +457,7 @@ export default function InventoryClient({
                 onEditFormChange={(field, value) =>
                   setEditForm((prev) => ({ ...prev, [field]: value }))
                 }
+                onImageUpload={handleImageUpload}
               />
             </section>
           )}
@@ -423,6 +473,7 @@ export default function InventoryClient({
                 editingId={editingId}
                 editForm={editForm}
                 saving={saving}
+                uploading={uploading}
                 onEdit={startEdit}
                 onCancel={cancelEdit}
                 onSave={saveEdit}
@@ -431,6 +482,7 @@ export default function InventoryClient({
                 onEditFormChange={(field, value) =>
                   setEditForm((prev) => ({ ...prev, [field]: value }))
                 }
+                onImageUpload={handleImageUpload}
               />
             </section>
           )}
@@ -446,6 +498,7 @@ export default function InventoryClient({
                 editingId={editingId}
                 editForm={editForm}
                 saving={saving}
+                uploading={uploading}
                 onEdit={startEdit}
                 onCancel={cancelEdit}
                 onSave={saveEdit}
@@ -454,6 +507,7 @@ export default function InventoryClient({
                 onEditFormChange={(field, value) =>
                   setEditForm((prev) => ({ ...prev, [field]: value }))
                 }
+                onImageUpload={handleImageUpload}
               />
             </section>
           )}
@@ -480,23 +534,27 @@ function ProductTable({
   editingId,
   editForm,
   saving,
+  uploading,
   onEdit,
   onCancel,
   onSave,
   onToggleStock,
   onDelete,
   onEditFormChange,
+  onImageUpload,
 }: {
   products: Product[];
   editingId: number | null;
   editForm: Partial<Product>;
   saving: boolean;
+  uploading: boolean;
   onEdit: (p: Product) => void;
   onCancel: () => void;
   onSave: () => void;
   onToggleStock: (p: Product) => void;
   onDelete: (id: number, name: string) => void;
   onEditFormChange: (field: string, value: string | number | boolean | null) => void;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit') => void;
 }) {
   return (
     <div className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] overflow-hidden">
@@ -565,15 +623,27 @@ function ProductTable({
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <input
-                      type="url"
-                      value={editForm.imageUrl ?? ""}
-                      onChange={(e) =>
-                        onEditFormChange("imageUrl", e.target.value)
-                      }
-                      placeholder="https://..."
-                      className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
-                    />
+                    <div className="flex gap-1 items-start">
+                      <input
+                        type="url"
+                        value={editForm.imageUrl ?? ""}
+                        onChange={(e) =>
+                          onEditFormChange("imageUrl", e.target.value)
+                        }
+                        placeholder="https://..."
+                        className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
+                      />
+                      <label className="bg-[#7a4f2e] text-white px-2 py-1 rounded cursor-pointer hover:bg-[#5c3a1e] text-xs whitespace-nowrap">
+                        {uploading ? '...' : '📤'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => onImageUpload(e, 'edit')}
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
                     {editForm.imageUrl && (
                       <div className="mt-1 w-10 h-10 rounded overflow-hidden border border-[#5c3a1e]">
                         <Image
