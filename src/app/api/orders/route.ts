@@ -232,14 +232,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Create the order - use onConflictDoNothing for id to handle autoIncrement properly
+      // Ensure all required fields have proper values
       const orderData = {
         userId: userId ?? undefined,
         facebookId: facebookId ?? undefined,
         customerName,
         customerEmail: customerEmail ?? undefined,
-        customerAddress: customerAddress ?? "",
-        deliveryType: deliveryType ?? "home",
-        deliveryLocation: deliveryLocation ?? undefined,
+        customerAddress: customerAddress?.trim() || "",
+        deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
+        deliveryLocation: deliveryLocation?.trim() || undefined,
         deliveryFee,
         orderType: orderType ?? "bouquet",
         bouquetItems: JSON.stringify(bouquetItems ?? []),
@@ -256,7 +257,7 @@ export async function POST(request: NextRequest) {
         status: "pending",
       };
       
-      console.log("[Orders API] Insert values:", JSON.stringify(orderData));
+      console.log("[Orders API] Final order data:", JSON.stringify(orderData));
       
       const result = await tx
         .insert(orders)
