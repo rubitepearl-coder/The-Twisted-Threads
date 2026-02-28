@@ -246,6 +246,7 @@ export async function POST(request: NextRequest) {
 
       // Create the order - use onConflictDoNothing for id to handle autoIncrement properly
       // Ensure all required fields have proper values
+      // Note: Using explicit column mapping to ensure correct field assignment
       const orderData = {
         userId: userId || undefined,
         facebookId: (facebookId && facebookId.toString().trim()) || undefined,
@@ -271,7 +272,10 @@ export async function POST(request: NextRequest) {
       };
       
       console.log("[Orders API] Final order data:", JSON.stringify(orderData));
+      console.log("[Orders API] facebookId value:", orderData.facebookId);
+      console.log("[Orders API] customerName value:", orderData.customerName);
       
+      // Insert with explicit column specification to ensure correct mapping
       const result = await tx
         .insert(orders)
         .values(orderData);

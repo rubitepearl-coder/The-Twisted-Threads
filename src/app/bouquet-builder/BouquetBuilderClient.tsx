@@ -442,13 +442,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Your Name *
+                    Your Name * <span className="text-xs text-[#a07850] font-normal">(your full name)</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Jane Smith"
+                    placeholder="e.g., Maria Garcia"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required
                   />
