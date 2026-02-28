@@ -556,6 +556,11 @@ function ProductTable({
   onEditFormChange: (field: string, value: string | number | boolean | null) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit') => void;
 }) {
+  // Helper to check if image URL is valid
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
   return (
     <div className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] overflow-hidden">
       <table className="w-full">
@@ -720,10 +725,10 @@ function ProductTable({
                 <>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      {product.imageUrl ? (
+                      {isValidImageUrl(product.imageUrl) ? (
                         <div className="w-10 h-10 rounded-lg overflow-hidden border border-[#5c3a1e] flex-shrink-0">
                           <Image
-                            src={product.imageUrl}
+                            src={product.imageUrl as string}
                             alt={product.name}
                             width={40}
                             height={40}
@@ -747,8 +752,8 @@ function ProductTable({
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    {product.imageUrl ? (
-                      <span className="text-[#7a5c3e] text-xs truncate max-w-[120px] block" title={product.imageUrl}>
+                    {isValidImageUrl(product.imageUrl) ? (
+                      <span className="text-[#7a5c3e] text-xs truncate max-w-[120px] block" title={product.imageUrl || ''}>
                         ✓ Set
                       </span>
                     ) : (
@@ -820,6 +825,44 @@ function WrapperColorsTab({
   const [saving, setSaving] = useState(false);
   const [editingColorId, setEditingColorId] = useState<number | null>(null);
   const [editColorForm, setEditColorForm] = useState<Partial<WrapperColor>>({});
+  const [uploading, setUploading] = useState(false);
+
+  // Helper to check if image URL is valid
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  const handleColorImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const { url } = await res.json();
+      
+      if (target === 'new') {
+        setNewColor(c => ({ ...c, imageUrl: url }));
+      } else {
+        setEditColorForm(prev => ({ ...prev, imageUrl: url }));
+      }
+      showMessage('✅ Image uploaded!');
+    } catch {
+      showMessage('❌ Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const toggleColorStock = async (color: WrapperColor) => {
     try {
@@ -965,18 +1008,32 @@ function WrapperColorsTab({
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs text-[#c4a882] mb-1">
-                Photo URL <span className="text-[#7a5c3e]">(square image of the wrapper)</span>
+                Photo <span className="text-[#7a5c3e]">(square image of the wrapper)</span>
               </label>
-              <input
-                type="url"
-                value={newColor.imageUrl}
-                onChange={(e) =>
-                  setNewColor((c) => ({ ...c, imageUrl: e.target.value }))
-                }
-                placeholder="https://example.com/wrapper.jpg"
-                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
-              />
-              {newColor.imageUrl && (
+              <div className="flex gap-2 items-start">
+                <div className="flex-1">
+                  <input
+                    type="url"
+                    value={newColor.imageUrl}
+                    onChange={(e) =>
+                      setNewColor((c) => ({ ...c, imageUrl: e.target.value }))
+                    }
+                    placeholder="Or paste image URL..."
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                </div>
+                <label className="bg-[#7a4f2e] text-white px-3 py-2 rounded-lg cursor-pointer hover:bg-[#5c3a1e] transition-colors text-sm font-medium">
+                  {uploading ? 'Uploading...' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleColorImageUpload(e, 'new')}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+              {isValidImageUrl(newColor.imageUrl) && (
                 <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-[#5c3a1e]">
                   <Image
                     src={newColor.imageUrl}
@@ -1052,19 +1109,31 @@ function WrapperColorsTab({
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <input
-                          type="url"
-                          value={editColorForm.imageUrl ?? ""}
-                          onChange={(e) =>
-                            setEditColorForm((f) => ({ ...f, imageUrl: e.target.value }))
-                          }
-                          placeholder="https://..."
-                          className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
-                        />
-                        {editColorForm.imageUrl && (
+                        <div className="flex gap-1 items-start">
+                          <input
+                            type="url"
+                            value={editColorForm.imageUrl ?? ""}
+                            onChange={(e) =>
+                              setEditColorForm((f) => ({ ...f, imageUrl: e.target.value }))
+                            }
+                            placeholder="https://..."
+                            className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
+                          />
+                          <label className="bg-[#7a4f2e] text-white px-2 py-1 rounded cursor-pointer hover:bg-[#5c3a1e] text-xs whitespace-nowrap">
+                            {uploading ? '...' : '📤'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleColorImageUpload(e, 'edit')}
+                              disabled={uploading}
+                            />
+                          </label>
+                        </div>
+                        {isValidImageUrl(editColorForm.imageUrl) && (
                           <div className="mt-1 w-10 h-10 rounded overflow-hidden border border-[#5c3a1e]">
                             <Image
-                              src={editColorForm.imageUrl}
+                              src={editColorForm.imageUrl as string}
                               alt="Preview"
                               width={40}
                               height={40}
@@ -1101,10 +1170,10 @@ function WrapperColorsTab({
                     <>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          {color.imageUrl ? (
+                          {isValidImageUrl(color.imageUrl) ? (
                             <div className="w-10 h-10 rounded-lg overflow-hidden border border-[#5c3a1e] flex-shrink-0">
                               <Image
-                                src={color.imageUrl}
+                                src={color.imageUrl as string}
                                 alt={color.name}
                                 width={40}
                                 height={40}
@@ -1127,7 +1196,7 @@ function WrapperColorsTab({
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        {color.imageUrl ? (
+                        {isValidImageUrl(color.imageUrl) ? (
                           <span className="text-[#7a5c3e] text-xs">✓ Set</span>
                         ) : (
                           <span className="text-[#5c3a1e] text-xs italic">No photo</span>
