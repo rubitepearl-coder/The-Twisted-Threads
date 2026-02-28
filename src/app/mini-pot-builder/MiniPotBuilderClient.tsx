@@ -491,18 +491,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Email Address (optional)
-                  </label>
-                  <input
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="jane@example.com"
-                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                  />
-                </div>
                 {deliveryType === "home" && (
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-[#3d2c1e] mb-1">

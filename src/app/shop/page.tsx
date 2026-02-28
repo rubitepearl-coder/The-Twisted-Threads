@@ -524,19 +524,6 @@ export default function ShopPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[#3d2c1e] font-medium mb-1">
-                    Email Address <span className="text-gray-400">(optional)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-[#d4b896] rounded-lg focus:outline-none focus:border-[#7a4f2e]"
-                    placeholder="your@email.com"
-                  />
-                </div>
-
-                <div>
                   <label className="block text-[#3d2c1e] font-medium mb-2">
                     Delivery Type <span className="text-red-500">*</span>
                   </label>
