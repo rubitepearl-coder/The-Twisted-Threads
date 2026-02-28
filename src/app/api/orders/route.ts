@@ -3,9 +3,20 @@ import { getDb } from "@/db";
 import { orders, products } from "@/db/schema";
 import { desc, eq, and } from "drizzle-orm";
 import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
+import { isAdminAuthenticated } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
+    // Only allow admin to fetch all orders
+    const isAdmin = await isAdminAuthenticated();
+    
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: "Unauthorized. Admin access required." },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const facebookId = searchParams.get("facebookId");

@@ -64,8 +64,7 @@ export default async function OrderConfirmationPage({
           </p>
           {order && (
             <p className="text-sm text-[#a07850] mt-3">
-              Order #{order.id} · Confirmation sent to{" "}
-              <span className="font-medium">{order.customerEmail}</span>
+              Order #{order.id} · Thank you for your order!
             </p>
           )}
         </div>
@@ -221,7 +220,7 @@ export default async function OrderConfirmationPage({
               </div>
             </div>
 
-            {/* Shipping Details */}
+            {/* Shipping Details - Only show generic confirmation, not full details */}
             <div className="bg-white rounded-3xl border border-[#e8d5be] shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold text-[#3d2c1e] mb-4 flex items-center gap-2">
                 📦 Delivery Details
@@ -231,17 +230,24 @@ export default async function OrderConfirmationPage({
                   <span className="text-[#a07850] text-sm w-20 flex-shrink-0">Name</span>
                   <span className="text-[#3d2c1e] font-medium">{order.customerName}</span>
                 </div>
-                <div className="flex gap-3">
-                  <span className="text-[#a07850] text-sm w-20 flex-shrink-0">Email</span>
-                  <span className="text-[#3d2c1e]">{order.customerEmail}</span>
-                </div>
-                {order.customerAddress && (
+                {order.customerEmail && (
+                  <div className="flex gap-3">
+                    <span className="text-[#a07850] text-sm w-20 flex-shrink-0">Email</span>
+                    <span className="text-[#3d2c1e]">{order.customerEmail}</span>
+                  </div>
+                )}
+                {order.deliveryType === "home" && order.customerAddress && (
                   <div className="flex gap-3">
                     <span className="text-[#a07850] text-sm w-20 flex-shrink-0">Address</span>
                     <span className="text-[#3d2c1e] whitespace-pre-line">
-                      {order.customerAddress}
+                      [Delivery address on file]
                     </span>
                   </div>
+                )}
+                {order.deliveryType === "pickup" && (
+                  <p className="text-[#6b4c30] text-sm">
+                    📍 Your order will be available for pickup. We&apos;ll contact you when it&apos;s ready!
+                  </p>
                 )}
               </div>
             </div>
