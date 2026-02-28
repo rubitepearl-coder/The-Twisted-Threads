@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         hasFacebook: !!facebookId 
       });
       return NextResponse.json(
-        { error: "Name is required. Email or Facebook ID is required for contact." },
+        { error: "Name and Facebook name (or email) are required to place an order." },
         { status: 400 }
       );
     }
