@@ -17,24 +17,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Customer lookup by email (for "My Orders" feature)
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-    const facebookId = searchParams.get("facebookId");
+    const customerEmail = searchParams.get("email");
 
     const db = getDb();
     
-    // If userId or facebookId provided, fetch orders for that specific user
-    if (userId || facebookId) {
-      const query = userId 
-        ? eq(orders.userId, userId)
-        : eq(orders.facebookId, facebookId!);
-        
-      const userOrders = await db
+    // If email provided, fetch orders for that specific customer
+    if (customerEmail) {
+      const customerOrders = await db
         .select()
         .from(orders)
-        .where(query)
+        .where(eq(orders.customerEmail, customerEmail))
         .orderBy(desc(orders.createdAt));
-      return NextResponse.json(userOrders);
+      return NextResponse.json(customerOrders);
     }
     
     // Otherwise, fetch all orders (admin view)
@@ -76,10 +72,7 @@ export async function POST(request: NextRequest) {
       potId,
       potName,
       potImageUrl,
-      wrapperColorId,
-      wrapperColorName,
-      wrapperColorHex,
-      wrapperColorImageUrl,
+      // wrapperColor fields are no longer used in new orders
       totalPrice,
     } = body;
 
@@ -262,41 +255,71 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Create the order - only include required and provided fields
-      // Do NOT include userId or facebookId - orders can be placed without login
-      const orderData = {
-        // Required fields
-        customerName: (customerName && customerName.toString().trim()) || "Unknown",
+      // Build order data with EXPLICIT column specification only
+      // Only include fields that are actually provided - no undefined values
+      const orderData: any = {
+        // Required fields - always included
+        customerName: customerName?.toString().trim() || "Unknown",
         deliveryType: finalDeliveryType,
         totalPrice: finalTotal,
-        status: "pending" as const,
-        
-        // Optional fields - only include if provided
-        ...(facebookName ? { facebookName: facebookName.toString().trim() } : {}),
-        ...(customerEmail ? { customerEmail: customerEmail.toString().trim() } : {}),
-        ...(customerAddress ? { customerAddress: customerAddress.toString().trim() } : {}),
-        ...(finalDeliveryLocation ? { deliveryLocation: finalDeliveryLocation } : {}),
-        ...(finalDeliveryFee > 0 ? { deliveryFee: finalDeliveryFee } : {}),
-        ...(orderType ? { orderType } : { orderType: "bouquet" }),
-        
-        // Items - use defaults if not provided
-        ...(bouquetItems ? { bouquetItems: typeof bouquetItems === 'string' ? bouquetItems : JSON.stringify(bouquetItems) } : {}),
-        ...(miniPotItems ? { miniPotItems: typeof miniPotItems === 'string' ? miniPotItems : JSON.stringify(miniPotItems) } : {}),
-        ...(shopItems ? { shopItems: typeof shopItems === 'string' ? shopItems : JSON.stringify(shopItems) } : {}),
-        
-        // Pot and wrapper info - only include if provided
-        ...(potId ? { potId } : {}),
-        ...(potName ? { potName } : {}),
-        ...(potImageUrl ? { potImageUrl } : {}),
-        ...(wrapperColorId ? { wrapperColorId } : {}),
-        ...(wrapperColorName ? { wrapperColorName } : {}),
-        ...(wrapperColorHex ? { wrapperColorHex } : {}),
-        ...(wrapperColorImageUrl ? { wrapperColorImageUrl } : {}),
+        status: "pending",
+        orderType: orderType || "bouquet",
       };
+
+      // Facebook name - required for contact
+      if (facebookName && facebookName.toString().trim()) {
+        orderData.facebookName = facebookName.toString().trim();
+      }
+
+      // Customer email - optional
+      if (customerEmail && customerEmail.toString().trim()) {
+        orderData.customerEmail = customerEmail.toString().trim();
+      }
+
+      // Customer address - optional (for reference, not used for delivery)
+      if (customerAddress && customerAddress.toString().trim()) {
+        orderData.customerAddress = customerAddress.toString().trim();
+      }
+
+      // Delivery location - only for home delivery
+      if (finalDeliveryLocation) {
+        orderData.deliveryLocation = finalDeliveryLocation;
+      }
+
+      // Delivery fee - only if > 0
+      if (finalDeliveryFee > 0) {
+        orderData.deliveryFee = finalDeliveryFee;
+      }
+
+      // Items - only include if provided
+      if (bouquetItems && bouquetItems.length > 0) {
+        orderData.bouquetItems = typeof bouquetItems === 'string' ? bouquetItems : JSON.stringify(bouquetItems);
+      }
+      if (miniPotItems && miniPotItems.length > 0) {
+        orderData.miniPotItems = typeof miniPotItems === 'string' ? miniPotItems : JSON.stringify(miniPotItems);
+      }
+      if (shopItems && shopItems.length > 0) {
+        orderData.shopItems = typeof shopItems === 'string' ? shopItems : JSON.stringify(shopItems);
+      }
+
+      // Pot info - only include if provided
+      if (potId) {
+        orderData.potId = potId;
+      }
+      if (potName) {
+        orderData.potName = potName;
+      }
+      if (potImageUrl) {
+        orderData.potImageUrl = potImageUrl;
+      }
+
+      // NOTE: wrapperColor fields are NO LONGER INSERTED
+      // They are kept in schema for backward compatibility but not used in new orders
       
+      console.log("[Orders API] Final order data keys:", Object.keys(orderData));
       console.log("[Orders API] Final order data:", JSON.stringify(orderData));
       
-      // Insert with explicit column specification to ensure correct mapping
+      // Insert with explicit values only - Drizzle will only insert what we provide
       const result = await tx
         .insert(orders)
         .values(orderData);
@@ -321,8 +344,7 @@ export async function POST(request: NextRequest) {
           miniPotItems: JSON.stringify(miniPotItems ?? []),
           potId: potId ?? null,
           potName: potName ?? null,
-          wrapperColorId: wrapperColorId ?? null,
-          wrapperColorName: wrapperColorName ?? null,
+          // wrapperColor fields removed - no longer used
           totalPrice: finalTotal,
           status: "pending",
         });
