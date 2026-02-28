@@ -272,7 +272,7 @@ export default function ShopPage() {
                     <ProductCard 
                       key={product.id} 
                       product={product} 
-                      onAddToCart={() => addToCart(product)}
+                      onAddToCart={() => addToCart(product, true)}
                     />
                   ))}
                 </div>
@@ -640,9 +640,11 @@ export default function ShopPage() {
 function ProductCard({
   product,
   onAddToCart,
+  showCartAfterAdd = false,
 }: {
   product: Product;
   onAddToCart: () => void;
+  showCartAfterAdd?: boolean;
 }) {
   const isAvailable = product.inStock && product.stockQuantity > 0;
 
