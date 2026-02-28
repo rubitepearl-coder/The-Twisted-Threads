@@ -8,6 +8,10 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 ## Recently Completed
 
+- [x] Database migration 0007: Fix order constraints - made all optional fields nullable (customer_address, wrapper fields, pot fields, delivery_fee, notes)
+- [x] Updated API insert logic to only include required fields
+- [x] Fixed delivery logic: pickup = no location/fee (0), delivery = location required
+- [x] Removed userId/facebookId from insert query - orders can be placed without login
 - [x] Order form updates: Added Full Name and Facebook Name fields, made email optional
 - [x] Database migration 0006: Added facebook_name column to orders table
 - [x] All order forms (bouquet-builder, mini-pot-builder, shop) now have:
@@ -105,3 +109,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-02-27 | Switched to @libsql/client for cloud-compatible SQLite database (works with Turso or local file)
 | 2026-02-28 | Cloudinary integration for image uploads; Fixed node-domexception deprecation warning
 | 2026-02-28 | Removed email field from order forms - customers now order via Facebook name only (migration 0005)
+| 2026-02-28 | Fixed database constraints (migration 0007): Made optional fields nullable, fixed delivery logic for pickup vs delivery
