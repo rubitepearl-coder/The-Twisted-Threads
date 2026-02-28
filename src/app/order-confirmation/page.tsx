@@ -41,11 +41,11 @@ export default async function OrderConfirmationPage({
     }
   }
 
-  const bouquetItems: OrderItem[] = order
+  const bouquetItems: OrderItem[] = order?.bouquetItems
     ? (JSON.parse(order.bouquetItems) as OrderItem[])
     : [];
 
-  const miniPotItems: OrderItem[] = order
+  const miniPotItems: OrderItem[] = order?.miniPotItems
     ? (JSON.parse(order.miniPotItems) as OrderItem[])
     : [];
 

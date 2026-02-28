@@ -8,17 +8,20 @@ type Order = {
   userId: string | null;
   facebookId: string | null;
   customerName: string;
+  facebookName: string | null;
   customerEmail: string | null;
   customerAddress: string | null;
   deliveryType: string;
   deliveryLocation: string | null;
-  deliveryFee: number;
+  deliveryFee: number | null;
   orderType: string;
-  bouquetItems: string;
-  miniPotItems: string;
+  bouquetItems: string | null;
+  miniPotItems: string | null;
+  shopItems: string | null;
   potId: number | null;
   potName: string | null;
   potImageUrl: string | null;
+  wrapperColorId: number | null;
   wrapperColorName: string | null;
   wrapperColorHex: string | null;
   wrapperColorImageUrl: string | null;
@@ -326,7 +329,7 @@ export default function OrdersClient({
                             ₱{order.totalPrice.toFixed(2)}
                           </span>
                         </div>
-                        {order.deliveryFee > 0 && (
+                        {order.deliveryFee != null && order.deliveryFee > 0 && (
                           <div className="flex justify-between text-xs">
                             <span className="text-[#7a5c3e]">+ Delivery</span>
                             <span className="text-orange-300">₱{order.deliveryFee.toFixed(2)}</span>
@@ -365,7 +368,7 @@ export default function OrdersClient({
                                 📍 Location: {order.deliveryLocation}
                               </p>
                             )}
-                            {order.deliveryFee > 0 && (
+                            {order.deliveryFee != null && order.deliveryFee > 0 && (
                               <p className="text-orange-300 text-xs mt-1">
                                 🚚 Delivery Fee: ₱{order.deliveryFee.toFixed(2)}
                               </p>

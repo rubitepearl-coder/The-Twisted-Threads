@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     console.log("[Orders API] Received body:", JSON.stringify(body));
     
     const {
-      userId,
+      // Note: userId and facebookId are NOT used - orders can be placed without login
       customerName,
       facebookName,
       customerEmail,
@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    // customerName (Full Name) is required, facebookName (for contact) is required
-    console.log("[Orders API] Validation check:", { customerName, facebookName, customerEmail });
+    // customerName (Full Name) is required for shipping records
+    console.log("[Orders API] Validation check:", { customerName, facebookName, customerEmail, deliveryType, deliveryLocation });
     if (!customerName) {
       console.log("[Orders API] Validation FAILED: No full name");
       return NextResponse.json(
@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    // Facebook name is required for contact via Messenger
     if (!facebookName) {
       console.log("[Orders API] Validation FAILED: No Facebook name");
       return NextResponse.json(
@@ -100,41 +101,55 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    // Delivery location is required if delivery is selected
+    if (deliveryType === "home" && !deliveryLocation) {
+      console.log("[Orders API] Validation FAILED: No delivery location for home delivery");
+      return NextResponse.json(
+        { error: "Delivery location is required for home delivery." },
+        { status: 400 }
+      );
+    }
     console.log("[Orders API] Validation PASSED");
 
-    // Calculate delivery fee:
-    // - ₱10 for Anini-y
-    // - FREE for San Francisco area (STHS, SFES, nearby houses)
-    let deliveryFee = 0;
-    if (deliveryType === "home" && deliveryLocation) {
+    // Determine delivery type - default to pickup
+    const finalDeliveryType = (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "pickup";
+    
+    // Calculate delivery fee and location based on delivery type
+    let finalDeliveryFee = 0;
+    let finalDeliveryLocation: string | undefined = undefined;
+    
+    if (finalDeliveryType === "home" && deliveryLocation) {
+      // Calculate delivery fee for home delivery
       const locationLower = deliveryLocation.toLowerCase();
       if (locationLower.includes("aniniy") || locationLower.includes("anini-y")) {
         // Anini-y area: ₱10 delivery fee
-        deliveryFee = 10;
+        finalDeliveryFee = 10;
       } else if (
         locationLower.includes("san francisco") ||
         locationLower.includes("sths") ||
         locationLower.includes("sfes")
       ) {
         // San Francisco area (STHS, SFES, nearby): FREE delivery
-        deliveryFee = 0;
+        finalDeliveryFee = 0;
       } else {
         // Other locations: ₱10 delivery fee
-        deliveryFee = 10;
+        finalDeliveryFee = 10;
       }
+      finalDeliveryLocation = deliveryLocation.toString().trim();
     }
+    // For pickup: no delivery fee, no location needed
     
     // Calculate final total with delivery fee
-    const finalTotal = totalPrice + deliveryFee;
+    const finalTotal = totalPrice + finalDeliveryFee;
     
     // Debug: Log the validated and processed values
     console.log("[Orders API] Validated values:", {
       customerName,
       customerEmail,
       customerAddress: customerAddress ?? "",
-      deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
-      deliveryLocation,
-      deliveryFee,
+      deliveryType: finalDeliveryType,
+      deliveryLocation: finalDeliveryLocation,
+      deliveryFee: finalDeliveryFee,
       orderType,
       totalPrice,
       finalTotal
@@ -247,31 +262,36 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Create the order - use onConflictDoNothing for id to handle autoIncrement properly
-      // Ensure all required fields have proper values
-      // Note: Using explicit column mapping to ensure correct field assignment
+      // Create the order - only include required and provided fields
+      // Do NOT include userId or facebookId - orders can be placed without login
       const orderData = {
-        userId: userId || undefined,
+        // Required fields
         customerName: (customerName && customerName.toString().trim()) || "Unknown",
-        facebookName: facebookName ? facebookName.toString().trim() : undefined,
-        customerEmail: customerEmail ? customerEmail.toString().trim() || undefined : undefined,
-        customerAddress: customerAddress && customerAddress.toString().trim() ? customerAddress.toString().trim() : undefined,
-        deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
-        deliveryLocation: (deliveryLocation && deliveryLocation.toString().trim()) || undefined,
-        deliveryFee,
-        orderType: orderType || "bouquet",
-        bouquetItems: typeof bouquetItems === 'string' ? bouquetItems : JSON.stringify(bouquetItems || []),
-        miniPotItems: typeof miniPotItems === 'string' ? miniPotItems : JSON.stringify(miniPotItems || []),
-        shopItems: typeof shopItems === 'string' ? shopItems : JSON.stringify(shopItems || []),
-        potId: potId || undefined,
-        potName: potName || undefined,
-        potImageUrl: potImageUrl || undefined,
-        wrapperColorId: wrapperColorId || undefined,
-        wrapperColorName: wrapperColorName || undefined,
-        wrapperColorHex: wrapperColorHex || undefined,
-        wrapperColorImageUrl: wrapperColorImageUrl || undefined,
+        deliveryType: finalDeliveryType,
         totalPrice: finalTotal,
-        status: "pending",
+        status: "pending" as const,
+        
+        // Optional fields - only include if provided
+        ...(facebookName ? { facebookName: facebookName.toString().trim() } : {}),
+        ...(customerEmail ? { customerEmail: customerEmail.toString().trim() } : {}),
+        ...(customerAddress ? { customerAddress: customerAddress.toString().trim() } : {}),
+        ...(finalDeliveryLocation ? { deliveryLocation: finalDeliveryLocation } : {}),
+        ...(finalDeliveryFee > 0 ? { deliveryFee: finalDeliveryFee } : {}),
+        ...(orderType ? { orderType } : { orderType: "bouquet" }),
+        
+        // Items - use defaults if not provided
+        ...(bouquetItems ? { bouquetItems: typeof bouquetItems === 'string' ? bouquetItems : JSON.stringify(bouquetItems) } : {}),
+        ...(miniPotItems ? { miniPotItems: typeof miniPotItems === 'string' ? miniPotItems : JSON.stringify(miniPotItems) } : {}),
+        ...(shopItems ? { shopItems: typeof shopItems === 'string' ? shopItems : JSON.stringify(shopItems) } : {}),
+        
+        // Pot and wrapper info - only include if provided
+        ...(potId ? { potId } : {}),
+        ...(potName ? { potName } : {}),
+        ...(potImageUrl ? { potImageUrl } : {}),
+        ...(wrapperColorId ? { wrapperColorId } : {}),
+        ...(wrapperColorName ? { wrapperColorName } : {}),
+        ...(wrapperColorHex ? { wrapperColorHex } : {}),
+        ...(wrapperColorImageUrl ? { wrapperColorImageUrl } : {}),
       };
       
       console.log("[Orders API] Final order data:", JSON.stringify(orderData));
@@ -320,7 +340,7 @@ export async function POST(request: NextRequest) {
     // Return the order result
     return NextResponse.json({ 
       orderId: orderResult.orderId, 
-      deliveryFee,
+      deliveryFee: finalDeliveryFee,
       finalTotal 
     }, { status: 201 });
     
