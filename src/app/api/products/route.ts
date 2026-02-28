@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { products } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const allProducts = await getDb().select().from(products);
-    return NextResponse.json(allProducts);
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    
+    let productsList;
+    if (category) {
+      productsList = await getDb()
+        .select()
+        .from(products)
+        .where(eq(products.category, category));
+    } else {
+      productsList = await getDb().select().from(products);
+    }
+    return NextResponse.json(productsList);
   } catch (error) {
     console.error("Failed to fetch products:", error);
     return NextResponse.json(

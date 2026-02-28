@@ -29,6 +29,13 @@
       "when": 1772257474507,
       "tag": "0003_lovely_preak",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1772300000000,
+      "tag": "0004_white_wolf",
+      "breakpoints": true
     }
   ]
 }

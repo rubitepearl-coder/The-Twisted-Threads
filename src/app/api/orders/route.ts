@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       orderType,
       bouquetItems,
       miniPotItems,
+      shopItems,
       potId,
       potName,
       potImageUrl,
@@ -173,6 +174,40 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Check and decrement stock for shop items (finished goods)
+      if (shopItems && shopItems.length > 0) {
+        for (const item of shopItems) {
+          const productId = item.productId;
+          const quantity = item.quantity;
+
+          const [product] = await tx
+            .select()
+            .from(products)
+            .where(eq(products.id, productId))
+            .limit(1);
+
+          if (!product) {
+            throw new Error(`Product not found: ${item.name}`);
+          }
+
+          const currentStock = product.stockQuantity || 0;
+          
+          if (currentStock < quantity) {
+            throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
+          }
+
+          const newStock = currentStock - quantity;
+          await tx
+            .update(products)
+            .set({ 
+              stockQuantity: newStock,
+              inStock: newStock > 0,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, productId));
+        }
+      }
+
       // Create the order
       const result = await tx
         .insert(orders)
@@ -188,6 +223,7 @@ export async function POST(request: NextRequest) {
           orderType: orderType ?? "bouquet",
           bouquetItems: JSON.stringify(bouquetItems ?? []),
           miniPotItems: JSON.stringify(miniPotItems ?? []),
+          shopItems: JSON.stringify(shopItems ?? []),
           potId: potId ?? null,
           potName: potName ?? null,
           potImageUrl: potImageUrl ?? null,

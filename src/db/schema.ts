@@ -36,6 +36,7 @@ export const orders = sqliteTable("orders", {
   orderType: text("order_type").notNull().default("bouquet"), // 'bouquet' | 'mini_pot' | 'shop'
   bouquetItems: text("bouquet_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl}
   miniPotItems: text("mini_pot_items").notNull().default("[]"), // JSON array of {productId, name, quantity, imageUrl} for fuzzy wire flowers
+  shopItems: text("shop_items").notNull().default("[]"), // JSON array of {productId, name, quantity, price, imageUrl} for shop/finished goods
   potId: integer("pot_id"), // Selected pot product ID
   potName: text("pot_name"),
   potImageUrl: text("pot_image_url"),

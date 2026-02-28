@@ -25,6 +25,7 @@ type Order = {
   orderType: string;
   bouquetItems: string;
   miniPotItems: string;
+  shopItems: string;
   potId: number | null;
   potName: string | null;
   potImageUrl: string | null;
@@ -214,7 +215,8 @@ export default function MyOrdersClient() {
             {orders.map((order) => {
               const bouquetItems = parseItems(order.bouquetItems);
               const miniPotItems = parseItems(order.miniPotItems);
-              const allItems = [...bouquetItems, ...miniPotItems];
+              const shopItems = parseItems(order.shopItems || "[]");
+              const allItems = [...bouquetItems, ...miniPotItems, ...shopItems];
 
               return (
                 <div
