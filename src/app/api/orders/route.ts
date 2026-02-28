@@ -84,12 +84,19 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields - customerName is required, but email is optional if facebookId provided
+    console.log("[Orders API] Validation check:", { customerName, customerEmail, facebookId });
     if (!customerName || (!customerEmail && !facebookId)) {
+      console.log("[Orders API] Validation FAILED:", { 
+        hasName: !!customerName, 
+        hasEmail: !!customerEmail, 
+        hasFacebook: !!facebookId 
+      });
       return NextResponse.json(
         { error: "Name is required. Email or Facebook ID is required for contact." },
         { status: 400 }
       );
     }
+    console.log("[Orders API] Validation PASSED");
 
     // Calculate delivery fee:
     // - ₱10 for Anini-y
