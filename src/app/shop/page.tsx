@@ -468,9 +468,15 @@ export default function ShopPage() {
                       setShowCart(false);
                       setIsCheckingOut(true);
                     }}
-                    className="w-full bg-[#7a4f2e] text-white py-3 rounded-full font-semibold hover:bg-[#5c3a1e] transition-colors"
+                    className="w-full bg-[#7a4f2e] text-white py-3 rounded-full font-semibold hover:bg-[#5c3a1e] transition-colors mb-3"
                   >
                     Proceed to Checkout
+                  </button>
+                  <button
+                    onClick={() => setShowCart(false)}
+                    className="w-full bg-[#e8d5be] text-[#3d2c1e] py-3 rounded-full font-semibold hover:bg-[#d4b896] transition-colors"
+                  >
+                    Add More Items 🛒
                   </button>
                 </>
               )}
