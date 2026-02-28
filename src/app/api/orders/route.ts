@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
       const orderData = {
         userId: userId || undefined,
         customerName: (customerName && customerName.toString().trim()) || "Unknown",
-        customerEmail: (customerEmail && customerEmail.toString().trim()) || undefined,
+        customerEmail: customerEmail ? customerEmail.toString().trim() || undefined : undefined,
         customerAddress: (customerAddress && customerAddress.toString().trim()) || "",
         deliveryType: (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "home",
         deliveryLocation: (deliveryLocation && deliveryLocation.toString().trim()) || undefined,
