@@ -2,11 +2,20 @@
 
 ## Current State
 
-**Project Status**: ✅ Full e-commerce site built with visual overhaul
+**Project Status**: ✅ Full e-commerce site built with custom order forms
 
-The template has been fully expanded into "The Petal Loop" — a custom crochet florist and boutique e-commerce site with a bouquet builder, shop, and admin dashboard.
+The template has been fully expanded into "The Twisted Threads" — a custom crochet florist and boutique e-commerce site with a bouquet builder, mini-pot builder, shop, and admin dashboard.
 
 ## Recently Completed
+
+- [x] Order form updates: Added Full Name and Facebook Name fields, made email optional
+- [x] Database migration 0006: Added facebook_name column to orders table
+- [x] All order forms (bouquet-builder, mini-pot-builder, shop) now have:
+  - Full Name (required) - for shipping records
+  - Facebook Name (required) - for contact via Messenger
+  - Email (optional) - visible but not required
+- [x] API validation updated to require both Full Name and Facebook Name
+- [x] Removed all blocking logic for email and Facebook ID requirements
 
 - [x] Base Next.js 16 setup with App Router
 - [x] TypeScript configuration with strict mode
