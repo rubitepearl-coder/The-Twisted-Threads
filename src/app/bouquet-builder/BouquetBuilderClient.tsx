@@ -95,9 +95,9 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
       setError("Please enter your name.");
       return;
     }
-    // Email is optional if Facebook ID is provided
-    if (!customerEmail.trim() && !facebookId.trim()) {
-      setError("Please enter your email or Facebook account for contact.");
+    // Facebook Name is required, Email is optional
+    if (!facebookId.trim()) {
+      setError("Please enter your Facebook name for contact.");
       return;
     }
     if (deliveryType === "home" && !customerAddress.trim()) {
@@ -441,7 +441,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Email Address {facebookId ? "(optional)" : "*"}
+                    Email Address (optional)
                   </label>
                   <input
                     type="email"
@@ -449,23 +449,22 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="jane@example.com"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                    required={!facebookId}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Facebook Account {customerEmail ? "(optional)" : "*"}
+                    Facebook Name {customerEmail ? "(optional)" : "*"}
                   </label>
                   <input
                     type="text"
                     value={facebookId}
                     onChange={(e) => setFacebookId(e.target.value)}
-                    placeholder="facebook.com/jane.smith"
+                    placeholder="jane.smith"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required={!customerEmail}
                   />
                   <p className="text-xs text-[#a07850] mt-1">
-                    Use Facebook for contact if no email
+                    Your Facebook username for contact
                   </p>
                 </div>
                 {deliveryType === "home" && (

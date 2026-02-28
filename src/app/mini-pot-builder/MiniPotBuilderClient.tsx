@@ -36,10 +36,8 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const availablePots = pots.filter((p) => p.inStock && p.stockQuantity > 0);
-  const availableFlowers = fuzzyFlowers.filter(
-    (f) => f.inStock && f.stockQuantity > 0
-  );
+  const availablePots = pots;
+  const availableFlowers = fuzzyFlowers;
 
   const updateQuantity = (id: number, delta: number) => {
     setQuantities((prev) => {
@@ -101,9 +99,9 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
       setError("Please enter your name.");
       return;
     }
-    // Email is optional if Facebook ID is provided
-    if (!customerEmail.trim() && !facebookId.trim()) {
-      setError("Please enter your email or Facebook account for contact.");
+    // Facebook Name is required, Email is optional
+    if (!facebookId.trim()) {
+      setError("Please enter your Facebook name for contact.");
       return;
     }
     if (deliveryType === "home" && !customerAddress.trim()) {
@@ -212,55 +210,66 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                 </p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 ml-10">
-                  {availablePots.map((pot) => (
-                    <button
-                      key={pot.id}
-                      type="button"
-                      onClick={() => setSelectedPot(pot.id)}
-                      className={`bg-white rounded-2xl p-4 border-2 transition-all ${
-                        selectedPot === pot.id
-                          ? "border-[#7a4f2e] shadow-md"
-                          : "border-[#e8d5be] hover:border-[#c4a882]"
-                      }`}
-                    >
-                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 border border-[#e8d5be]">
-                        {pot.imageUrl ? (
-                          <Image
-                            src={pot.imageUrl}
-                            alt={pot.name}
-                            width={120}
-                            height={120}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-4xl">
-                            {pot.imageEmoji}
-                          </div>
-                        )}
-                      </div>
-                      <p className="font-semibold text-[#3d2c1e] text-sm">
-                        {pot.name}
-                      </p>
-                      <p className="text-[#7a4f2e] text-sm font-medium">
-                        {pot.salePrice ? (
-                          <>
-                            <span className="line-through text-[#a07850] text-xs">
-                              ₱{pot.price.toFixed(2)}
-                            </span>{" "}
-                            ₱{pot.salePrice.toFixed(2)}
-                          </>
-                        ) : (
-                          `₱${pot.price.toFixed(2)}`
-                        )}
-                      </p>
-                      {pot.stockQuantity <= 5 && pot.stockQuantity > 0 && (
-                        <p className="text-xs text-orange-600">
-                          Only {pot.stockQuantity} left!
+                  {availablePots.map((pot) => {
+                    const isOutOfStock = !pot.inStock || pot.stockQuantity <= 0;
+                    return (
+                      <button
+                        key={pot.id}
+                        type="button"
+                        onClick={() => !isOutOfStock && setSelectedPot(pot.id)}
+                        disabled={isOutOfStock}
+                        className={`bg-white rounded-2xl p-4 border-2 transition-all ${
+                          selectedPot === pot.id
+                            ? "border-[#7a4f2e] shadow-md"
+                            : isOutOfStock
+                            ? "border-gray-200 opacity-60 cursor-not-allowed"
+                            : "border-[#e8d5be] hover:border-[#c4a882]"
+                        }`}
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 border border-[#e8d5be]">
+                          {pot.imageUrl ? (
+                            <Image
+                              src={pot.imageUrl}
+                              alt={pot.name}
+                              width={120}
+                              height={120}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-4xl">
+                              {pot.imageEmoji}
+                            </div>
+                          )}
+                        </div>
+                        <p className="font-semibold text-[#3d2c1e] text-sm">
+                          {pot.name}
+                          {isOutOfStock && (
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                              Sold Out
+                            </span>
+                          )}
                         </p>
-                      )}
-                    </button>
-                  ))}
+                        <p className="text-[#7a4f2e] text-sm font-medium">
+                          {pot.salePrice ? (
+                            <>
+                              <span className="line-through text-[#a07850] text-xs">
+                                ₱{pot.price.toFixed(2)}
+                              </span>{" "}
+                              ₱{pot.salePrice.toFixed(2)}
+                            </>
+                          ) : (
+                            `₱${pot.price.toFixed(2)}`
+                          )}
+                        </p>
+                        {pot.stockQuantity <= 5 && pot.stockQuantity > 0 && (
+                          <p className="text-xs text-orange-600">
+                            Only {pot.stockQuantity} left!
+                          </p>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -285,12 +294,15 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {availableFlowers.map((flower) => {
                     const qty = quantities[flower.id] ?? 0;
+                    const isOutOfStock = !flower.inStock || flower.stockQuantity <= 0;
                     return (
                       <div
                         key={flower.id}
                         className={`bg-white rounded-2xl p-4 border-2 transition-all ${
                           qty > 0
                             ? "border-[#7a4f2e] shadow-md"
+                            : isOutOfStock
+                            ? "border-gray-200 opacity-60"
                             : "border-[#e8d5be] hover:border-[#c4a882]"
                         }`}
                       >
@@ -315,6 +327,11 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-[#3d2c1e]">
                               {flower.name}
+                              {isOutOfStock && (
+                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                  Sold Out
+                                </span>
+                              )}
                             </p>
                             <p className="text-[#7a4f2e] text-sm font-medium">
                               {flower.salePrice ? (
@@ -340,7 +357,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                             <button
                               type="button"
                               onClick={() => updateQuantity(flower.id, -1)}
-                              disabled={qty === 0}
+                              disabled={qty === 0 || isOutOfStock}
                               className="w-8 h-8 rounded-full bg-[#f5ede0] text-[#7a4f2e] font-bold text-lg flex items-center justify-center hover:bg-[#e8d5be] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
                               −
@@ -351,7 +368,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                             <button
                               type="button"
                               onClick={() => updateQuantity(flower.id, 1)}
-                              disabled={qty >= flower.stockQuantity}
+                              disabled={isOutOfStock || qty >= flower.stockQuantity}
                               className="w-8 h-8 rounded-full bg-[#7a4f2e] text-white font-bold text-lg flex items-center justify-center hover:bg-[#5c3a1e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
                               +
@@ -458,7 +475,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Email Address {facebookId ? "(optional)" : "*"}
+                    Email Address (optional)
                   </label>
                   <input
                     type="email"
@@ -466,18 +483,17 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="jane@example.com"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                    required={!facebookId}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Facebook Account {customerEmail ? "(optional)" : "*"}
+                    Facebook Name {customerEmail ? "(optional)" : "*"}
                   </label>
                   <input
                     type="text"
                     value={facebookId}
                     onChange={(e) => setFacebookId(e.target.value)}
-                    placeholder="facebook.com/jane.smith"
+                    placeholder="jane.smith"
                     className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required={!customerEmail}
                   />

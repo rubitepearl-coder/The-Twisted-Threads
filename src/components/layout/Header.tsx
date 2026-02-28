@@ -50,6 +50,12 @@ export default function Header() {
               Shop
             </Link>
             <Link
+              href="/my-orders"
+              className="text-[#5c3a1e] hover:text-[#7a4f2e] font-medium transition-colors"
+            >
+              My Orders
+            </Link>
+            <Link
               href="/bouquet-builder"
               className="bg-[#7a4f2e] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#5c3a1e] transition-colors"
             >
@@ -118,6 +124,13 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
             >
               Shop
+            </Link>
+            <Link
+              href="/my-orders"
+              className="text-[#5c3a1e] hover:text-[#7a4f2e] font-medium"
+              onClick={() => setMenuOpen(false)}
+            >
+              My Orders
             </Link>
             <Link
               href="/bouquet-builder"
