@@ -37,6 +37,8 @@ The template has been fully expanded into "The Petal Loop" — a custom crochet 
 - [x] Google Sheets integration: External backend via Google Apps Script for order & inventory tracking
 - [x] Switched to @libsql/client + drizzle-orm with Turso cloud database (requires TURSO_DATABASE_URL and TURSO_AUTH_TOKEN env vars)
 - [x] Shop ordering: Full cart & checkout flow for finished goods (amigurumi, crochet items) with "Add to Cart" buttons, cart modal, and checkout form
+- [x] Added "Add More Items" button to cart modal for continue shopping
+- [x] Added built-in image upload feature to admin inventory (POST /api/upload)
 
 ## Current Structure
 
