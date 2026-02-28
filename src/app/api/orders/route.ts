@@ -112,6 +112,14 @@ export async function POST(request: NextRequest) {
         deliveryFee = 10;
       }
     }
+    
+    // Debug: Log the processed values
+    console.log("[Orders API] Processed values:", {
+      deliveryType,
+      deliveryLocation,
+      deliveryFee,
+      orderType
+    });
 
     // Calculate final total with delivery fee
     const finalTotal = totalPrice + deliveryFee;
