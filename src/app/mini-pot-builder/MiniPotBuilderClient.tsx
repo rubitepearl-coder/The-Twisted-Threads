@@ -35,6 +35,18 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  // Helper function to validate image URL
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  // Handle image load error
+  const handleImageError = (key: string) => {
+    setImageErrors(prev => ({ ...prev, [key]: true }));
+  };
 
   const availablePots = pots;
   const availableFlowers = fuzzyFlowers;
@@ -227,14 +239,15 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                         }`}
                       >
                         <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 border border-[#e8d5be]">
-                          {pot.imageUrl ? (
+                          {isValidImageUrl(pot.imageUrl) && !imageErrors[`pot-${pot.id}`] ? (
                             <Image
-                              src={pot.imageUrl}
+                              src={pot.imageUrl!}
                               alt={pot.name}
                               width={120}
                               height={120}
                               className="w-full h-full object-cover"
                               unoptimized
+                              onError={() => handleImageError(`pot-${pot.id}`)}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-4xl">
@@ -308,15 +321,16 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                       >
                         <div className="flex items-center gap-3">
                           {/* Square image or emoji fallback */}
-                          {flower.imageUrl ? (
+                          {isValidImageUrl(flower.imageUrl) && !imageErrors[`flower-${flower.id}`] ? (
                             <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be]">
                               <Image
-                                src={flower.imageUrl}
+                                src={flower.imageUrl!}
                                 alt={flower.name}
                                 width={56}
                                 height={56}
                                 className="w-full h-full object-cover"
                                 unoptimized
+                                onError={() => handleImageError(`flower-${flower.id}`)}
                               />
                             </div>
                           ) : (
@@ -526,15 +540,16 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
 
               {selectedPotObj ? (
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#e8d5be]">
-                  {selectedPotObj.imageUrl ? (
+                  {isValidImageUrl(selectedPotObj.imageUrl) && !imageErrors[`summary-pot-${selectedPotObj.id}`] ? (
                     <div className="w-12 h-12 rounded-xl overflow-hidden border border-[#e8d5be] flex-shrink-0">
                       <Image
-                        src={selectedPotObj.imageUrl}
+                        src={selectedPotObj.imageUrl!}
                         alt={selectedPotObj.name}
                         width={48}
                         height={48}
                         className="w-full h-full object-cover"
                         unoptimized
+                        onError={() => handleImageError(`summary-pot-${selectedPotObj.id}`)}
                       />
                     </div>
                   ) : (
@@ -578,15 +593,16 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                       className="flex items-center justify-between text-sm gap-2"
                     >
                       <span className="flex items-center gap-1.5 text-[#3d2c1e]">
-                        {f.imageUrl ? (
+                        {isValidImageUrl(f.imageUrl) && !imageErrors[`summary-flower-${f.id}`] ? (
                           <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0">
                             <Image
-                              src={f.imageUrl}
+                              src={f.imageUrl!}
                               alt={f.name}
                               width={24}
                               height={24}
                               className="w-full h-full object-cover"
                               unoptimized
+                              onError={() => handleImageError(`summary-flower-${f.id}`)}
                             />
                           </div>
                         ) : (

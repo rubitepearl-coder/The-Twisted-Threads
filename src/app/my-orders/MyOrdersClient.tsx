@@ -46,6 +46,18 @@ export default function MyOrdersClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  // Helper function to validate image URL
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  // Handle image load error
+  const handleImageError = (key: string) => {
+    setImageErrors(prev => ({ ...prev, [key]: true }));
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,14 +264,15 @@ export default function MyOrdersClient() {
                           className="flex items-center gap-3 p-2 bg-[#faf7f2] rounded-lg"
                         >
                           <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#e8d5be]">
-                            {item.imageUrl ? (
+                            {isValidImageUrl(item.imageUrl) && !imageErrors[`${order.id}-${idx}`] ? (
                               <Image
-                                src={item.imageUrl}
+                                src={item.imageUrl!}
                                 alt={item.name}
                                 width={40}
                                 height={40}
                                 className="w-full h-full object-cover"
                                 unoptimized
+                                onError={() => handleImageError(`${order.id}-${idx}`)}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-xl">

@@ -28,6 +28,12 @@ interface CartItem {
   quantity: number;
 }
 
+// Helper function to validate image URL
+const isValidImageUrl = (url: string | null | undefined): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  return url.startsWith('http://') || url.startsWith('https://');
+};
+
 export default function ShopPage() {
   const [finishedGoods, setFinishedGoods] = useState<Product[]>([]);
   const [flowers, setFlowers] = useState<Product[]>([]);
@@ -35,6 +41,7 @@ export default function ShopPage() {
   const [showCart, setShowCart] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   
   // Customer form state
   const [customerName, setCustomerName] = useState("");
@@ -302,14 +309,15 @@ export default function ShopPage() {
                     >
                       {/* Square image */}
                       <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]">
-                        {flower.imageUrl ? (
+                        {isValidImageUrl(flower.imageUrl) && !imageErrors[flower.id] ? (
                           <Image
-                            src={flower.imageUrl}
+                            src={flower.imageUrl!}
                             alt={flower.name}
                             width={300}
                             height={300}
                             className="w-full h-full object-cover"
                             unoptimized
+                            onError={() => setImageErrors(prev => ({ ...prev, [flower.id]: true }))}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-5xl">
@@ -408,14 +416,15 @@ export default function ShopPage() {
                     {cart.map((item) => (
                       <div key={item.product.id} className="flex items-center gap-4 bg-[#faf7f2] p-3 rounded-xl">
                         <div className="w-16 h-16 bg-[#f5ede0] rounded-lg overflow-hidden flex-shrink-0">
-                          {item.product.imageUrl ? (
+                          {isValidImageUrl(item.product.imageUrl) && !imageErrors[item.product.id] ? (
                             <Image
-                              src={item.product.imageUrl}
+                              src={item.product.imageUrl!}
                               alt={item.product.name}
                               width={64}
                               height={64}
                               className="w-full h-full object-cover"
                               unoptimized
+                              onError={() => setImageErrors(prev => ({ ...prev, [item.product.id]: true }))}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-2xl">
@@ -653,12 +662,16 @@ function ProductCard({
   showCartAfterAdd?: boolean;
 }) {
   const isAvailable = product.inStock && product.stockQuantity > 0;
+  const [imageError, setImageError] = useState(false);
+
+  // Check if imageUrl is valid (non-empty string starting with http)
+  const hasValidImage = product.imageUrl && typeof product.imageUrl === 'string' && product.imageUrl.startsWith('http');
 
   return (
     <div className="bg-white rounded-2xl border border-[#e8d5be] overflow-hidden hover:shadow-lg transition-shadow">
       {/* Square image */}
       <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]">
-        {product.imageUrl ? (
+        {hasValidImage && !imageError ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
@@ -666,6 +679,7 @@ function ProductCard({
             height={400}
             className="w-full h-full object-cover"
             unoptimized
+            onError={() => setImageError(true)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-7xl">

@@ -13,6 +13,12 @@ type OrderItem = {
   imageUrl?: string;
 };
 
+// Helper function to validate image URL (works in server components)
+const isValidImageUrl = (url: string | null | undefined): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  return url.startsWith('http://') || url.startsWith('https://');
+};
+
 export default async function OrderConfirmationPage({
   searchParams,
 }: {
@@ -112,9 +118,9 @@ export default async function OrderConfirmationPage({
                     <div key={i} className="flex items-center gap-3">
                       {/* Square thumbnail */}
                       <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be] bg-[#f5ede0]">
-                        {item.imageUrl ? (
+                        {isValidImageUrl(item.imageUrl) ? (
                           <Image
-                            src={item.imageUrl}
+                            src={item.imageUrl!}
                             alt={item.name}
                             width={56}
                             height={56}
@@ -148,9 +154,9 @@ export default async function OrderConfirmationPage({
                     <div key={i} className="flex items-center gap-3">
                       {/* Square thumbnail */}
                       <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be] bg-[#f5ede0]">
-                        {item.imageUrl ? (
+                        {isValidImageUrl(item.imageUrl) ? (
                           <Image
-                            src={item.imageUrl}
+                            src={item.imageUrl!}
                             alt={item.name}
                             width={56}
                             height={56}

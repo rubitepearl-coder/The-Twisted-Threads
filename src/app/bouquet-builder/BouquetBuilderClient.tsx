@@ -43,6 +43,18 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  // Helper function to validate image URL
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  // Handle image load error
+  const handleImageError = (key: string) => {
+    setImageErrors(prev => ({ ...prev, [key]: true }));
+  };
 
   // Show all flowers, but mark out-of-stock ones
   // const availableFlowers = flowers.filter((f) => f.inStock && f.stockQuantity > 0);
@@ -214,15 +226,16 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     >
                       <div className="flex items-center gap-3">
                         {/* Square image or emoji fallback */}
-                        {flower.imageUrl ? (
+                        {isValidImageUrl(flower.imageUrl) && !imageErrors[`flower-${flower.id}`] ? (
                           <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be]">
                             <Image
-                              src={flower.imageUrl}
+                              src={flower.imageUrl!}
                               alt={flower.name}
                               width={56}
                               height={56}
                               className="w-full h-full object-cover"
                               unoptimized
+                              onError={() => handleImageError(`flower-${flower.id}`)}
                             />
                           </div>
                         ) : (
@@ -323,15 +336,16 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                             : "border-[#e8d5be] bg-white text-[#6b4c30] hover:border-[#c4a882]"
                         }`}
                       >
-                        {color.imageUrl ? (
+                        {isValidImageUrl(color.imageUrl) && !imageErrors[`wrapper-${color.id}`] ? (
                           <div className="w-8 h-8 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                             <Image
-                              src={color.imageUrl}
+                              src={color.imageUrl!}
                               alt={color.name}
                               width={32}
                               height={32}
                               className="w-full h-full object-cover"
                               unoptimized
+                              onError={() => handleImageError(`wrapper-${color.id}`)}
                             />
                           </div>
                         ) : (
@@ -505,15 +519,16 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                       className="flex items-center justify-between text-sm gap-2"
                     >
                       <span className="flex items-center gap-1.5 text-[#3d2c1e]">
-                        {f.imageUrl ? (
+                        {isValidImageUrl(f.imageUrl) && !imageErrors[`summary-flower-${f.id}`] ? (
                           <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0">
                             <Image
-                              src={f.imageUrl}
+                              src={f.imageUrl!}
                               alt={f.name}
                               width={24}
                               height={24}
                               className="w-full h-full object-cover"
                               unoptimized
+                              onError={() => handleImageError(`summary-flower-${f.id}`)}
                             />
                           </div>
                         ) : (
@@ -531,15 +546,16 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
 
               {selectedWrapperObj && (
                 <div className="flex items-center gap-2 text-sm text-[#6b4c30] mb-4 pb-4 border-b border-[#e8d5be]">
-                  {selectedWrapperObj.imageUrl ? (
+                  {isValidImageUrl(selectedWrapperObj.imageUrl) && !imageErrors[`summary-wrapper-${selectedWrapperObj.id}`] ? (
                     <div className="w-5 h-5 rounded overflow-hidden border border-gray-200 flex-shrink-0">
                       <Image
-                        src={selectedWrapperObj.imageUrl}
+                        src={selectedWrapperObj.imageUrl!}
                         alt={selectedWrapperObj.name}
                         width={20}
                         height={20}
                         className="w-full h-full object-cover"
                         unoptimized
+                        onError={() => handleImageError(`summary-wrapper-${selectedWrapperObj.id}`)}
                       />
                     </div>
                   ) : (

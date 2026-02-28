@@ -45,6 +45,18 @@ export default function OrdersClient({
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [message, setMessage] = useState("");
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  // Helper function to validate image URL
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  // Handle image load error
+  const handleImageError = (key: string) => {
+    setImageErrors(prev => ({ ...prev, [key]: true }));
+  };
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -246,14 +258,15 @@ export default function OrdersClient({
                               <div key={i} className="flex items-center gap-3">
                                 {/* Square thumbnail */}
                                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
-                                  {item.imageUrl ? (
+                                  {isValidImageUrl(item.imageUrl) && !imageErrors[`${order.id}-item-${i}`] ? (
                                     <Image
-                                      src={item.imageUrl}
+                                      src={item.imageUrl!}
                                       alt={item.name}
                                       width={40}
                                       height={40}
                                       className="w-full h-full object-cover"
                                       unoptimized
+                                      onError={() => handleImageError(`${order.id}-item-${i}`)}
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-lg">
