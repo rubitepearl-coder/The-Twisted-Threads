@@ -118,3 +118,10 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-02-28 | Fixed database constraints (migration 0007): Made optional fields nullable, fixed delivery logic for pickup vs delivery
 | 2026-03-01 | Fixed admin dashboard data filtering: Removed email filter, customer orders now match by customerName OR facebookName
 | 2026-03-01 | Fixed deployment error: Added column name mapping (camelCase to snake_case) for raw SQL inserts in orders API
+| 2026-03-01 | Fixed stock quantity handling: NULL stockQuantity means unlimited (available), not sold out
+
+- [x] **FIX: Stock quantity handling** - Changed stockQuantity to allow NULL (unlimited) instead of defaulting to 0. Products with NULL stockQuantity are now treated as available (unlimited stock). Only products with explicit stockQuantity > 0 are limited. Products with stockQuantity <= 0 are sold out. Fixed in:
+  - Schema: Removed `.default(0)` from stockQuantity
+  - Products API: Allows NULL instead of defaulting to 10
+  - Orders API: Only blocks checkout if stockQuantity is explicitly set AND insufficient
+  - Frontend: Treats NULL stockQuantity as available (not sold out)
