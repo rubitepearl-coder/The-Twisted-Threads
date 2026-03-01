@@ -5,6 +5,31 @@ import { desc, eq, and } from "drizzle-orm";
 import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
 import { isAdminAuthenticated } from "@/lib/auth";
 
+// Raw SQL insert helper to only insert SPECIFIC columns
+function buildInsertSQL(data: Record<string, any>): { sql: string; values: any[] } {
+  const columns: string[] = [];
+  const placeholders: string[] = [];
+  const values: any[] = [];
+  
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined && value !== null) {
+      columns.push(key);
+      placeholders.push("?");
+      values.push(value);
+    }
+  }
+  
+  // Always include created_at
+  columns.push("created_at");
+  placeholders.push("?");
+  values.push(Date.now()); // Unix timestamp in milliseconds
+  
+  return {
+    sql: `INSERT INTO orders (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`,
+    values
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Only allow admin to fetch all orders
@@ -49,9 +74,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  let db;
   try {
-    db = getDb();
+    const db = getDb();
     const body = await request.json();
     
     // Debug: Log the incoming request body
@@ -148,115 +172,116 @@ export async function POST(request: NextRequest) {
       finalTotal
     });
 
-    // Start a transaction to ensure stock consistency
-    const orderResult = await db.transaction(async (tx) => {
-      // Check and decrement stock for bouquet items
-      if (bouquetItems && bouquetItems.length > 0) {
-        for (const item of bouquetItems) {
-          const productId = item.productId;
-          const quantity = item.quantity;
+    // Start - use raw SQL for insert to control exact columns
+    // Stock updates still use Drizzle ORM
+    
+    // Check and decrement stock for bouquet items
+    if (bouquetItems && bouquetItems.length > 0) {
+      for (const item of bouquetItems) {
+        const productId = item.productId;
+        const quantity = item.quantity;
 
-          // Get current product stock
-          const [product] = await tx
-            .select()
-            .from(products)
-            .where(eq(products.id, productId))
-            .limit(1);
+        // Get current product stock
+        const [product] = await db
+          .select()
+          .from(products)
+          .where(eq(products.id, productId))
+          .limit(1);
 
-          if (!product) {
-            throw new Error(`Product not found: ${item.name}`);
-          }
-
-          const currentStock = product.stockQuantity || 0;
-          
-          // Check if sufficient stock available
-          if (currentStock < quantity) {
-            throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
-          }
-
-          // Decrement stock
-          const newStock = currentStock - quantity;
-          await tx
-            .update(products)
-            .set({ 
-              stockQuantity: newStock,
-              inStock: newStock > 0,
-              updatedAt: new Date()
-            })
-            .where(eq(products.id, productId));
+        if (!product) {
+          throw new Error(`Product not found: ${item.name}`);
         }
-      }
 
-      // Check and decrement stock for mini pot items
-      if (miniPotItems && miniPotItems.length > 0) {
-        for (const item of miniPotItems) {
-          const productId = item.productId;
-          const quantity = item.quantity;
-
-          const [product] = await tx
-            .select()
-            .from(products)
-            .where(eq(products.id, productId))
-            .limit(1);
-
-          if (!product) {
-            throw new Error(`Product not found: ${item.name}`);
-          }
-
-          const currentStock = product.stockQuantity || 0;
-          
-          if (currentStock < quantity) {
-            throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
-          }
-
-          const newStock = currentStock - quantity;
-          await tx
-            .update(products)
-            .set({ 
-              stockQuantity: newStock,
-              inStock: newStock > 0,
-              updatedAt: new Date()
-            })
-            .where(eq(products.id, productId));
+        const currentStock = product.stockQuantity || 0;
+        
+        // Check if sufficient stock available
+        if (currentStock < quantity) {
+          throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
+
+        // Decrement stock
+        const newStock = currentStock - quantity;
+        await db
+          .update(products)
+          .set({ 
+            stockQuantity: newStock,
+            inStock: newStock > 0,
+            updatedAt: new Date()
+          })
+          .where(eq(products.id, productId));
       }
+    }
 
-      // Check and decrement stock for shop items (finished goods)
-      if (shopItems && shopItems.length > 0) {
-        for (const item of shopItems) {
-          const productId = item.productId;
-          const quantity = item.quantity;
+    // Check and decrement stock for mini pot items
+    if (miniPotItems && miniPotItems.length > 0) {
+      for (const item of miniPotItems) {
+        const productId = item.productId;
+        const quantity = item.quantity;
 
-          const [product] = await tx
-            .select()
-            .from(products)
-            .where(eq(products.id, productId))
-            .limit(1);
+        const [product] = await db
+          .select()
+          .from(products)
+          .where(eq(products.id, productId))
+          .limit(1);
 
-          if (!product) {
-            throw new Error(`Product not found: ${item.name}`);
-          }
-
-          const currentStock = product.stockQuantity || 0;
-          
-          if (currentStock < quantity) {
-            throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
-          }
-
-          const newStock = currentStock - quantity;
-          await tx
-            .update(products)
-            .set({ 
-              stockQuantity: newStock,
-              inStock: newStock > 0,
-              updatedAt: new Date()
-            })
-            .where(eq(products.id, productId));
+        if (!product) {
+          throw new Error(`Product not found: ${item.name}`);
         }
+
+        const currentStock = product.stockQuantity || 0;
+        
+        if (currentStock < quantity) {
+          throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
+        }
+
+        const newStock = currentStock - quantity;
+        await db
+          .update(products)
+          .set({ 
+            stockQuantity: newStock,
+            inStock: newStock > 0,
+            updatedAt: new Date()
+          })
+          .where(eq(products.id, productId));
       }
+    }
+
+    // Check and decrement stock for shop items (finished goods)
+    if (shopItems && shopItems.length > 0) {
+      for (const item of shopItems) {
+        const productId = item.productId;
+        const quantity = item.quantity;
+
+        const [product] = await db
+          .select()
+          .from(products)
+          .where(eq(products.id, productId))
+          .limit(1);
+
+        if (!product) {
+          throw new Error(`Product not found: ${item.name}`);
+        }
+
+        const currentStock = product.stockQuantity || 0;
+        
+        if (currentStock < quantity) {
+          throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
+        }
+
+        const newStock = currentStock - quantity;
+        await db
+          .update(products)
+          .set({ 
+            stockQuantity: newStock,
+            inStock: newStock > 0,
+            updatedAt: new Date()
+          })
+          .where(eq(products.id, productId));
+      }
+    }
 
       // Build order data with EXPLICIT column specification only
-      // Only include fields that are actually provided - no undefined values
+      // Only include fields that are actually provided - no undefined/null values
       const orderData: any = {
         // Required fields - always included
         customerName: customerName?.toString().trim() || "Unknown",
@@ -315,17 +340,21 @@ export async function POST(request: NextRequest) {
 
       // NOTE: wrapperColor fields are NO LONGER INSERTED
       // They are kept in schema for backward compatibility but not used in new orders
+      // Also NOT inserting: userId, facebookId, customerAddress
       
       console.log("[Orders API] Final order data keys:", Object.keys(orderData));
       console.log("[Orders API] Final order data:", JSON.stringify(orderData));
       
-      // Insert with explicit values only - Drizzle will only insert what we provide
-      const result = await tx
-        .insert(orders)
-        .values(orderData);
-
+      // Use raw SQL to insert ONLY the columns we specify
+      const { sql, values } = buildInsertSQL(orderData);
+      console.log("[Orders API] Raw SQL:", sql);
+      console.log("[Orders API] Values:", values);
+      
+      // Use the underlying libsql client to run raw SQL
+      await db.$client.execute(sql, values);
+      
       // Get the last inserted order ID
-      const [latestOrder] = await tx
+      const [latestOrder] = await db
         .select({ id: orders.id })
         .from(orders)
         .orderBy(desc(orders.createdAt))
@@ -357,21 +386,12 @@ export async function POST(request: NextRequest) {
       }
 
       return { orderId };
-    });
-
-    // Return the order result
-    return NextResponse.json({ 
-      orderId: orderResult.orderId, 
-      deliveryFee: finalDeliveryFee,
-      finalTotal 
-    }, { status: 201 });
-    
-  } catch (error) {
-    console.error("Failed to create order:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to create order";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to create order";
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 500 }
+      );
+    }
   }
-}
