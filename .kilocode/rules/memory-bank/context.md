@@ -8,7 +8,14 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 ## Recently Completed
 
-- [x] **FIX: Column Name Mapping (camelCase to snake_case)** - Added `COLUMN_NAME_MAP` to convert camelCase JavaScript keys to snake_case SQL column names in `buildInsertSQL()` function. Fixed deployment error "table orders has no column named customerName" by ensuring raw SQL inserts use correct snake_case column names matching the Turso database schema.
+- [x] **FIX: Sold-Out Logic** - Removed `inStock` dependency from sold-out checks. Now products are ONLY marked as sold out when `stockQuantity` is explicitly set AND <= 0. Products with NULL stockQuantity are available (unlimited). Fixed in:
+  - MiniPotBuilderClient.tsx: Removed `!pot.inStock` check
+  - BouquetBuilderClient.tsx: Removed `!flower.inStock` check
+  - Shop page: Removed `product.inStock` check
+  - Home page: Removed `flower.inStock` check
+  - Admin Dashboard: Added logging to debug 0 products/orders issue
+
+- [x] **FIX: Stock quantity handling** - Changed stockQuantity to allow NULL (unlimited) instead of defaulting to 0. Products with NULL stockQuantity are now treated as available (unlimited). Only products with explicit stockQuantity > 0 are limited. Products with stockQuantity <= 0 are sold out. Fixed in:
 
 - [x] **FIX: Admin Dashboard Data Filtering** - Removed old email-based filtering from `/api/orders/route.ts`. Admin now correctly fetches all orders without any user_id/facebook_id/owner_id filtering. Customer "My Orders" now matches by BOTH customerName AND facebookName (OR logic) for better order lookup.
 
