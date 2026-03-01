@@ -8,6 +8,8 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 ## Recently Completed
 
+- [x] **FIX: Column Name Mapping (camelCase to snake_case)** - Added `COLUMN_NAME_MAP` to convert camelCase JavaScript keys to snake_case SQL column names in `buildInsertSQL()` function. Fixed deployment error "table orders has no column named customerName" by ensuring raw SQL inserts use correct snake_case column names matching the Turso database schema.
+
 - [x] **FIX: Admin Dashboard Data Filtering** - Removed old email-based filtering from `/api/orders/route.ts`. Admin now correctly fetches all orders without any user_id/facebook_id/owner_id filtering. Customer "My Orders" now matches by BOTH customerName AND facebookName (OR logic) for better order lookup.
 
 - [x] **FIX: Order INSERT using raw SQL** - Replaced Drizzle ORM insert with raw SQL using `buildInsertSQL()` helper to explicitly control which columns are inserted. Now only inserts: customer_name, facebook_name, customer_email, customer_address, delivery_type, delivery_location, delivery_fee, order_type, bouquet_items, mini_pot_items, shop_items, pot_id, pot_name, pot_image_url, total_price, status, created_at. No longer inserts: id (auto-generated), user_id, facebook_id, wrapper_color_*
@@ -115,3 +117,4 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-02-28 | Removed email field from order forms - customers now order via Facebook name only (migration 0005)
 | 2026-02-28 | Fixed database constraints (migration 0007): Made optional fields nullable, fixed delivery logic for pickup vs delivery
 | 2026-03-01 | Fixed admin dashboard data filtering: Removed email filter, customer orders now match by customerName OR facebookName
+| 2026-03-01 | Fixed deployment error: Added column name mapping (camelCase to snake_case) for raw SQL inserts in orders API
