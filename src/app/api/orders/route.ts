@@ -398,6 +398,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Return the order ID in a consistent format
       return NextResponse.json({ orderId });
     } catch (error) {
       console.error("Failed to create order:", error);
