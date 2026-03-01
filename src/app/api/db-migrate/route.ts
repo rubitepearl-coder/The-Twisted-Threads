@@ -3,6 +3,31 @@ import { getDb } from "@/db";
 
 // This endpoint manually runs the missing migrations
 // It's a fallback in case the automatic migrations on startup don't work
+
+export async function GET(request: NextRequest) {
+  // Debug endpoint to check current schema
+  try {
+    const db = getDb();
+    const client = db.$client;
+    
+    const tableInfo = await client.execute("PRAGMA table_info(orders)");
+    const columns = tableInfo.rows.map((row: any) => row.name);
+    
+    return NextResponse.json({
+      endpoint: "db-migrate",
+      method: "GET",
+      ordersColumns: columns,
+      hasFacebookName: columns.includes("facebook_name"),
+      message: "Use POST to run migrations"
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Check failed", details: String(error) },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const db = getDb();
