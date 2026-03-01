@@ -132,3 +132,5 @@ After deployment, call `POST /api/seed` to populate the database with:
   - Products API: Allows NULL instead of defaulting to 10
   - Orders API: Only blocks checkout if stockQuantity is explicitly set AND insufficient
   - Frontend: Treats NULL stockQuantity as available (not sold out)
+
+- [x] **FIX: Production database schema** - Added `/api/db-check` and `/api/db-migrate` endpoints. The db-check endpoint verifies current schema, and db-migrate endpoint runs missing ALTER TABLE commands to add facebook_name and stock_quantity columns if they don't exist. This fixes the error where production database was missing the facebook_name column.
