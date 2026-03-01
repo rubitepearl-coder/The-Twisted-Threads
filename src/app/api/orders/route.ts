@@ -371,7 +371,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return { orderId };
+      return NextResponse.json({ orderId });
     } catch (error) {
       console.error("Failed to create order:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to create order";
