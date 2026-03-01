@@ -10,7 +10,7 @@ type Product = {
   category: string;
   price: number;
   salePrice: number | null;
-  stockQuantity: number;
+  stockQuantity: number | null;
   inStock: boolean;
   imageEmoji: string;
   imageUrl: string | null;
@@ -166,7 +166,7 @@ export default function InventoryClient({
           ...newProduct,
           price: parseFloat(newProduct.price),
           salePrice: newProduct.salePrice ? parseFloat(newProduct.salePrice) : null,
-          stockQuantity: newProduct.stockQuantity ? parseInt(newProduct.stockQuantity) : 0,
+          stockQuantity: newProduct.stockQuantity ? parseInt(newProduct.stockQuantity) : null,
         }),
       });
       if (!res.ok) throw new Error("Failed to add");

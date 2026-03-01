@@ -9,7 +9,7 @@ type Flower = {
   name: string;
   price: number;
   salePrice: number | null;
-  stockQuantity: number;
+  stockQuantity: number | null;
   inStock: boolean;
   imageEmoji: string;
   imageUrl: string | null;
@@ -123,7 +123,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
     // Check stock availability before submitting
     for (const item of selectedItems) {
       const qty = quantities[item.id];
-      if (qty > item.stockQuantity) {
+      // Only check stock if stockQuantity is explicitly set
+      if (item.stockQuantity !== null && qty > item.stockQuantity) {
         setError(`Not enough stock for ${item.name}. Only ${item.stockQuantity} available.`);
         return;
       }
@@ -211,7 +212,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {availableFlowers.map((flower) => {
                   const qty = quantities[flower.id] ?? 0;
-                  const isOutOfStock = !flower.inStock || flower.stockQuantity <= 0;
+                    const isOutOfStock = !flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity <= 0);
                   return (
                     <div
                       key={flower.id}
@@ -260,7 +261,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                             )}
                             <span className="text-xs font-normal text-[#a07850]"> / stem</span>
                           </p>
-                          {flower.stockQuantity <= 5 && flower.stockQuantity > 0 && (
+                          {flower.stockQuantity !== null && flower.stockQuantity <= 5 && flower.stockQuantity > 0 && (
                             <p className="text-xs text-orange-600 font-medium">
                               Only {flower.stockQuantity} left!
                             </p>
@@ -291,7 +292,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                           <button
                             type="button"
                             onClick={() => updateQuantity(flower.id, 1)}
-                            disabled={isOutOfStock || qty >= flower.stockQuantity}
+                            disabled={isOutOfStock || (flower.stockQuantity !== null && qty >= flower.stockQuantity)}
                             className="w-8 h-8 rounded-full bg-[#7a4f2e] text-white font-bold text-lg flex items-center justify-center hover:bg-[#5c3a1e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                           >
                             +

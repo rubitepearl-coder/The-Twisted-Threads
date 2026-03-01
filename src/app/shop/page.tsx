@@ -15,7 +15,7 @@ interface Product {
   category: string;
   price: number;
   salePrice: number | null;
-  stockQuantity: number;
+  stockQuantity: number | null;
   inStock: boolean;
   imageEmoji: string;
   imageUrl: string;
@@ -77,7 +77,8 @@ export default function ShopPage() {
   const addToCart = (product: Product, showCartAfterAdd: boolean = false) => {
     const existing = cart.find(item => item.product.id === product.id);
     if (existing) {
-      if (existing.quantity < product.stockQuantity) {
+      // Only check stock if stockQuantity is explicitly set
+      if (product.stockQuantity !== null && existing.quantity < product.stockQuantity) {
         setCart(cart.map(item => 
           item.product.id === product.id 
             ? { ...item, quantity: item.quantity + 1 }
@@ -85,7 +86,8 @@ export default function ShopPage() {
         ));
       }
     } else {
-      if (product.stockQuantity > 0) {
+      // Only add to cart if stock is unlimited (NULL) or > 0
+      if (product.stockQuantity === null || product.stockQuantity > 0) {
         setCart([...cart, { product, quantity: 1 }]);
       }
     }
@@ -104,7 +106,9 @@ export default function ShopPage() {
       if (item.product.id === productId) {
         const newQty = item.quantity + delta;
         if (newQty <= 0) return item;
-        if (newQty > item.product.stockQuantity) return item;
+        if (newQty <= 0) return item;
+        // Only check stock if stockQuantity is explicitly set
+        if (item.product.stockQuantity !== null && newQty > item.product.stockQuantity) return item;
         return { ...item, quantity: newQty };
       }
       return item;
@@ -350,11 +354,11 @@ export default function ShopPage() {
                             / stem
                           </span>
                         </p>
-                        {!flower.inStock || flower.stockQuantity === 0 ? (
+                        {!flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity === 0) ? (
                           <span className="inline-block mt-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             Sold Out
                           </span>
-                        ) : flower.stockQuantity <= 5 ? (
+                        ) : flower.stockQuantity !== null && flower.stockQuantity <= 5 ? (
                           <span className="inline-block mt-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
                             Only {flower.stockQuantity} left!
                           </span>
@@ -661,7 +665,7 @@ function ProductCard({
   onAddToCart: () => void;
   showCartAfterAdd?: boolean;
 }) {
-  const isAvailable = product.inStock && product.stockQuantity > 0;
+  const isAvailable = product.inStock && (product.stockQuantity === null || product.stockQuantity > 0);
   const [imageError, setImageError] = useState(false);
 
   // Check if imageUrl is valid (non-empty string starting with http)

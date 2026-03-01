@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         category: category ?? "flower",
         price: parseFloat(price),
         salePrice: salePrice ? parseFloat(salePrice) : null,
-        stockQuantity: stockQuantity ? parseInt(stockQuantity) : 10,
+        stockQuantity: stockQuantity ? parseInt(stockQuantity) : null, // NULL = unlimited/not tracked
         inStock: inStock ?? true,
         imageEmoji: imageEmoji ?? "🌸",
         imageUrl: imageUrl ?? "",

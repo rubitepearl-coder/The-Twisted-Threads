@@ -7,7 +7,7 @@ export const products = sqliteTable("products", {
   category: text("category").notNull().default("flower"), // 'flower' | 'finished_good' | 'pot' | 'fuzzy_wire_flower'
   price: real("price").notNull(),
   salePrice: real("sale_price"),
-  stockQuantity: integer("stock_quantity").notNull().default(0),
+  stockQuantity: integer("stock_quantity"), // NULL = unlimited/not tracked, number = limited stock
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
   imageEmoji: text("image_emoji").notNull().default("🌸"),
   imageUrl: text("image_url").default(""),

@@ -9,7 +9,7 @@ type Product = {
   name: string;
   price: number;
   salePrice: number | null;
-  stockQuantity: number;
+  stockQuantity: number | null;
   inStock: boolean;
   imageEmoji: string;
   imageUrl: string | null;
@@ -24,7 +24,7 @@ type Props = {
 export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const router = useRouter();
   const [selectedPot, setSelectedPot] = useState<number | null>(
-    pots.find((p) => p.inStock && p.stockQuantity > 0)?.id ?? null
+    pots.find((p) => p.inStock && (p.stockQuantity === null || p.stockQuantity > 0))?.id ?? null
   );
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [customerName, setCustomerName] = useState(""); // Full legal name
@@ -124,14 +124,15 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
       return;
     }
 
-    // Check stock availability
-    if (selectedPotObj && selectedPotObj.stockQuantity < 1) {
+    // Check stock availability - only if stockQuantity is explicitly set
+    if (selectedPotObj && selectedPotObj.stockQuantity !== null && selectedPotObj.stockQuantity < 1) {
       setError(`Sorry, ${selectedPotObj.name} is out of stock.`);
       return;
     }
     for (const item of selectedItems) {
       const qty = quantities[item.id];
-      if (qty > item.stockQuantity) {
+      // Only check stock if stockQuantity is explicitly set
+      if (item.stockQuantity !== null && qty > item.stockQuantity) {
         setError(`Not enough stock for ${item.name}. Only ${item.stockQuantity} available.`);
         return;
       }
@@ -233,7 +234,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 ml-10">
                   {availablePots.map((pot) => {
-                    const isOutOfStock = !pot.inStock || pot.stockQuantity <= 0;
+                    const isOutOfStock = !pot.inStock || (pot.stockQuantity !== null && pot.stockQuantity <= 0);
                     return (
                       <button
                         key={pot.id}
@@ -285,7 +286,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                             `₱${pot.price.toFixed(2)}`
                           )}
                         </p>
-                        {pot.stockQuantity <= 5 && pot.stockQuantity > 0 && (
+                        {pot.stockQuantity !== null && pot.stockQuantity <= 5 && pot.stockQuantity > 0 && (
                           <p className="text-xs text-orange-600">
                             Only {pot.stockQuantity} left!
                           </p>
@@ -317,7 +318,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {availableFlowers.map((flower) => {
                     const qty = quantities[flower.id] ?? 0;
-                    const isOutOfStock = !flower.inStock || flower.stockQuantity <= 0;
+                    const isOutOfStock = !flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity <= 0);
                     return (
                       <div
                         key={flower.id}
@@ -370,7 +371,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                               )}{" "}
                               / flower
                             </p>
-                            {flower.stockQuantity <= 5 &&
+                            {flower.stockQuantity !== null && flower.stockQuantity <= 5 &&
                               flower.stockQuantity > 0 && (
                                 <p className="text-xs text-orange-600">
                                   Only {flower.stockQuantity} left!
@@ -392,7 +393,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                             <button
                               type="button"
                               onClick={() => updateQuantity(flower.id, 1)}
-                              disabled={isOutOfStock || qty >= flower.stockQuantity}
+                              disabled={isOutOfStock || (flower.stockQuantity !== null && qty >= flower.stockQuantity)}
                               className="w-8 h-8 rounded-full bg-[#7a4f2e] text-white font-bold text-lg flex items-center justify-center hover:bg-[#5c3a1e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
                               +

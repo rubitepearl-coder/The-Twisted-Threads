@@ -205,23 +205,26 @@ export async function POST(request: NextRequest) {
           throw new Error(`Product not found: ${item.name}`);
         }
 
-        const currentStock = product.stockQuantity || 0;
+        // Stock check: Only block if stockQuantity is explicitly set AND insufficient
+        // If stockQuantity is NULL, allow checkout (unlimited/not tracked)
+        const currentStock = product.stockQuantity;
         
-        // Check if sufficient stock available
-        if (currentStock < quantity) {
+        if (currentStock !== null && currentStock < quantity) {
           throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        // Decrement stock
-        const newStock = currentStock - quantity;
-        await db
-          .update(products)
-          .set({ 
-            stockQuantity: newStock,
-            inStock: newStock > 0,
-            updatedAt: new Date()
-          })
-          .where(eq(products.id, productId));
+        // Only decrement stock if it's explicitly set
+        if (currentStock !== null) {
+          const newStock = currentStock - quantity;
+          await db
+            .update(products)
+            .set({ 
+              stockQuantity: newStock,
+              inStock: newStock > 0,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, productId));
+        }
       }
     }
 
@@ -241,21 +244,25 @@ export async function POST(request: NextRequest) {
           throw new Error(`Product not found: ${item.name}`);
         }
 
-        const currentStock = product.stockQuantity || 0;
+        // Stock check: Only block if stockQuantity is explicitly set AND insufficient
+        const currentStock = product.stockQuantity;
         
-        if (currentStock < quantity) {
+        if (currentStock !== null && currentStock < quantity) {
           throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        const newStock = currentStock - quantity;
-        await db
-          .update(products)
-          .set({ 
-            stockQuantity: newStock,
-            inStock: newStock > 0,
-            updatedAt: new Date()
-          })
-          .where(eq(products.id, productId));
+        // Only decrement stock if it's explicitly set
+        if (currentStock !== null) {
+          const newStock = currentStock - quantity;
+          await db
+            .update(products)
+            .set({ 
+              stockQuantity: newStock,
+              inStock: newStock > 0,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, productId));
+        }
       }
     }
 
@@ -275,21 +282,25 @@ export async function POST(request: NextRequest) {
           throw new Error(`Product not found: ${item.name}`);
         }
 
-        const currentStock = product.stockQuantity || 0;
+        // Stock check: Only block if stockQuantity is explicitly set AND insufficient
+        const currentStock = product.stockQuantity;
         
-        if (currentStock < quantity) {
+        if (currentStock !== null && currentStock < quantity) {
           throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        const newStock = currentStock - quantity;
-        await db
-          .update(products)
-          .set({ 
-            stockQuantity: newStock,
-            inStock: newStock > 0,
-            updatedAt: new Date()
-          })
-          .where(eq(products.id, productId));
+        // Only decrement stock if it's explicitly set
+        if (currentStock !== null) {
+          const newStock = currentStock - quantity;
+          await db
+            .update(products)
+            .set({ 
+              stockQuantity: newStock,
+              inStock: newStock > 0,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, productId));
+        }
       }
     }
 
