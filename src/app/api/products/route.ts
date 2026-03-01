@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         category: category ?? "flower",
         price: parseFloat(price),
         salePrice: salePrice ? parseFloat(salePrice) : null,
-        stockQuantity: stockQuantity ? parseInt(stockQuantity) : 0,
+        stockQuantity: stockQuantity ? parseInt(stockQuantity) : 10,
         inStock: inStock ?? true,
         imageEmoji: imageEmoji ?? "🌸",
         imageUrl: imageUrl ?? "",

@@ -7,6 +7,7 @@ const flowerData = [
     description: "Classic romantic bloom",
     category: "flower",
     price: 4.5,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "🌹",
   },
@@ -15,6 +16,7 @@ const flowerData = [
     description: "Elegant spring flower",
     category: "flower",
     price: 3.75,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "🌷",
   },
@@ -23,6 +25,7 @@ const flowerData = [
     description: "Ruffled and romantic",
     category: "flower",
     price: 4.0,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "🌸",
   },
@@ -31,6 +34,7 @@ const flowerData = [
     description: "Sweet and simple",
     category: "flower",
     price: 3.0,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "🌼",
   },
@@ -39,6 +43,7 @@ const flowerData = [
     description: "Calming purple sprig",
     category: "flower",
     price: 3.5,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "💜",
   },
@@ -47,6 +52,7 @@ const flowerData = [
     description: "Delicate pink petals",
     category: "flower",
     price: 5.5,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "🌸",
   },
@@ -55,6 +61,7 @@ const flowerData = [
     description: "Elegant and fragrant",
     category: "flower",
     price: 4.75,
+    stockQuantity: 20,
     inStock: true,
     imageEmoji: "🪷",
   },
@@ -63,6 +70,7 @@ const flowerData = [
     description: "Tropical beauty",
     category: "flower",
     price: 4.25,
+    stockQuantity: 0,
     inStock: false,
     imageEmoji: "🌺",
   },
@@ -74,6 +82,7 @@ const finishedGoodsData = [
     description: "12 hand-crocheted roses in a kraft paper wrap",
     category: "finished_good",
     price: 58.0,
+    stockQuantity: 10,
     inStock: true,
     imageEmoji: "💐",
   },
@@ -82,6 +91,7 @@ const finishedGoodsData = [
     description: "Tulips, daisies, and lavender — ready to gift",
     category: "finished_good",
     price: 45.0,
+    stockQuantity: 10,
     inStock: true,
     imageEmoji: "🌷",
   },
@@ -90,6 +100,7 @@ const finishedGoodsData = [
     description: "5 large sunflowers in a rustic vase",
     category: "finished_good",
     price: 35.0,
+    stockQuantity: 10,
     inStock: true,
     imageEmoji: "🌻",
   },
@@ -98,6 +109,7 @@ const finishedGoodsData = [
     description: "3 single stems in tiny ceramic vases",
     category: "finished_good",
     price: 28.0,
+    stockQuantity: 0,
     inStock: false,
     imageEmoji: "🏺",
   },
@@ -106,8 +118,96 @@ const finishedGoodsData = [
     description: "Chibi crochet idol doll inspired by K-pop aesthetics — pastel outfit, mic in hand",
     category: "finished_good",
     price: 42.0,
+    stockQuantity: 5,
     inStock: true,
     imageEmoji: "🎤",
+  },
+];
+
+const fuzzyWireFlowersData = [
+  {
+    name: "Fuzzy Wire Rose",
+    description: "Handmade fuzzy wire rose in red",
+    category: "fuzzy_wire_flower",
+    price: 8.0,
+    stockQuantity: 15,
+    inStock: true,
+    imageEmoji: "🌹",
+  },
+  {
+    name: "Fuzzy Wire Tulip",
+    description: "Handmade fuzzy wire tulip in assorted colors",
+    category: "fuzzy_wire_flower",
+    price: 7.0,
+    stockQuantity: 15,
+    inStock: true,
+    imageEmoji: "🌷",
+  },
+  {
+    name: "Fuzzy Wire Sunflower",
+    description: "Handmade fuzzy wire sunflower in yellow",
+    category: "fuzzy_wire_flower",
+    price: 9.0,
+    stockQuantity: 15,
+    inStock: true,
+    imageEmoji: "🌻",
+  },
+  {
+    name: "Fuzzy Wire Daisy",
+    description: "Handmade fuzzy wire daisy in white/yellow",
+    category: "fuzzy_wire_flower",
+    price: 6.5,
+    stockQuantity: 15,
+    inStock: true,
+    imageEmoji: "🌼",
+  },
+  {
+    name: "Fuzzy Wire Lavender",
+    description: "Handmade fuzzy wire lavender sprig",
+    category: "fuzzy_wire_flower",
+    price: 7.5,
+    stockQuantity: 15,
+    inStock: true,
+    imageEmoji: "💜",
+  },
+];
+
+const potsData = [
+  {
+    name: "Mini Ceramic Pot - Pink",
+    description: "Adorable mini ceramic pot in pastel pink",
+    category: "pot",
+    price: 12.0,
+    stockQuantity: 8,
+    inStock: true,
+    imageEmoji: "🪴",
+  },
+  {
+    name: "Mini Ceramic Pot - White",
+    description: "Adorable mini ceramic pot in clean white",
+    category: "pot",
+    price: 12.0,
+    stockQuantity: 8,
+    inStock: true,
+    imageEmoji: "🪴",
+  },
+  {
+    name: "Mini Ceramic Pot - Blue",
+    description: "Adorable mini ceramic pot in sky blue",
+    category: "pot",
+    price: 12.0,
+    stockQuantity: 8,
+    inStock: true,
+    imageEmoji: "🪴",
+  },
+  {
+    name: "Mini Ceramic Pot - Green",
+    description: "Adorable mini ceramic pot in sage green",
+    category: "pot",
+    price: 12.0,
+    stockQuantity: 0,
+    inStock: false,
+    imageEmoji: "🪴",
   },
 ];
 
@@ -130,6 +230,12 @@ async function seed() {
   }
   for (const good of finishedGoodsData) {
     await db.insert(products).values(good).onConflictDoNothing();
+  }
+  for (const fuzzyFlower of fuzzyWireFlowersData) {
+    await db.insert(products).values(fuzzyFlower).onConflictDoNothing();
+  }
+  for (const pot of potsData) {
+    await db.insert(products).values(pot).onConflictDoNothing();
   }
 
   // Insert wrapper colors
