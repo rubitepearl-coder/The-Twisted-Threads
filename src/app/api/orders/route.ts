@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { orders, products } from "@/db/schema";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
 import { isAdminAuthenticated } from "@/lib/auth";
 
@@ -42,23 +42,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Customer lookup by email (for "My Orders" feature)
-    const { searchParams } = new URL(request.url);
-    const customerEmail = searchParams.get("email");
-
     const db = getDb();
     
-    // If email provided, fetch orders for that specific customer
-    if (customerEmail) {
-      const customerOrders = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.customerEmail, customerEmail))
-        .orderBy(desc(orders.createdAt));
-      return NextResponse.json(customerOrders);
-    }
-    
-    // Otherwise, fetch all orders (admin view)
+    // Admin: fetch all orders sorted by date (newest first)
     const allOrders = await db
       .select()
       .from(orders)

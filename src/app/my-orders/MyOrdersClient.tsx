@@ -16,6 +16,7 @@ type OrderItem = {
 type Order = {
   id: number;
   customerName: string;
+  facebookName: string | null;
   customerEmail: string | null;
   customerAddress: string;
   deliveryType: string;
@@ -40,6 +41,7 @@ type Order = {
 
 export default function MyOrdersClient() {
   const [customerName, setCustomerName] = useState("");
+  const [facebookName, setFacebookName] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -73,6 +75,11 @@ export default function MyOrdersClient() {
       const params = new URLSearchParams({
         customerName: customerName.trim(),
       });
+      
+      // Add facebookName if provided for better matching
+      if (facebookName.trim()) {
+        params.set("facebookName", facebookName.trim());
+      }
 
       const res = await fetch(`/api/orders/customer?${params}`);
 
@@ -161,15 +168,27 @@ export default function MyOrdersClient() {
           <form onSubmit={handleSearch} className="space-y-4">
             <div>
                 <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                  Your Name * (for contact - your Facebook name)
+                  Your Full Name *
                 </label>
                 <input
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="e.g., pearl.rubite"
+                  placeholder="e.g., Pearl Rubite"
                   className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                  Your Facebook Name (for better matching)
+                </label>
+                <input
+                  type="text"
+                  value={facebookName}
+                  onChange={(e) => setFacebookName(e.target.value)}
+                  placeholder="e.g., pearl.rubite"
+                  className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                 />
               </div>
             {error && (
