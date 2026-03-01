@@ -14,7 +14,7 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 - [x] **FIX: Order INSERT using raw SQL** - Replaced Drizzle ORM insert with raw SQL using `buildInsertSQL()` helper to explicitly control which columns are inserted. Now only inserts: customer_name, facebook_name, customer_email, customer_address, delivery_type, delivery_location, delivery_fee, order_type, bouquet_items, mini_pot_items, shop_items, pot_id, pot_name, pot_image_url, total_price, status, created_at. No longer inserts: id (auto-generated), user_id, facebook_id, wrapper_color_*
 
-- [x] Database migration 0007: Fix order constraints - made all optional fields nullable (customer_address, wrapper fields, pot fields, delivery_fee, notes)
+- [x] **FIX: Add migrations to instrumentation.ts** - Updated server startup to run Drizzle migrations automatically. This fixes the production database error where `facebook_name` column was missing because migrations weren't running on Vercel.
 - [x] Updated API insert logic to only include required fields
 - [x] Fixed delivery logic: pickup = no location/fee (0), delivery = location required
 - [x] Removed userId/facebookId from insert query - orders can be placed without login
