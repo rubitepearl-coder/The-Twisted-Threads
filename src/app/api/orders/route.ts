@@ -373,7 +373,7 @@ export async function POST(request: NextRequest) {
         .orderBy(desc(orders.createdAt))
         .limit(1);
 
-      const orderId = latestOrder?.id;
+      const orderId = latestOrder?.id ?? 0;
 
       // Send order to Google Sheets if configured
       if (isGoogleSheetsConfigured()) {
@@ -399,7 +399,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Return the order ID in a consistent format
-      return NextResponse.json({ orderId });
+      return NextResponse.json({ orderId: orderId });
     } catch (error) {
       console.error("Failed to create order:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to create order";
