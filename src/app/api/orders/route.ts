@@ -6,6 +6,31 @@ import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleS
 import { isAdminAuthenticated } from "@/lib/auth";
 
 // Raw SQL insert helper to only insert SPECIFIC columns
+// Maps camelCase JavaScript keys to snake_case SQL column names
+const COLUMN_NAME_MAP: Record<string, string> = {
+  customerName: "customer_name",
+  facebookName: "facebook_name",
+  customerEmail: "customer_email",
+  customerAddress: "customer_address",
+  deliveryType: "delivery_type",
+  deliveryLocation: "delivery_location",
+  deliveryFee: "delivery_fee",
+  orderType: "order_type",
+  bouquetItems: "bouquet_items",
+  miniPotItems: "mini_pot_items",
+  shopItems: "shop_items",
+  potId: "pot_id",
+  potName: "pot_name",
+  potImageUrl: "pot_image_url",
+  wrapperColorId: "wrapper_color_id",
+  wrapperColorName: "wrapper_color_name",
+  wrapperColorHex: "wrapper_color_hex",
+  wrapperColorImageUrl: "wrapper_color_image_url",
+  totalPrice: "total_price",
+  createdAt: "created_at",
+  updatedAt: "updated_at"
+};
+
 function buildInsertSQL(data: Record<string, any>): { sql: string; values: any[] } {
   const columns: string[] = [];
   const placeholders: string[] = [];
@@ -13,7 +38,9 @@ function buildInsertSQL(data: Record<string, any>): { sql: string; values: any[]
   
   for (const [key, value] of Object.entries(data)) {
     if (value !== undefined && value !== null) {
-      columns.push(key);
+      // Convert camelCase to snake_case for SQL column name
+      const sqlColumn = COLUMN_NAME_MAP[key] || key;
+      columns.push(sqlColumn);
       placeholders.push("?");
       values.push(value);
     }
