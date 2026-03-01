@@ -19,10 +19,12 @@ export default async function AdminDashboardPage() {
 
   try {
     const allOrders = await db.select().from(orders);
+    console.log("[AdminDashboard] Total orders from DB:", allOrders.length);
     totalOrders = allOrders.length;
     pendingOrders = allOrders.filter((o) => o.status === "pending").length;
 
     const allProducts = await db.select().from(products);
+    console.log("[AdminDashboard] Total products from DB:", allProducts.length);
     totalProducts = allProducts.length;
 
     recentOrders = await db
@@ -30,7 +32,8 @@ export default async function AdminDashboardPage() {
       .from(orders)
       .orderBy(desc(orders.createdAt))
       .limit(5);
-  } catch {
+  } catch (error) {
+    console.error("[AdminDashboard] Error fetching data:", error);
     // DB not yet seeded
   }
 

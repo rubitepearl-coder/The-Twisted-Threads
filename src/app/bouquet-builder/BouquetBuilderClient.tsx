@@ -212,7 +212,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {availableFlowers.map((flower) => {
                   const qty = quantities[flower.id] ?? 0;
-                    const isOutOfStock = !flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity <= 0);
+                    const isOutOfStock = flower.stockQuantity !== null && flower.stockQuantity <= 0;
                   return (
                     <div
                       key={flower.id}

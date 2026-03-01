@@ -122,7 +122,7 @@ export default async function HomePage() {
                   <p className="text-[#7a4f2e] text-sm font-medium">
                     ₱{flower.price.toFixed(2)}
                   </p>
-                  {!flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity <= 0) && (
+                  {flower.stockQuantity !== null && flower.stockQuantity <= 0 && (
                     <span className="text-xs text-red-500">Out of stock</span>
                   )}
                 </div>

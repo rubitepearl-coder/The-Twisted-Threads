@@ -354,7 +354,7 @@ export default function ShopPage() {
                             / stem
                           </span>
                         </p>
-                        {!flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity === 0) ? (
+                        {flower.stockQuantity !== null && flower.stockQuantity === 0 ? (
                           <span className="inline-block mt-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             Sold Out
                           </span>
@@ -665,7 +665,7 @@ function ProductCard({
   onAddToCart: () => void;
   showCartAfterAdd?: boolean;
 }) {
-  const isAvailable = product.inStock && (product.stockQuantity === null || product.stockQuantity > 0);
+  const isAvailable = product.stockQuantity === null || product.stockQuantity > 0;
   const [imageError, setImageError] = useState(false);
 
   // Check if imageUrl is valid (non-empty string starting with http)

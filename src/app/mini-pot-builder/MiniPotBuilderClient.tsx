@@ -24,7 +24,7 @@ type Props = {
 export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const router = useRouter();
   const [selectedPot, setSelectedPot] = useState<number | null>(
-    pots.find((p) => p.inStock && (p.stockQuantity === null || p.stockQuantity > 0))?.id ?? null
+    pots.find((p) => p.stockQuantity === null || p.stockQuantity > 0)?.id ?? null
   );
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [customerName, setCustomerName] = useState(""); // Full legal name
@@ -234,7 +234,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 ml-10">
                   {availablePots.map((pot) => {
-                    const isOutOfStock = !pot.inStock || (pot.stockQuantity !== null && pot.stockQuantity <= 0);
+                    const isOutOfStock = pot.stockQuantity !== null && pot.stockQuantity <= 0;
                     return (
                       <button
                         key={pot.id}
@@ -318,7 +318,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {availableFlowers.map((flower) => {
                     const qty = quantities[flower.id] ?? 0;
-                    const isOutOfStock = !flower.inStock || (flower.stockQuantity !== null && flower.stockQuantity <= 0);
+                    const isOutOfStock = flower.stockQuantity !== null && flower.stockQuantity <= 0;
                     return (
                       <div
                         key={flower.id}
