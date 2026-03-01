@@ -6,6 +6,8 @@ import { getDb } from "@/db";
 
 export async function GET(request: NextRequest) {
   // Debug endpoint to check current schema
+  // NOTE: This endpoint has NO authentication - if you get 401, check Postman settings
+  console.log("[db-migrate] GET request received");
   try {
     const db = getDb();
     const client = db.$client;
@@ -16,6 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       endpoint: "db-migrate",
       method: "GET",
+      note: "This endpoint has NO authentication - 401 should NOT happen",
       ordersColumns: columns,
       hasFacebookName: columns.includes("facebook_name"),
       message: "Use POST to run migrations"
