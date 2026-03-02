@@ -3,6 +3,9 @@ import { products, wrapperColors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import BouquetBuilderClient from "./BouquetBuilderClient";
 
+// Force dynamic rendering so inventory updates are reflected immediately
+export const dynamic = "force-dynamic";
+
 export default async function BouquetBuilderPage() {
   let flowers: typeof products.$inferSelect[] = [];
   let colors: typeof wrapperColors.$inferSelect[] = [];

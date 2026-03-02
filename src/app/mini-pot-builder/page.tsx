@@ -3,6 +3,9 @@ import { products } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import MiniPotBuilderClient from "./MiniPotBuilderClient";
 
+// Force dynamic rendering so inventory updates are reflected immediately
+export const dynamic = "force-dynamic";
+
 export default async function MiniPotBuilderPage() {
   let pots: typeof products.$inferSelect[] = [];
   let fuzzyFlowers: typeof products.$inferSelect[] = [];
