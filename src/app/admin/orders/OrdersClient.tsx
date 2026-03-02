@@ -185,8 +185,8 @@ export default function OrdersClient({
                       </div>
                       <p className="text-[#c4a882] text-sm">
                         {order.customerName}
-                        {order.facebookId && (
-                          <span className="ml-2 text-blue-300">📘 {order.facebookId}</span>
+                        {order.facebookName && (
+                          <span className="ml-2 text-blue-300">📘 {order.facebookName}</span>
                         )}
                         {order.customerEmail && (
                           <span className="ml-2 text-[#7a5c3e]">· {order.customerEmail}</span>
@@ -348,9 +348,9 @@ export default function OrdersClient({
                             <p className="text-[#f5ede0] text-sm font-medium">
                               {order.customerName}
                             </p>
-                            {order.facebookId && (
+                            {order.facebookName && (
                               <p className="text-blue-300 text-xs">
-                                📘 {order.facebookId}
+                                📘 {order.facebookName}
                               </p>
                             )}
                             {order.customerEmail && (
