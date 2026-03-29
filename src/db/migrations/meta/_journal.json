@@ -1,5 +1,5 @@
 {
-  "version": "7",
+  "version": "9",
   "dialect": "sqlite",
   "entries": [
     {
@@ -56,6 +56,13 @@
       "version": "6",
       "when": 1772600000000,
       "tag": "0007_fix_order_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1772700000000,
+      "tag": "0009_drop_email_not_null",
       "breakpoints": true
     }
   ]
