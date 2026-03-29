@@ -5,44 +5,210 @@ import { getDb } from "@/db";
 // It's a fallback in case the automatic migrations on startup don't work
 
 export async function GET(request: NextRequest) {
-  // Debug endpoint to check current schema
-  // NOTE: This endpoint has NO authentication - if you get 401, check Postman settings
-  console.log("[db-migrate] GET request received");
+  // This endpoint runs migrations and returns schema info
+  console.log("[db-migrate] GET request received - running migrations");
   try {
     const db = getDb();
     const client = db.$client;
+    const migrations: string[] = [];
     
     // Check all tables
     const tablesResult = await client.execute("SELECT name FROM sqlite_master WHERE type='table'");
     const tableNames = tablesResult.rows.map((row: any) => row.name);
+    console.log("[db-migrate] Existing tables:", tableNames);
     
-    const result: Record<string, any> = {
-      endpoint: "db-migrate",
-      method: "GET",
-      note: "This endpoint has NO authentication - 401 should NOT happen",
-      tables: tableNames,
-    };
-    
-    // Check orders table columns
-    if (tableNames.includes("orders")) {
-      const tableInfo = await client.execute("PRAGMA table_info(orders)");
-      const columns = tableInfo.rows.map((row: any) => row.name);
-      result.ordersColumns = columns;
-      result.hasFacebookName = columns.includes("facebook_name");
+    // Create admin_sessions table if it doesn't exist
+    if (!tableNames.includes("admin_sessions")) {
+      try {
+        await client.execute(`
+          CREATE TABLE admin_sessions (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            token text NOT NULL,
+            created_at integer,
+            expires_at integer NOT NULL
+          )
+        `);
+        await client.execute(`CREATE UNIQUE INDEX admin_sessions_token_unique ON admin_sessions (token)`);
+        migrations.push("Created admin_sessions table");
+        console.log("[db-migrate] Created admin_sessions table");
+      } catch (e: any) {
+        console.error("[db-migrate] Failed to create admin_sessions:", e);
+      }
     }
     
-    // Check products table columns
-    if (tableNames.includes("products")) {
+    // Create products table if it doesn't exist
+    if (!tableNames.includes("products")) {
+      try {
+        await client.execute(`
+          CREATE TABLE products (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            name text NOT NULL,
+            description text DEFAULT '' NOT NULL,
+            category text DEFAULT 'flower' NOT NULL,
+            price real NOT NULL,
+            sale_price real,
+            stock_quantity integer,
+            in_stock integer DEFAULT 1 NOT NULL,
+            image_emoji text DEFAULT '🌸' NOT NULL,
+            image_url text DEFAULT '',
+            created_at integer,
+            updated_at integer
+          )
+        `);
+        migrations.push("Created products table");
+        console.log("[db-migrate] Created products table");
+      } catch (e: any) {
+        console.error("[db-migrate] Failed to create products:", e);
+      }
+    } else {
       const tableInfo = await client.execute("PRAGMA table_info(products)");
       const columns = tableInfo.rows.map((row: any) => row.name);
-      result.productsColumns = columns;
-      result.hasStockQuantity = columns.includes("stock_quantity");
+      
+      if (!columns.includes("stock_quantity")) {
+        try {
+          await client.execute("ALTER TABLE products ADD COLUMN stock_quantity integer;");
+          migrations.push("Added stock_quantity column to products");
+          console.log("[db-migrate] Added stock_quantity column to products");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to add stock_quantity:", e);
+        }
+      }
+      
+      if (!columns.includes("sale_price")) {
+        try {
+          await client.execute("ALTER TABLE products ADD COLUMN sale_price real;");
+          migrations.push("Added sale_price column to products");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to add sale_price:", e);
+        }
+      }
+      
+      if (!columns.includes("image_url")) {
+        try {
+          await client.execute("ALTER TABLE products ADD COLUMN image_url text DEFAULT '';");
+          migrations.push("Added image_url column to products");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to add image_url:", e);
+        }
+      }
     }
     
-    return NextResponse.json(result);
+    // Create wrapper_colors table if it doesn't exist
+    if (!tableNames.includes("wrapper_colors")) {
+      try {
+        await client.execute(`
+          CREATE TABLE wrapper_colors (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            name text NOT NULL,
+            color_hex text NOT NULL,
+            image_url text DEFAULT '',
+            price real DEFAULT 0,
+            in_stock integer DEFAULT 1 NOT NULL
+          )
+        `);
+        migrations.push("Created wrapper_colors table");
+        console.log("[db-migrate] Created wrapper_colors table");
+      } catch (e: any) {
+        console.error("[db-migrate] Failed to create wrapper_colors:", e);
+      }
+    } else {
+      const wrapperTableInfo = await client.execute("PRAGMA table_info(wrapper_colors)");
+      const wrapperColumns = wrapperTableInfo.rows.map((row: any) => row.name);
+      
+      if (!wrapperColumns.includes("price")) {
+        try {
+          await client.execute("ALTER TABLE wrapper_colors ADD COLUMN price real DEFAULT 0");
+          migrations.push("Added price column to wrapper_colors");
+          console.log("[db-migrate] Added price column to wrapper_colors");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to add price column:", e);
+        }
+      }
+    }
+    
+    // Create orders table if it doesn't exist
+    if (!tableNames.includes("orders")) {
+      try {
+        await client.execute(`
+          CREATE TABLE orders (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            user_id text,
+            facebook_id text,
+            customer_name text NOT NULL,
+            facebook_name text,
+            customer_email text,
+            customer_address text,
+            delivery_type text DEFAULT 'pickup' NOT NULL,
+            delivery_location text,
+            delivery_fee real DEFAULT 0,
+            order_type text DEFAULT 'bouquet' NOT NULL,
+            bouquet_items text DEFAULT '[]',
+            mini_pot_items text DEFAULT '[]',
+            shop_items text DEFAULT '[]',
+            pot_id integer,
+            pot_name text,
+            pot_image_url text,
+            wrapper_color_id integer,
+            wrapper_color_name text,
+            wrapper_color_hex text,
+            wrapper_color_image_url text,
+            total_price real NOT NULL,
+            status text DEFAULT 'pending' NOT NULL,
+            notes text DEFAULT '',
+            created_at integer
+          )
+        `);
+        migrations.push("Created orders table");
+        console.log("[db-migrate] Created orders table");
+      } catch (e: any) {
+        console.error("[db-migrate] Failed to create orders:", e);
+      }
+    } else {
+      const tableInfo = await client.execute("PRAGMA table_info(orders)");
+      const columns = tableInfo.rows.map((row: any) => row.name);
+      
+      const missingColumns = [
+        { name: "facebook_name", type: "text" },
+        { name: "delivery_type", type: "text DEFAULT 'pickup'" },
+        { name: "delivery_location", type: "text" },
+        { name: "delivery_fee", type: "real DEFAULT 0" },
+        { name: "mini_pot_items", type: "text DEFAULT '[]'" },
+        { name: "shop_items", type: "text DEFAULT '[]'" },
+        { name: "pot_id", type: "integer" },
+        { name: "pot_name", type: "text" },
+        { name: "pot_image_url", type: "text" },
+        { name: "wrapper_color_id", type: "integer" },
+        { name: "wrapper_color_name", type: "text" },
+        { name: "wrapper_color_hex", type: "text" },
+        { name: "wrapper_color_image_url", type: "text" },
+      ];
+      
+      for (const col of missingColumns) {
+        if (!columns.includes(col.name)) {
+          try {
+            await client.execute(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.type};`);
+            migrations.push(`Added ${col.name} column to orders`);
+            console.log(`[db-migrate] Added ${col.name} column to orders`);
+          } catch (e: any) {
+            console.error(`[db-migrate] Failed to add ${col.name}:`, e);
+          }
+        }
+      }
+    }
+    
+    console.log("[db-migrate] Migrations completed:", migrations);
+    
+    return NextResponse.json({
+      success: true,
+      migrations,
+      message: migrations.length > 0 
+        ? `Ran ${migrations.length} migration(s)` 
+        : "Database already up to date"
+    });
   } catch (error) {
+    console.error("[db-migrate] Migration failed:", error);
     return NextResponse.json(
-      { error: "Check failed", details: String(error) },
+      { error: "Migration failed", details: String(error) },
       { status: 500 }
     );
   }
