@@ -226,8 +226,8 @@ export default function MyOrdersClient() {
             )}
 
             {orders.map((order) => {
-              const bouquetItems = parseItems(order.bouquetItems);
-              const miniPotItems = parseItems(order.miniPotItems);
+              const bouquetItems = parseItems(order.bouquetItems || "[]");
+              const miniPotItems = parseItems(order.miniPotItems || "[]");
               const shopItems = parseItems(order.shopItems || "[]");
               const allItems = [...bouquetItems, ...miniPotItems, ...shopItems];
 
