@@ -242,12 +242,6 @@ export default async function OrderConfirmationPage({
                     <span className="text-[#3d2c1e]">{order.facebookName}</span>
                   </div>
                 )}
-                {order.customerEmail && (
-                  <div className="flex gap-3">
-                    <span className="text-[#a07850] text-sm w-20 flex-shrink-0">Email</span>
-                    <span className="text-[#3d2c1e]">{order.customerEmail}</span>
-                  </div>
-                )}
                 {order.deliveryType === "home" && order.customerAddress && (
                   <div className="flex gap-3">
                     <span className="text-[#a07850] text-sm w-20 flex-shrink-0">Address</span>
