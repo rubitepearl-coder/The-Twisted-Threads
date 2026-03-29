@@ -272,7 +272,7 @@ export default function InventoryClient({
                   </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     value={newProduct.price}
                     onChange={(e) =>
@@ -288,7 +288,7 @@ export default function InventoryClient({
                   </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     value={newProduct.salePrice}
                     onChange={(e) =>
@@ -666,7 +666,7 @@ function ProductTable({
                   <td className="px-4 py-3">
                     <input
                       type="number"
-                      step="0.01"
+                      step="1"
                       min="0"
                       value={editForm.price ?? ""}
                       onChange={(e) =>
@@ -678,7 +678,7 @@ function ProductTable({
                   <td className="px-4 py-3">
                     <input
                       type="number"
-                      step="0.01"
+                      step="1"
                       min="0"
                       value={editForm.salePrice ?? ""}
                       onChange={(e) =>
@@ -1013,7 +1013,7 @@ function WrapperColorsTab({
               </label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 min="0"
                 value={newColor.price}
                 onChange={(e) =>
@@ -1131,7 +1131,7 @@ function WrapperColorsTab({
                       <td className="px-4 py-3">
                         <input
                           type="number"
-                          step="0.01"
+                          step="1"
                           min="0"
                           value={editColorForm.price ?? 0}
                           onChange={(e) =>
