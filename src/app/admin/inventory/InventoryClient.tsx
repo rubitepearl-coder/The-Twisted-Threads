@@ -1177,11 +1177,6 @@ function WrapperColorsTab({
                         />
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-[#f5ede0] text-sm">
-                          ₱{color.price?.toFixed(2) ?? "0.00"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
                         <span className="text-[#c4a882] text-sm">
                           {color.inStock ? "In Stock" : "Out of Stock"}
                         </span>
@@ -1239,6 +1234,9 @@ function WrapperColorsTab({
                         ) : (
                           <span className="text-[#5c3a1e] text-xs italic">No photo</span>
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[#f5ede0] text-sm">₱{color.price ?? 0}</span>
                       </td>
                       <td className="px-4 py-3">
                         <button
