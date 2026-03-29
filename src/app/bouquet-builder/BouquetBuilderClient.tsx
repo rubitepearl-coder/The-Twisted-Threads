@@ -94,11 +94,25 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const wrapperPrice = selectedWrapperObj?.price ?? 0;
   const finalTotal = totalPrice + wrapperPrice + deliveryFee;
 
-  const allFlowerImages: LightboxImage[] = useMemo(() => 
-    flowers.filter(f => f.imageUrl).map(f => ({ src: f.imageUrl as string, alt: f.name })),
-    [flowers]
-  );
+  const allFlowerImages: LightboxImage[] = useMemo(() => {
+    const flowerImgs = flowers.filter(f => f.imageUrl).map(f => ({ src: f.imageUrl as string, alt: f.name }));
+    const wrapperImgs = wrapperColors.filter(c => c.imageUrl).map(c => ({ src: c.imageUrl as string, alt: c.name }));
+    return [...flowerImgs, ...wrapperImgs];
+  }, [flowers, wrapperColors]);
+  
+  const flowerCount = flowers.filter(f => f.imageUrl).length;
   const lightbox = useImageLightbox(allFlowerImages);
+  
+  const openFlowerLightbox = (flowerId: number) => {
+    const idx = flowers.filter(f => f.imageUrl).findIndex(f => f.id === flowerId);
+    if (idx >= 0) lightbox.openLightbox(idx);
+  };
+  
+  const openWrapperLightbox = (colorId: number) => {
+    const wrapperImgs = wrapperColors.filter(c => c.imageUrl);
+    const idx = wrapperImgs.findIndex(c => c.id === colorId);
+    if (idx >= 0) lightbox.openLightbox(flowerCount + idx);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,10 +249,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                         {isValidImageUrl(flower.imageUrl) && !imageErrors[`flower-${flower.id}`] ? (
                           <div 
                             className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be] cursor-pointer"
-                            onClick={() => {
-                              const idx = flowers.filter(f => f.imageUrl).findIndex(f => f.id === flower.id);
-                              if (idx >= 0) lightbox.openLightbox(idx);
-                            }}
+                            onClick={() => openFlowerLightbox(flower.id)}
                           >
                             <Image
                               src={flower.imageUrl!}
@@ -349,7 +360,10 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                         }`}
                       >
                         {isValidImageUrl(color.imageUrl) && !imageErrors[`wrapper-${color.id}`] ? (
-                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                          <div 
+                            className="w-8 h-8 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0 cursor-pointer"
+                            onClick={(e) => { e.stopPropagation(); openWrapperLightbox(color.id); }}
+                          >
                             <Image
                               src={color.imageUrl!}
                               alt={color.name}
