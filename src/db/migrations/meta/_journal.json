@@ -64,6 +64,13 @@
       "when": 1772700000000,
       "tag": "0009_drop_email_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1772800000000,
+      "tag": "0011_wrapper_colors_price_v2",
+      "breakpoints": true
     }
   ]
 }

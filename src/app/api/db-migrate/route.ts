@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
             name text NOT NULL,
             color_hex text NOT NULL,
             image_url text DEFAULT '',
+            price real DEFAULT 0,
             in_stock integer DEFAULT 1 NOT NULL
           )
         `);
@@ -154,6 +155,20 @@ export async function POST(request: NextRequest) {
         console.log("[db-migrate] Created wrapper_colors table");
       } catch (e: any) {
         console.error("[db-migrate] Failed to create wrapper_colors:", e);
+      }
+    } else {
+      // Table exists, check for price column
+      const wrapperTableInfo = await client.execute("PRAGMA table_info(wrapper_colors)");
+      const wrapperColumns = wrapperTableInfo.rows.map((row: any) => row.name);
+      
+      if (!wrapperColumns.includes("price")) {
+        try {
+          await client.execute("ALTER TABLE wrapper_colors ADD COLUMN price real DEFAULT 0");
+          migrations.push("Added price column to wrapper_colors");
+          console.log("[db-migrate] Added price column to wrapper_colors");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to add price column:", e);
+        }
       }
     }
     
