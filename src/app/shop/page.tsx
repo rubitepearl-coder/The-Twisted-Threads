@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLightbox, LightboxModal } from "@/components/Lightbox";
 
 interface Product {
   id: number;
@@ -119,15 +118,6 @@ export default function ShopPage() {
     const price = item.product.salePrice || item.product.price;
     return sum + (price * item.quantity);
   }, 0);
-
-  // Lightbox for images
-  const allShopImages = useMemo(() => {
-    const images: { src: string; alt: string }[] = [];
-    finishedGoods.forEach(p => { if (isValidImageUrl(p.imageUrl)) images.push({ src: p.imageUrl, alt: p.name }); });
-    return images;
-  }, [finishedGoods]);
-
-  const lightbox = useLightbox(allShopImages);
 
   const handleCheckout = async () => {
     setError("");
