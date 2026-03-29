@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useLightbox, LightboxModal } from "@/components/Lightbox";
 
 type Product = {
   id: number;
@@ -90,6 +91,16 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
     : 0;
 
   const finalTotal = totalPrice + deliveryFee;
+
+  // Lightbox for images
+  const allImages = useMemo(() => {
+    const images: { src: string; alt: string }[] = [];
+    fuzzyFlowers.forEach(f => { if (isValidImageUrl(f.imageUrl)) images.push({ src: f.imageUrl as string, alt: f.name }); });
+    pots.forEach(p => { if (isValidImageUrl(p.imageUrl)) images.push({ src: p.imageUrl as string, alt: p.name }); });
+    return images;
+  }, [fuzzyFlowers, pots]);
+
+  const lightbox = useLightbox(allImages);
 
   const selectedItems = fuzzyFlowers.filter(
     (f) => (quantities[f.id] ?? 0) > 0
@@ -248,15 +259,17 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                       >
                         <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 border border-[#e8d5be]">
                           {isValidImageUrl(pot.imageUrl) && !imageErrors[`pot-${pot.id}`] ? (
-                            <Image
-                              src={pot.imageUrl!}
-                              alt={pot.name}
-                              width={120}
-                              height={120}
-                              className="w-full h-full object-cover"
-                              unoptimized
-                              onError={() => handleImageError(`pot-${pot.id}`)}
-                            />
+                            <div className="w-full h-full cursor-pointer" onClick={() => { const idx = fuzzyFlowers.length + pots.findIndex(p => p.id === pot.id); if (idx >= 0) lightbox.openLightbox(idx); }}>
+                              <Image
+                                src={pot.imageUrl!}
+                                alt={pot.name}
+                                width={120}
+                                height={120}
+                                className="w-full h-full object-cover"
+                                unoptimized
+                                onError={() => handleImageError(`pot-${pot.id}`)}
+                              />
+                            </div>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-4xl">
                               {pot.imageEmoji}
@@ -667,6 +680,16 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
           </div>
         </div>
       </form>
+
+      <LightboxModal
+        images={lightbox.images}
+        isOpen={lightbox.isOpen}
+        currentIndex={lightbox.currentIndex}
+        onClose={lightbox.closeLightbox}
+        onPrev={lightbox.prevImage}
+        onNext={lightbox.nextImage}
+        title="Click to view larger"
+      />
     </div>
   );
 }

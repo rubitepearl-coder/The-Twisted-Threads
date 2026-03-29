@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useLightbox, LightboxModal, ClickableImage } from "@/components/Lightbox";
 
 type Flower = {
   id: number;
@@ -92,6 +93,18 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const selectedWrapperObj = wrapperColors.find((c) => c.id === selectedWrapper);
   const wrapperPrice = selectedWrapperObj?.price ?? 0;
   const finalTotal = totalPrice + wrapperPrice + deliveryFee;
+
+  // Lightbox for images
+  const allImages = useMemo(() => {
+    const images: { src: string; alt: string }[] = [];
+    flowers.forEach(f => { if (isValidImageUrl(f.imageUrl)) images.push({ src: f.imageUrl as string, alt: f.name }); });
+    if (selectedWrapperObj && isValidImageUrl(selectedWrapperObj.imageUrl)) {
+      images.push({ src: selectedWrapperObj.imageUrl as string, alt: selectedWrapperObj.name });
+    }
+    return images;
+  }, [flowers, selectedWrapperObj]);
+
+  const lightbox = useLightbox(allImages);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,7 +239,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                       <div className="flex items-center gap-3">
                         {/* Square image or emoji fallback */}
                         {isValidImageUrl(flower.imageUrl) && !imageErrors[`flower-${flower.id}`] ? (
-                          <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be]">
+                          <div 
+                            className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be] cursor-pointer"
+                            onClick={() => {
+                              const idx = flowers.findIndex(f => f.id === flower.id && isValidImageUrl(f.imageUrl));
+                              if (idx >= 0) lightbox.openLightbox(idx);
+                            }}
+                          >
                             <Image
                               src={flower.imageUrl!}
                               alt={flower.name}
@@ -613,6 +632,16 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
           </div>
         </div>
       </form>
+
+      <LightboxModal
+        images={lightbox.images}
+        isOpen={lightbox.isOpen}
+        currentIndex={lightbox.currentIndex}
+        onClose={lightbox.closeLightbox}
+        onPrev={lightbox.prevImage}
+        onNext={lightbox.nextImage}
+        title="Click to view larger"
+      />
     </div>
   );
 }
