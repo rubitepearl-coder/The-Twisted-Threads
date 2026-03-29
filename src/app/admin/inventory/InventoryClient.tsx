@@ -22,6 +22,7 @@ type WrapperColor = {
   colorHex: string;
   imageUrl: string | null;
   inStock: boolean;
+  price: number | null;
 };
 
 type Props = {
@@ -821,7 +822,7 @@ function WrapperColorsTab({
   showMessage: (msg: string) => void;
 }) {
   const [showAdd, setShowAdd] = useState(false);
-  const [newColor, setNewColor] = useState({ name: "", colorHex: "#ffffff", imageUrl: "" });
+  const [newColor, setNewColor] = useState({ name: "", colorHex: "#ffffff", imageUrl: "", price: 0 });
   const [saving, setSaving] = useState(false);
   const [editingColorId, setEditingColorId] = useState<number | null>(null);
   const [editColorForm, setEditColorForm] = useState<Partial<WrapperColor>>({});
@@ -940,7 +941,7 @@ function WrapperColorsTab({
       if (!res.ok) throw new Error("Failed");
       const created = await res.json();
       setColors((prev) => [...prev, created]);
-      setNewColor({ name: "", colorHex: "#ffffff", imageUrl: "" });
+      setNewColor({ name: "", colorHex: "#ffffff", imageUrl: "", price: 0 });
       setShowAdd(false);
       showMessage("✅ Color added!");
     } catch {
@@ -1005,6 +1006,22 @@ function WrapperColorsTab({
                   className="flex-1 bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Price
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={newColor.price}
+                onChange={(e) =>
+                  setNewColor((c) => ({ ...c, price: parseFloat(e.target.value) || 0 }))
+                }
+                placeholder="₱0"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              />
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs text-[#c4a882] mb-1">
@@ -1073,6 +1090,9 @@ function WrapperColorsTab({
                   Photo URL
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Price
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
                   Stock
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
@@ -1109,6 +1129,19 @@ function WrapperColorsTab({
                         </div>
                       </td>
                       <td className="px-4 py-3">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={editColorForm.price ?? 0}
+                          onChange={(e) =>
+                            setEditColorForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))
+                          }
+                          className="w-20 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                          placeholder="₱0"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
                         <div className="flex gap-1 items-start">
                           <input
                             type="url"
@@ -1142,6 +1175,11 @@ function WrapperColorsTab({
                             />
                           </div>
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[#f5ede0] text-sm">
+                          ₱{color.price?.toFixed(2) ?? "0.00"}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-[#c4a882] text-sm">

@@ -19,6 +19,7 @@ export const wrapperColors = sqliteTable("wrapper_colors", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   colorHex: text("color_hex").notNull(),
+  price: real("price").default(0), // Price for this wrapper color
   imageUrl: text("image_url").default(""),
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
 });

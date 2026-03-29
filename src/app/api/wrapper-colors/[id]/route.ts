@@ -17,6 +17,7 @@ export async function PATCH(
     if (body.colorHex !== undefined) updateData.colorHex = body.colorHex;
     if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
     if (body.inStock !== undefined) updateData.inStock = body.inStock;
+    if (body.price !== undefined) updateData.price = body.price;
 
     const result = await getDb()
       .update(wrapperColors)

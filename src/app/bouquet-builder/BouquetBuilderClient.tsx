@@ -22,6 +22,7 @@ type WrapperColor = {
   colorHex: string;
   imageUrl: string | null;
   inStock: boolean;
+  price: number | null;
 };
 
 type Props = {
@@ -87,10 +88,10 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
       })()
     : 0;
 
-  const finalTotal = totalPrice + deliveryFee;
-
   const selectedItems = flowers.filter((f) => (quantities[f.id] ?? 0) > 0);
   const selectedWrapperObj = wrapperColors.find((c) => c.id === selectedWrapper);
+  const wrapperPrice = selectedWrapperObj?.price ?? 0;
+  const finalTotal = totalPrice + wrapperPrice + deliveryFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -560,6 +561,17 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                     ₱{totalPrice.toFixed(2)}
                   </span>
                 </div>
+                
+                {selectedWrapperObj && wrapperPrice > 0 && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[#6b4c30]">
+                      {selectedWrapperObj.name} wrapper
+                    </span>
+                    <span className="text-[#3d2c1e]">
+                      ₱{wrapperPrice.toFixed(2)}
+                    </span>
+                  </div>
+                )}
                 
                 {deliveryType === "home" && (
                   <div className="flex justify-between items-center text-sm">
