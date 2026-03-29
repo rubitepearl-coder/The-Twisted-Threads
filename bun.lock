@@ -215,7 +215,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@kilocode/app-builder-db": ["@kilocode/app-builder-db@github:Kilo-Org/app-builder-db#186d1c1", { "peerDependencies": { "drizzle-orm": ">=0.30.0" } }, "Kilo-Org-app-builder-db-186d1c1"],
+    "@kilocode/app-builder-db": ["@kilocode/app-builder-db@github:Kilo-Org/app-builder-db#186d1c1", { "peerDependencies": { "drizzle-orm": ">=0.30.0" } }, "Kilo-Org-app-builder-db-186d1c1", "sha512-BWHW5rko9U4K0Pu/Xtf1O5zju2alCRtWWcVWVNC8uO37EBVDfQEdjAO/43imkX7mgkFtsaj1zzxNkXz7FhXgDg=="],
 
     "@libsql/client": ["@libsql/client@0.17.0", "", { "dependencies": { "@libsql/core": "^0.17.0", "@libsql/hrana-client": "^0.9.0", "js-base64": "^3.7.5", "libsql": "^0.5.22", "promise-limit": "^2.7.0" } }, "sha512-TLjSU9Otdpq0SpKHl1tD1Nc9MKhrsZbCFGot3EbCxRa8m1E5R1mMwoOjKMMM31IyF7fr+hPNHLpYfwbMKNusmg=="],
 

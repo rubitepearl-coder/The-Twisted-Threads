@@ -29,7 +29,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [customerName, setCustomerName] = useState(""); // Full legal name
   const [facebookName, setFacebookName] = useState(""); // Facebook name for contact
-  const [customerEmail, setCustomerEmail] = useState(""); // Optional email
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
   const [deliveryLocation, setDeliveryLocation] = useState("");
@@ -157,7 +156,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
         body: JSON.stringify({
           customerName: customerName.trim(),
           facebookName: facebookName.trim(),
-          customerEmail: customerEmail.trim() || undefined,
           customerAddress: customerAddress.trim() || undefined,
           deliveryType,
           deliveryLocation: deliveryLocation.trim() || null,
@@ -172,7 +170,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
 
       console.log("[MiniPotBuilder] Order submission data:", {
         customerName: customerName.trim(),
-        customerEmail: customerEmail.trim() || undefined,
         customerAddress: customerAddress.trim() || undefined,
         deliveryType,
         deliveryLocation: deliveryLocation.trim() || null,
@@ -511,18 +508,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                     required
                   />
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Email Address <span className="text-xs text-[#a07850] font-normal">(optional - for order confirmation)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="e.g., juan@example.com"
-                    className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
-                  />
-                </div>
                 {deliveryType === "home" && (
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
@@ -676,7 +661,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               </button>
 
               <p className="text-xs text-[#a07850] text-center mt-3">
-                We will confirm your order by email
+                We will confirm your order via Facebook Messenger
               </p>
             </div>
           </div>

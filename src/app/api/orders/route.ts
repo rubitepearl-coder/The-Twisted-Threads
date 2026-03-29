@@ -10,7 +10,6 @@ import { isAdminAuthenticated } from "@/lib/auth";
 const COLUMN_NAME_MAP: Record<string, string> = {
   customerName: "customer_name",
   facebookName: "facebook_name",
-  customerEmail: "customer_email",
   customerAddress: "customer_address",
   deliveryType: "delivery_type",
   deliveryLocation: "delivery_location",
@@ -98,7 +97,6 @@ export async function POST(request: NextRequest) {
       // Note: userId and facebookId are NOT used - orders can be placed without login
       customerName,
       facebookName,
-      customerEmail,
       customerAddress,
       deliveryType,
       deliveryLocation,
@@ -115,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     // customerName (Full Name) is required for shipping records
-    console.log("[Orders API] Validation check:", { customerName, facebookName, customerEmail, deliveryType, deliveryLocation });
+    console.log("[Orders API] Validation check:", { customerName, facebookName, deliveryType, deliveryLocation });
     if (!customerName) {
       console.log("[Orders API] Validation FAILED: No full name");
       return NextResponse.json(
@@ -123,7 +121,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    // Facebook name is required for contact via Messenger
+    // Facebook name - required for contact via Messenger
     if (!facebookName) {
       console.log("[Orders API] Validation FAILED: No Facebook name");
       return NextResponse.json(
@@ -175,7 +173,6 @@ export async function POST(request: NextRequest) {
     // Debug: Log the validated and processed values
     console.log("[Orders API] Validated values:", {
       customerName,
-      customerEmail,
       customerAddress: customerAddress ?? "",
       deliveryType: finalDeliveryType,
       deliveryLocation: finalDeliveryLocation,
@@ -190,30 +187,36 @@ export async function POST(request: NextRequest) {
     
     // Check and decrement stock for bouquet items
     if (bouquetItems && bouquetItems.length > 0) {
-      for (const item of bouquetItems) {
-        const productId = item.productId;
-        const quantity = item.quantity;
+      // Group items by productId and sum quantities
+      const groupedItems = bouquetItems.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
+        if (!acc[item.productId]) {
+          acc[item.productId] = { name: item.name || '', quantity: 0 };
+        }
+        acc[item.productId].quantity += item.quantity;
+        return acc;
+      }, {} as Record<number, {name: string, quantity: number}>);
 
-        // Get current product stock
+      for (const [productId, itemData] of Object.entries(groupedItems) as [string, {name: string, quantity: number}][]) {
+        const productIdNum = parseInt(productId);
+        const quantity = itemData.quantity;
+        const name = itemData.name;
+
         const [product] = await db
           .select()
           .from(products)
-          .where(eq(products.id, productId))
+          .where(eq(products.id, productIdNum))
           .limit(1);
 
         if (!product) {
-          throw new Error(`Product not found: ${item.name}`);
+          throw new Error(`Product not found: ${name}`);
         }
 
-        // Stock check: Only block if stockQuantity is explicitly set AND insufficient
-        // If stockQuantity is NULL, allow checkout (unlimited/not tracked)
         const currentStock = product.stockQuantity;
         
         if (currentStock !== null && currentStock < quantity) {
-          throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
+          throw new Error(`Insufficient stock for ${name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        // Only decrement stock if it's explicitly set
         if (currentStock !== null) {
           const newStock = currentStock - quantity;
           await db
@@ -223,35 +226,43 @@ export async function POST(request: NextRequest) {
               inStock: newStock > 0,
               updatedAt: new Date()
             })
-            .where(eq(products.id, productId));
+            .where(eq(products.id, productIdNum));
         }
       }
     }
 
     // Check and decrement stock for mini pot items
+    // Check and decrement stock for mini pot items
     if (miniPotItems && miniPotItems.length > 0) {
-      for (const item of miniPotItems) {
-        const productId = item.productId;
-        const quantity = item.quantity;
+      const groupedItems = miniPotItems.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
+        if (!acc[item.productId]) {
+          acc[item.productId] = { name: item.name || '', quantity: 0 };
+        }
+        acc[item.productId].quantity += item.quantity;
+        return acc;
+      }, {} as Record<number, {name: string, quantity: number}>);
+
+      for (const [productId, itemData] of Object.entries(groupedItems) as [string, {name: string, quantity: number}][]) {
+        const productIdNum = parseInt(productId);
+        const quantity = itemData.quantity;
+        const name = itemData.name;
 
         const [product] = await db
           .select()
           .from(products)
-          .where(eq(products.id, productId))
+          .where(eq(products.id, productIdNum))
           .limit(1);
 
         if (!product) {
-          throw new Error(`Product not found: ${item.name}`);
+          throw new Error(`Product not found: ${name}`);
         }
 
-        // Stock check: Only block if stockQuantity is explicitly set AND insufficient
         const currentStock = product.stockQuantity;
         
         if (currentStock !== null && currentStock < quantity) {
-          throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
+          throw new Error(`Insufficient stock for ${name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        // Only decrement stock if it's explicitly set
         if (currentStock !== null) {
           const newStock = currentStock - quantity;
           await db
@@ -261,35 +272,42 @@ export async function POST(request: NextRequest) {
               inStock: newStock > 0,
               updatedAt: new Date()
             })
-            .where(eq(products.id, productId));
+            .where(eq(products.id, productIdNum));
         }
       }
     }
 
     // Check and decrement stock for shop items (finished goods)
     if (shopItems && shopItems.length > 0) {
-      for (const item of shopItems) {
-        const productId = item.productId;
-        const quantity = item.quantity;
+      const groupedItems = shopItems.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
+        if (!acc[item.productId]) {
+          acc[item.productId] = { name: item.name || '', quantity: 0 };
+        }
+        acc[item.productId].quantity += item.quantity;
+        return acc;
+      }, {} as Record<number, {name: string, quantity: number}>);
+
+      for (const [productId, itemData] of Object.entries(groupedItems) as [string, {name: string, quantity: number}][]) {
+        const productIdNum = parseInt(productId);
+        const quantity = itemData.quantity;
+        const name = itemData.name;
 
         const [product] = await db
           .select()
           .from(products)
-          .where(eq(products.id, productId))
+          .where(eq(products.id, productIdNum))
           .limit(1);
 
         if (!product) {
-          throw new Error(`Product not found: ${item.name}`);
+          throw new Error(`Product not found: ${name}`);
         }
 
-        // Stock check: Only block if stockQuantity is explicitly set AND insufficient
         const currentStock = product.stockQuantity;
         
         if (currentStock !== null && currentStock < quantity) {
-          throw new Error(`Insufficient stock for ${item.name}. Available: ${currentStock}, Requested: ${quantity}`);
+          throw new Error(`Insufficient stock for ${name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        // Only decrement stock if it's explicitly set
         if (currentStock !== null) {
           const newStock = currentStock - quantity;
           await db
@@ -299,7 +317,7 @@ export async function POST(request: NextRequest) {
               inStock: newStock > 0,
               updatedAt: new Date()
             })
-            .where(eq(products.id, productId));
+            .where(eq(products.id, productIdNum));
         }
       }
     }
@@ -315,15 +333,10 @@ export async function POST(request: NextRequest) {
         orderType: orderType || "bouquet",
       };
 
-      // Facebook name - required for contact
-      if (facebookName && facebookName.toString().trim()) {
-        orderData.facebookName = facebookName.toString().trim();
-      }
-
-      // Customer email - optional
-      if (customerEmail && customerEmail.toString().trim()) {
-        orderData.customerEmail = customerEmail.toString().trim();
-      }
+    // Facebook name - required for contact
+    if (facebookName && facebookName.toString().trim()) {
+      orderData.facebookName = facebookName.toString().trim();
+    }
 
       // Customer address - optional (for reference, not used for delivery)
       if (customerAddress && customerAddress.toString().trim()) {
@@ -390,7 +403,7 @@ export async function POST(request: NextRequest) {
       if (isGoogleSheetsConfigured()) {
         const sheetResult = await sendOrderToGoogleSheets({
           customerName,
-          customerEmail: customerEmail ?? "",
+          customerEmail: "",
           customerAddress: customerAddress ?? "",
           orderType: orderType ?? "bouquet",
           bouquetItems: JSON.stringify(bouquetItems ?? []),
