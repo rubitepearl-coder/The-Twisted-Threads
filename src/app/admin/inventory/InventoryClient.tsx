@@ -1129,19 +1129,6 @@ function WrapperColorsTab({
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          step="1"
-                          min="0"
-                          value={editColorForm.price ?? 0}
-                          onChange={(e) =>
-                            setEditColorForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))
-                          }
-                          className="w-20 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
-                          placeholder="₱0"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
                         <div className="flex gap-1 items-start">
                           <input
                             type="url"
@@ -1175,6 +1162,19 @@ function WrapperColorsTab({
                             />
                           </div>
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={editColorForm.price ?? 0}
+                          onChange={(e) =>
+                            setEditColorForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))
+                          }
+                          className="w-20 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                          placeholder="₱0"
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-[#f5ede0] text-sm">
