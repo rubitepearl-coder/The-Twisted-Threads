@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 
 export type LightboxImage = {
@@ -8,51 +8,13 @@ export type LightboxImage = {
   alt: string;
 };
 
-export function useLightbox(initialImages: LightboxImage[] = []) {
-  const [images, setImages] = useState<LightboxImage[]>(initialImages);
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    setImages(initialImages);
-  }, [initialImages]);
-
-  const openLightbox = (index: number) => {
-    if (images.length > 0) {
-      setCurrentIndex(index);
-      setIsOpen(true);
-    }
-  };
-
-  const closeLightbox = () => setIsOpen(false);
-
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-  };
-
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-  };
-
-  return {
-    images,
-    isOpen,
-    currentIndex,
-    openLightbox,
-    closeLightbox,
-    prevImage,
-    nextImage,
-  };
-}
-
-export function LightboxModal({ 
+function LightboxModal({ 
   images, 
   isOpen, 
   currentIndex, 
   onClose, 
   onPrev, 
-  onNext,
-  title 
+  onNext 
 }: { 
   images: LightboxImage[]; 
   isOpen: boolean; 
@@ -60,98 +22,82 @@ export function LightboxModal({
   onClose: () => void; 
   onPrev?: () => void; 
   onNext?: () => void;
-  title?: string;
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft' && onPrev) onPrev();
+      if (e.key === 'ArrowRight' && onNext) onNext();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose, onPrev, onNext]);
+
   if (!isOpen || images.length === 0) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center cursor-pointer"
-      onClick={onClose}
-    >
-      <button 
-        className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 cursor-pointer z-50"
-        onClick={onClose}
-      >
-        ×
-      </button>
-      
-      {images.length > 1 && onPrev && onNext && (
+    <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center" onClick={onClose}>
+      <button className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-50" onClick={onClose}>×</button>
+      {images.length > 1 && (
         <>
-          <button 
-            className="absolute left-4 text-white text-6xl hover:text-gray-300 cursor-pointer z-50"
-            onClick={(e) => { e.stopPropagation(); onPrev(); }}
-          >
-            ‹
-          </button>
-          <button 
-            className="absolute right-4 text-white text-6xl hover:text-gray-300 cursor-pointer z-50"
-            onClick={(e) => { e.stopPropagation(); onNext(); }}
-          >
-            ›
-          </button>
+          <button className="absolute left-4 text-white text-6xl hover:text-gray-300 z-50" onClick={(e) => { e.stopPropagation(); onPrev?.(); }}>‹</button>
+          <button className="absolute right-4 text-white text-6xl hover:text-gray-300 z-50" onClick={(e) => { e.stopPropagation(); onNext?.(); }}>›</button>
         </>
       )}
-      
-      <div 
-        className="max-w-[90vw] max-h-[85vh] flex items-center justify-center cursor-default"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <Image
-          src={images[currentIndex].src}
-          alt={images[currentIndex].alt}
-          width={800}
-          height={800}
-          className="max-w-[90vw] max-h-[80vh] object-contain"
-          unoptimized
-        />
+      <div className="max-w-[95vw] max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+        <Image src={images[currentIndex]?.src || ''} alt={images[currentIndex]?.alt || ''} width={1000} height={1000} className="max-w-[95vw] max-h-[90vh] object-contain" unoptimized priority />
       </div>
-      
-      {images.length > 1 && (
-        <div className="absolute bottom-4 text-white text-lg">
-          {currentIndex + 1} / {images.length}
-        </div>
-      )}
-      
-      {title && (
-        <div className="absolute top-4 left-4 text-white text-lg font-medium">
-          {title}
-        </div>
-      )}
+      {images.length > 1 && <div className="absolute bottom-4 text-white">{currentIndex + 1} / {images.length}</div>}
     </div>
   );
 }
 
-export function ClickableImage({ 
-  src, 
-  alt, 
-  width = 80, 
-  height = 80, 
-  className = "",
-  onClick,
-  rounded = true,
-}: { 
-  src: string; 
-  alt: string; 
-  width?: number;
-  height?: number;
-  className?: string;
-  onClick?: () => void;
-  rounded?: boolean;
-}) {
-  return (
-    <div 
-      className={`relative overflow-hidden cursor-pointer ${rounded ? 'rounded-xl' : ''} ${className}`}
-      onClick={onClick}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        className="w-full h-full object-cover"
-        unoptimized
+export function useImageLightbox(images: LightboxImage[]) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const openLightbox = useCallback((index: number) => {
+    if (images.length > 0) {
+      setCurrentIndex(Math.min(index, images.length - 1));
+      setIsOpen(true);
+    }
+  }, [images.length]);
+
+  const closeLightbox = useCallback(() => setIsOpen(false), []);
+  const prevImage = useCallback(() => setCurrentIndex(i => i > 0 ? i - 1 : images.length - 1), [images.length]);
+  const nextImage = useCallback(() => setCurrentIndex(i => i < images.length - 1 ? i + 1 : 0), [images.length]);
+
+  return {
+    isOpen,
+    currentIndex,
+    openLightbox,
+    closeLightbox,
+    prevImage,
+    nextImage,
+    LightboxComponent: () => (
+      <LightboxModal
+        images={images}
+        isOpen={isOpen}
+        currentIndex={currentIndex}
+        onClose={closeLightbox}
+        onPrev={images.length > 1 ? prevImage : undefined}
+        onNext={images.length > 1 ? nextImage : undefined}
       />
-    </div>
+    )
+  };
+}
+
+export default function Lightbox({ images }: { images: LightboxImage[] }) {
+  const { isOpen, currentIndex, openLightbox, closeLightbox, prevImage, nextImage, LightboxComponent } = useImageLightbox(images);
+  return (
+    <>
+      {images.map((img, idx) => (
+        <button key={idx} onClick={() => openLightbox(idx)} className="cursor-pointer">
+          Click image {idx}
+        </button>
+      ))}
+      <LightboxComponent />
+    </>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useImageLightbox, LightboxImage } from "@/components/Lightbox";
 
 type Flower = {
   id: number;
@@ -92,6 +93,12 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const selectedWrapperObj = wrapperColors.find((c) => c.id === selectedWrapper);
   const wrapperPrice = selectedWrapperObj?.price ?? 0;
   const finalTotal = totalPrice + wrapperPrice + deliveryFee;
+
+  const allFlowerImages: LightboxImage[] = useMemo(() => 
+    flowers.filter(f => f.imageUrl).map(f => ({ src: f.imageUrl as string, alt: f.name })),
+    [flowers]
+  );
+  const lightbox = useImageLightbox(allFlowerImages);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,7 +233,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
                       <div className="flex items-center gap-3">
                         {/* Square image or emoji fallback */}
                         {isValidImageUrl(flower.imageUrl) && !imageErrors[`flower-${flower.id}`] ? (
-                          <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be]">
+                          <div 
+                            className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be] cursor-pointer"
+                            onClick={() => {
+                              const idx = flowers.filter(f => f.imageUrl).findIndex(f => f.id === flower.id);
+                              if (idx >= 0) lightbox.openLightbox(idx);
+                            }}
+                          >
                             <Image
                               src={flower.imageUrl!}
                               alt={flower.name}
@@ -613,6 +626,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
           </div>
         </div>
       </form>
+      {lightbox.LightboxComponent()}
     </div>
   );
 }
