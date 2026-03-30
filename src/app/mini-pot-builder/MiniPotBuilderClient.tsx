@@ -345,7 +345,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                         <div className="flex items-center gap-3">
                           {/* Square image or emoji fallback */}
                           {isValidImageUrl(flower.imageUrl) && !imageErrors[`flower-${flower.id}`] ? (
-                            <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be]">
+                            <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-[#e8d5be] cursor-pointer" onClick={() => openFlowerLightbox(flower.id)}>
                               <Image
                                 src={flower.imageUrl!}
                                 alt={flower.name}
