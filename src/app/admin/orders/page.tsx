@@ -7,6 +7,8 @@ import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import OrdersClient from "./OrdersClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminOrdersPage() {
   const isAuth = await isAdminAuthenticated();
   if (!isAuth) {

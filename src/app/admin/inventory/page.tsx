@@ -6,6 +6,8 @@ import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import InventoryClient from "./InventoryClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminInventoryPage() {
   const isAuth = await isAdminAuthenticated();
   if (!isAuth) {

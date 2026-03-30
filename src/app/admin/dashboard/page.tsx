@@ -6,6 +6,8 @@ import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   const isAuth = await isAdminAuthenticated();
   if (!isAuth) {
