@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { getDb } from "@/db";
 import { orders, products } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
@@ -14,29 +14,37 @@ export default async function AdminDashboardPage() {
     redirect("/admin/login");
   }
 
-  const db = getDb();
+  let db;
+  try {
+    db = getDb();
+  } catch (dbError) {
+    console.error("[AdminDashboard] Database initialization failed:", dbError);
+  }
+
   let totalOrders = 0;
   let pendingOrders = 0;
   let totalProducts = 0;
   let recentOrders: typeof orders.$inferSelect[] = [];
 
-  try {
-    const allOrders = await db.select().from(orders);
-    console.log("[AdminDashboard] Total orders from DB:", allOrders.length);
-    totalOrders = allOrders.length;
-    pendingOrders = allOrders.filter((o) => o.status === "pending").length;
+  if (db) {
+    try {
+      const allOrders = await db.select().from(orders);
+      console.log("[AdminDashboard] Total orders from DB:", allOrders.length);
+      totalOrders = allOrders.length;
+      pendingOrders = allOrders.filter((o) => o.status === "pending").length;
 
-    const allProducts = await db.select().from(products);
-    console.log("[AdminDashboard] Total products from DB:", allProducts.length);
-    totalProducts = allProducts.length;
+      const allProducts = await db.select().from(products);
+      console.log("[AdminDashboard] Total products from DB:", allProducts.length);
+      totalProducts = allProducts.length;
 
-    recentOrders = await db
-      .select()
-      .from(orders)
-      .orderBy(desc(orders.createdAt))
-      .limit(5);
-  } catch (error) {
-    console.error("[AdminDashboard] Error fetching data:", error);
+      recentOrders = await db
+        .select()
+        .from(orders)
+        .orderBy(desc(orders.createdAt))
+        .limit(5);
+    } catch (error) {
+      console.error("[AdminDashboard] Error fetching data:", error);
+    }
   }
 
   return (

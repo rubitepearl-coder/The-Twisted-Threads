@@ -14,21 +14,29 @@ export default async function AdminInventoryPage() {
     redirect("/admin/login");
   }
 
-  const db = getDb();
+  let db;
+  try {
+    db = getDb();
+  } catch (dbError) {
+    console.error("[Inventory] Database initialization failed:", dbError);
+  }
+
   let allProducts: typeof products.$inferSelect[] = [];
   let allColors: typeof wrapperColors.$inferSelect[] = [];
   let allAddons: typeof addons.$inferSelect[] = [];
 
-  try {
-    console.log("[Inventory] Fetching products from database...");
-    allProducts = await db.select().from(products);
-    allColors = await db.select().from(wrapperColors);
-    allAddons = await db.select().from(addons);
-    console.log("[Inventory] Found products:", allProducts.length);
-    console.log("[Inventory] Found colors:", allColors.length);
-    console.log("[Inventory] Found addons:", allAddons.length);
-  } catch (error) {
-    console.error("[Inventory] Error fetching data:", error);
+  if (db) {
+    try {
+      console.log("[Inventory] Fetching products from database...");
+      allProducts = await db.select().from(products);
+      allColors = await db.select().from(wrapperColors);
+      allAddons = await db.select().from(addons);
+      console.log("[Inventory] Found products:", allProducts.length);
+      console.log("[Inventory] Found colors:", allColors.length);
+      console.log("[Inventory] Found addons:", allAddons.length);
+    } catch (error) {
+      console.error("[Inventory] Error fetching data:", error);
+    }
   }
 
   return (

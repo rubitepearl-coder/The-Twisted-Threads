@@ -10,7 +10,14 @@ export async function isAdminAuthenticated(): Promise<boolean> {
 
     if (!token) return false;
 
-    const db = getDb();
+    let db;
+    try {
+      db = getDb();
+    } catch (dbError) {
+      console.error("[Auth] Database initialization failed:", dbError);
+      return false;
+    }
+
     const session = await db
       .select()
       .from(adminSessions)
