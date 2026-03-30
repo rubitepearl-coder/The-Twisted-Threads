@@ -48,7 +48,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
-  const [addonMessage, setAddonMessage] = useState("");
 
   // Helper function to validate image URL
   const isValidImageUrl = (url: string | null | undefined): boolean => {
@@ -195,7 +194,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
           potImageUrl: selectedPotObj?.imageUrl ?? "",
           totalPrice: finalTotal,
           addonItems: selectedAddons.length > 0 ? JSON.stringify(selectedAddonItems) : null,
-          addonMessage: addonMessage.trim() || null,
         }),
       });
 
@@ -486,21 +484,6 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                     );
                   })}
                 </div>
-
-                {selectedAddons.length > 0 && (
-                  <div className="ml-10 mt-4">
-                    <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                      Add a message ({selectedAddonItems.length} addon{selectedAddonItems.length > 1 ? 's' : ''} selected)
-                    </label>
-                    <textarea
-                      value={addonMessage}
-                      onChange={(e) => setAddonMessage(e.target.value)}
-                      placeholder="Write your message here..."
-                      rows={3}
-                      className="w-full sm:w-[400px] border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent resize-none"
-                    />
-                  </div>
-                )}
               </div>
             )}
 

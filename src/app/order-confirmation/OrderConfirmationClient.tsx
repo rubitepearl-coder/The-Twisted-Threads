@@ -196,12 +196,6 @@ export default function OrderConfirmationClient({
                   </div>
                 ))}
               </div>
-              {order.addonMessage && (
-                <div className="mt-3 p-3 bg-[#f5ede0] rounded-xl">
-                  <p className="text-xs text-[#6b4c30] font-medium mb-1">Your Message:</p>
-                  <p className="text-sm text-[#3d2c1e] italic">{order.addonMessage}</p>
-                </div>
-              )}
             </div>
           )}
 

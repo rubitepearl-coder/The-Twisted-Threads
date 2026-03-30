@@ -57,7 +57,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
-  const [addonMessage, setAddonMessage] = useState("");
 
   // Helper function to validate image URL
   const isValidImageUrl = (url: string | null | undefined): boolean => {
@@ -193,7 +192,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
           wrapperColorHex: selectedWrapperObj?.colorHex,
           wrapperColorImageUrl: selectedWrapperObj?.imageUrl ?? "",
           addonItems: selectedAddons.length > 0 ? JSON.stringify(selectedAddonItems) : null,
-          addonMessage: addonMessage.trim() || null,
           totalPrice: finalTotal,
         }),
       });
@@ -456,20 +454,6 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                     );
                   })}
                 </div>
-                {selectedAddons.length > 0 && (
-                  <div className="ml-10 mt-4">
-                    <label className="block text-[#3d2c1e] font-medium mb-2">
-                      Add a message for your add-ons (optional)
-                    </label>
-                    <textarea
-                      value={addonMessage}
-                      onChange={(e) => setAddonMessage(e.target.value)}
-                      placeholder="e.g., Message for the greeting card..."
-                      className="w-full px-4 py-2 border border-[#d4b896] rounded-xl focus:outline-none focus:border-[#7a4f2e] text-[#3d2c1e]"
-                      rows={2}
-                    />
-                  </div>
-                )}
               </div>
             )}
 
