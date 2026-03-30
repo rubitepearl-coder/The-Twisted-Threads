@@ -122,25 +122,58 @@ const colorData = [
   { name: "Midnight Black", colorHex: "#2d2d2d", inStock: false },
 ];
 
-export async function POST() {
+async function seedDatabase() {
+  const db = getDb();
+  
+  // Check if already seeded
+  const existing = await db.select().from(products).limit(1);
+  if (existing.length > 0) {
+    return { success: true, message: "Already seeded" };
+  }
+
+  for (const flower of flowerData) {
+    await db.insert(products).values(flower);
+  }
+  for (const good of finishedGoodsData) {
+    await db.insert(products).values(good);
+  }
+  for (const color of colorData) {
+    await db.insert(wrapperColors).values(color);
+  }
+
+  return { success: true, message: "Seeded successfully" };
+}
+
+export async function GET() {
+  let db;
   try {
-    // Check if already seeded
-    const existing = await getDb().select().from(products).limit(1);
-    if (existing.length > 0) {
-      return NextResponse.json({ message: "Already seeded" });
-    }
+    db = getDb();
+  } catch (dbError) {
+    console.error("[seed] Database initialization failed:", dbError);
+    return NextResponse.json({ error: "Database not available" }, { status: 500 });
+  }
 
-    for (const flower of flowerData) {
-      await getDb().insert(products).values(flower);
-    }
-    for (const good of finishedGoodsData) {
-      await getDb().insert(products).values(good);
-    }
-    for (const color of colorData) {
-      await getDb().insert(wrapperColors).values(color);
-    }
+  try {
+    const result = await seedDatabase();
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Seed error:", error);
+    return NextResponse.json({ error: "Seed failed" }, { status: 500 });
+  }
+}
 
-    return NextResponse.json({ message: "Seeded successfully" });
+export async function POST() {
+  let db;
+  try {
+    db = getDb();
+  } catch (dbError) {
+    console.error("[seed] Database initialization failed:", dbError);
+    return NextResponse.json({ error: "Database not available" }, { status: 500 });
+  }
+
+  try {
+    const result = await seedDatabase();
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Seed error:", error);
     return NextResponse.json({ error: "Seed failed" }, { status: 500 });
