@@ -10,12 +10,13 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 - [x] **FEATURE: Add-ons for bouquet and mini pot builders** - Customers can now add items like letters, premium wrappers, and greeting cards to their orders:
   - Database: Added `addons` table with name, description, type, price, imageUrl, inStock
-  - Database: Added `addon_items` and `addon_message` columns to orders table
-  - API: Created `/api/addons` endpoint for GET/POST addons
-  - API: Updated orders API to accept and store addonItems and addonMessage
-  - Bouquet Builder: Integrated addons UI with checkbox selection and message textarea
-  - Mini Pot Builder: Integrated addons UI with checkbox selection and message textarea
-  - Order Confirmation: Displays selected addons and custom message
+  - Database: Added `addon_items` column to orders table (removed addon_message)
+  - API: Created `/api/addons` endpoint with GET/POST/PUT/DELETE
+  - API: Updated orders API to accept and store addonItems
+  - Bouquet Builder: Integrated addons UI with checkbox selection
+  - Mini Pot Builder: Integrated addons UI with checkbox selection
+  - Order Confirmation: Displays selected addons with prices
+  - Admin: Added Add-ons tab in Inventory for managing (CRUD, toggle stock)
 
 - [x] **FIX: Sold-Out Logic** - Removed `inStock` dependency from sold-out checks. Now products are ONLY marked as sold out when `stockQuantity` is explicitly set AND <= 0. Products with NULL stockQuantity are available (unlimited). Fixed in:
   - MiniPotBuilderClient.tsx: Removed `!pot.inStock` check
