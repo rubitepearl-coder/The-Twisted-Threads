@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { products, wrapperColors, addons } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import BouquetBuilderClient from "./BouquetBuilderClient";
 
 // Force dynamic rendering so inventory updates are reflected immediately
@@ -17,10 +17,17 @@ export default async function BouquetBuilderPage() {
       .from(products)
       .where(eq(products.category, "flower"));
     colors = await db.select().from(wrapperColors);
-    addonItems = await db.select().from(addons).where(eq(addons.inStock, true));
+    addonItems = await db
+      .select()
+      .from(addons)
+      .where(or(eq(addons.inStock, true), eq(addons.availableFor, "both")));
   } catch {
     // DB not yet seeded
   }
+
+  const filteredAddons = addonItems.filter(
+    (a) => a.availableFor === "both" || a.availableFor === "bouquet"
+  );
 
   return (
     <div className="min-h-screen bg-[#faf7f2]">
@@ -36,7 +43,7 @@ export default async function BouquetBuilderPage() {
         </p>
       </div>
 
-      <BouquetBuilderClient flowers={flowers} wrapperColors={colors} addons={addonItems} />
+      <BouquetBuilderClient flowers={flowers} wrapperColors={colors} addons={filteredAddons} />
     </div>
   );
 }

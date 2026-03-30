@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, type, price, imageUrl } = body;
+    const { name, description, type, price, imageUrl, availableFor } = body;
 
     if (!name || price === undefined) {
       return NextResponse.json({ error: "Name and price are required" }, { status: 400 });
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
         type: type ?? "addon", 
         price, 
         imageUrl: imageUrl ?? "",
-        inStock: true 
+        inStock: true,
+        availableFor: availableFor ?? "both"
       })
       .returning();
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, name, description, type, price, imageUrl, inStock } = body;
+    const { id, name, description, type, price, imageUrl, inStock, availableFor } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -57,6 +58,7 @@ export async function PUT(request: NextRequest) {
     if (price !== undefined) updateData.price = price;
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
     if (inStock !== undefined) updateData.inStock = inStock;
+    if (availableFor !== undefined) updateData.availableFor = availableFor;
 
     const result = await getDb()
       .update(addons)

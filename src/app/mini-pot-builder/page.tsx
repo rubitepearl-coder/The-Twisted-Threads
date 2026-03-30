@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { products, addons } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import MiniPotBuilderClient from "./MiniPotBuilderClient";
 
 // Force dynamic rendering so inventory updates are reflected immediately
@@ -20,10 +20,17 @@ export default async function MiniPotBuilderPage() {
       .select()
       .from(products)
       .where(eq(products.category, "fuzzy_wire_flower"));
-    addonItems = await db.select().from(addons).where(eq(addons.inStock, true));
+    addonItems = await db
+      .select()
+      .from(addons)
+      .where(or(eq(addons.inStock, true), eq(addons.availableFor, "both")));
   } catch {
     // DB not yet seeded
   }
+
+  const filteredAddons = addonItems.filter(
+    (a) => a.availableFor === "both" || a.availableFor === "mini_pot"
+  );
 
   return (
     <div className="min-h-screen bg-[#faf7f2]">
@@ -39,7 +46,7 @@ export default async function MiniPotBuilderPage() {
         </p>
       </div>
 
-      <MiniPotBuilderClient pots={pots} fuzzyFlowers={fuzzyFlowers} addons={addonItems} />
+      <MiniPotBuilderClient pots={pots} fuzzyFlowers={fuzzyFlowers} addons={filteredAddons} />
     </div>
   );
 }

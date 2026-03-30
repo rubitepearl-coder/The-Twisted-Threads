@@ -32,6 +32,7 @@ export const addons = sqliteTable("addons", {
   price: real("price").notNull(),
   imageUrl: text("image_url").default(""),
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
+  availableFor: text("available_for").notNull().default("both"), // 'bouquet' | 'mini_pot' | 'both'
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });

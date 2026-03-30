@@ -33,6 +33,7 @@ type Addon = {
   price: number;
   imageUrl: string | null;
   inStock: boolean;
+  availableFor: string;
 };
 
 type Props = {
@@ -75,6 +76,7 @@ export default function InventoryClient({
     type: "addon",
     price: "",
     imageUrl: "",
+    availableFor: "both",
   });
 
   const showMessage = (msg: string) => {
@@ -1349,8 +1351,8 @@ function AddonsTab({
   showMessage: (msg: string) => void;
   showAddForm: boolean;
   setShowAddForm: (show: boolean) => void;
-  newAddon: { name: string; description: string; type: string; price: string; imageUrl: string };
-  setNewAddon: React.Dispatch<React.SetStateAction<{ name: string; description: string; type: string; price: string; imageUrl: string }>>;
+  newAddon: { name: string; description: string; type: string; price: string; imageUrl: string; availableFor: string };
+  setNewAddon: React.Dispatch<React.SetStateAction<{ name: string; description: string; type: string; price: string; imageUrl: string; availableFor: string }>>;
   editingId: number | null;
   setEditingId: (id: number | null) => void;
   editForm: Partial<Addon>;
@@ -1381,6 +1383,7 @@ function AddonsTab({
           type: newAddon.type,
           price: parseFloat(newAddon.price),
           imageUrl: newAddon.imageUrl,
+          availableFor: newAddon.availableFor,
         }),
       });
 
@@ -1388,7 +1391,7 @@ function AddonsTab({
 
       const created = await res.json();
       setAddons((prev) => [...prev, created]);
-      setNewAddon({ name: "", description: "", type: "addon", price: "", imageUrl: "" });
+      setNewAddon({ name: "", description: "", type: "addon", price: "", imageUrl: "", availableFor: "both" });
       setShowAddForm(false);
       showMessage("Addon added successfully!");
     } catch (error) {
@@ -1423,6 +1426,7 @@ function AddonsTab({
           price: editForm.price,
           imageUrl: editForm.imageUrl,
           inStock: editForm.inStock,
+          availableFor: editForm.availableFor,
         }),
       });
 
@@ -1551,6 +1555,20 @@ function AddonsTab({
                 className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
               />
             </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Available For
+              </label>
+              <select
+                value={newAddon.availableFor}
+                onChange={(e) => setNewAddon((a) => ({ ...a, availableFor: e.target.value }))}
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              >
+                <option value="both">Both (Bouquet & Mini Pot)</option>
+                <option value="bouquet">Bouquet Only</option>
+                <option value="mini_pot">Mini Pot Only</option>
+              </select>
+            </div>
             <div className="sm:col-span-2">
               <label className="block text-xs text-[#c4a882] mb-1">
                 Image URL
@@ -1604,6 +1622,9 @@ function AddonsTab({
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
                   Type
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Available For
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
                   Price
@@ -1664,6 +1685,23 @@ function AddonsTab({
                       </select>
                     ) : (
                       <span className="text-[#c4a882] text-sm capitalize">{addon.type}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {editingId === addon.id ? (
+                      <select
+                        value={editForm.availableFor ?? "both"}
+                        onChange={(e) => setEditForm((f) => ({ ...f, availableFor: e.target.value }))}
+                        className="bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                      >
+                        <option value="both">Both</option>
+                        <option value="bouquet">Bouquet</option>
+                        <option value="mini_pot">Mini Pot</option>
+                      </select>
+                    ) : (
+                      <span className="text-[#c4a882] text-sm capitalize">
+                        {addon.availableFor === "both" ? "Both" : addon.availableFor === "bouquet" ? "Bouquet" : "Mini Pot"}
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3">
