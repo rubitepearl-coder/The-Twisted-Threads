@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { orders, products } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
@@ -12,6 +12,7 @@ export default async function AdminDashboardPage() {
     redirect("/admin/login");
   }
 
+  const db = getDb();
   let totalOrders = 0;
   let pendingOrders = 0;
   let totalProducts = 0;
@@ -34,7 +35,6 @@ export default async function AdminDashboardPage() {
       .limit(5);
   } catch (error) {
     console.error("[AdminDashboard] Error fetching data:", error);
-    // DB not yet seeded
   }
 
   return (

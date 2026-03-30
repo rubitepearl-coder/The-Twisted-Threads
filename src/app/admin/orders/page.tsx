@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { orders } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import Link from "next/link";
@@ -13,6 +13,7 @@ export default async function AdminOrdersPage() {
     redirect("/admin/login");
   }
 
+  const db = getDb();
   let allOrders: typeof orders.$inferSelect[] = [];
 
   try {
@@ -24,7 +25,6 @@ export default async function AdminOrdersPage() {
     console.log("[Orders] Found orders:", allOrders.length);
   } catch (error) {
     console.error("[Orders] Error fetching data:", error);
-    // DB not yet seeded
   }
 
   return (

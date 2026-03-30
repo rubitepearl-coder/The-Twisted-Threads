@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { products, wrapperColors, addons } from "@/db/schema";
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
@@ -12,6 +12,7 @@ export default async function AdminInventoryPage() {
     redirect("/admin/login");
   }
 
+  const db = getDb();
   let allProducts: typeof products.$inferSelect[] = [];
   let allColors: typeof wrapperColors.$inferSelect[] = [];
   let allAddons: typeof addons.$inferSelect[] = [];
@@ -26,7 +27,6 @@ export default async function AdminInventoryPage() {
     console.log("[Inventory] Found addons:", allAddons.length);
   } catch (error) {
     console.error("[Inventory] Error fetching data:", error);
-    // DB not yet seeded or connection failed
   }
 
   return (
