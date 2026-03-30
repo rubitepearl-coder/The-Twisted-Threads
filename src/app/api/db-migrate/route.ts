@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
             price real NOT NULL,
             imageUrl text DEFAULT '',
             inStock integer DEFAULT 1 NOT NULL,
-            available_for text DEFAULT 'both' NOT NULL,
+            availableFor text DEFAULT 'both' NOT NULL,
             created_at integer,
             updated_at integer
           )
@@ -69,17 +69,17 @@ export async function GET(request: NextRequest) {
         console.error("[db-migrate] Failed to create addons:", e);
       }
     } else {
-      // Table exists, add available_for column if it doesn't exist
+      // Table exists, add availableFor column if it doesn't exist
       const addonTableInfo = await client.execute("PRAGMA table_info(addons)");
       const addonColumns = addonTableInfo.rows.map((row: any) => row.name);
       
-      if (!addonColumns.includes("available_for")) {
+      if (!addonColumns.includes("availableFor")) {
         try {
-          await client.execute("ALTER TABLE addons ADD COLUMN available_for text DEFAULT 'both'");
-          migrations.push("Added available_for column to addons");
-          console.log("[db-migrate] Added available_for column to addons");
+          await client.execute("ALTER TABLE addons ADD COLUMN availableFor text DEFAULT 'both'");
+          migrations.push("Added availableFor column to addons");
+          console.log("[db-migrate] Added availableFor column to addons");
         } catch (e: any) {
-          console.error("[db-migrate] Failed to add available_for:", e);
+          console.error("[db-migrate] Failed to add availableFor:", e);
         }
       }
     }
