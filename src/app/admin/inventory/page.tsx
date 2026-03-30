@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { db } from "@/db";
-import { products, wrapperColors } from "@/db/schema";
+import { products, wrapperColors, addons } from "@/db/schema";
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import InventoryClient from "./InventoryClient";
@@ -14,13 +14,16 @@ export default async function AdminInventoryPage() {
 
   let allProducts: typeof products.$inferSelect[] = [];
   let allColors: typeof wrapperColors.$inferSelect[] = [];
+  let allAddons: typeof addons.$inferSelect[] = [];
 
   try {
     console.log("[Inventory] Fetching products from database...");
     allProducts = await db.select().from(products);
     allColors = await db.select().from(wrapperColors);
+    allAddons = await db.select().from(addons);
     console.log("[Inventory] Found products:", allProducts.length);
     console.log("[Inventory] Found colors:", allColors.length);
+    console.log("[Inventory] Found addons:", allAddons.length);
   } catch (error) {
     console.error("[Inventory] Error fetching data:", error);
     // DB not yet seeded or connection failed
@@ -82,6 +85,7 @@ export default async function AdminInventoryPage() {
         <InventoryClient
           initialProducts={allProducts}
           initialColors={allColors}
+          initialAddons={allAddons}
         />
       </main>
     </div>

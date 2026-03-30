@@ -25,17 +25,30 @@ type WrapperColor = {
   price: number | null;
 };
 
+type Addon = {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  price: number;
+  imageUrl: string | null;
+  inStock: boolean;
+};
+
 type Props = {
   initialProducts: Product[];
   initialColors: WrapperColor[];
+  initialAddons: Addon[];
 };
 
 export default function InventoryClient({
   initialProducts,
   initialColors,
+  initialAddons,
 }: Props) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [colors, setColors] = useState<WrapperColor[]>(initialColors);
+  const [addons, setAddons] = useState<Addon[]>(initialAddons);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<Product>>({});
   const [saving, setSaving] = useState(false);
@@ -52,7 +65,17 @@ export default function InventoryClient({
     imageEmoji: "🌸",
     imageUrl: "",
   });
-  const [activeTab, setActiveTab] = useState<"products" | "colors">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "colors" | "addons">("products");
+  const [editingAddonId, setEditingAddonId] = useState<number | null>(null);
+  const [editAddonForm, setEditAddonForm] = useState<Partial<Addon>>({});
+  const [showAddAddonForm, setShowAddAddonForm] = useState(false);
+  const [newAddon, setNewAddon] = useState({
+    name: "",
+    description: "",
+    type: "addon",
+    price: "",
+    imageUrl: "",
+  });
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -227,6 +250,16 @@ export default function InventoryClient({
           }`}
         >
           Wrapper Colors ({colors.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("addons")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeTab === "addons"
+              ? "bg-[#7a4f2e] text-white"
+              : "bg-[#2d1f14] text-[#c4a882] hover:text-[#f5ede0] border border-[#5c3a1e]"
+          }`}
+        >
+          Add-ons ({addons.length})
         </button>
       </div>
 
@@ -525,6 +558,24 @@ export default function InventoryClient({
 
       {activeTab === "colors" && (
         <WrapperColorsTab colors={colors} setColors={setColors} showMessage={showMessage} />
+      )}
+
+      {activeTab === "addons" && (
+        <AddonsTab 
+          addons={addons} 
+          setAddons={setAddons} 
+          showMessage={showMessage}
+          showAddForm={showAddAddonForm}
+          setShowAddForm={setShowAddAddonForm}
+          newAddon={newAddon}
+          setNewAddon={setNewAddon}
+          editingId={editingAddonId}
+          setEditingId={setEditingAddonId}
+          editForm={editAddonForm}
+          setEditForm={setEditAddonForm}
+          saving={saving}
+          setSaving={setSaving}
+        />
       )}
     </div>
   );
@@ -1268,6 +1319,416 @@ function WrapperColorsTab({
                       </td>
                     </>
                   )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AddonsTab({
+  addons,
+  setAddons,
+  showMessage,
+  showAddForm,
+  setShowAddForm,
+  newAddon,
+  setNewAddon,
+  editingId,
+  setEditingId,
+  editForm,
+  setEditForm,
+  saving,
+  setSaving,
+}: {
+  addons: Addon[];
+  setAddons: React.Dispatch<React.SetStateAction<Addon[]>>;
+  showMessage: (msg: string) => void;
+  showAddForm: boolean;
+  setShowAddForm: (show: boolean) => void;
+  newAddon: { name: string; description: string; type: string; price: string; imageUrl: string };
+  setNewAddon: React.Dispatch<React.SetStateAction<{ name: string; description: string; type: string; price: string; imageUrl: string }>>;
+  editingId: number | null;
+  setEditingId: (id: number | null) => void;
+  editForm: Partial<Addon>;
+  setEditForm: React.Dispatch<React.SetStateAction<Partial<Addon>>>;
+  saving: boolean;
+  setSaving: (saving: boolean) => void;
+}) {
+  const isValidImageUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  const handleAddAddon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAddon.name || !newAddon.price) {
+      showMessage("Name and price are required");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/addons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newAddon.name,
+          description: newAddon.description,
+          type: newAddon.type,
+          price: parseFloat(newAddon.price),
+          imageUrl: newAddon.imageUrl,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add addon");
+
+      const created = await res.json();
+      setAddons((prev) => [...prev, created]);
+      setNewAddon({ name: "", description: "", type: "addon", price: "", imageUrl: "" });
+      setShowAddForm(false);
+      showMessage("Addon added successfully!");
+    } catch (error) {
+      console.error("Failed to add addon:", error);
+      showMessage("Failed to add addon");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditAddon = (addon: Addon) => {
+    setEditingId(addon.id);
+    setEditForm(addon);
+  };
+
+  const handleSaveAddon = async () => {
+    if (!editingId || !editForm.name) {
+      showMessage("Name is required");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/addons", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingId,
+          name: editForm.name,
+          description: editForm.description,
+          type: editForm.type,
+          price: editForm.price,
+          imageUrl: editForm.imageUrl,
+          inStock: editForm.inStock,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update addon");
+
+      const updated = await res.json();
+      setAddons((prev) => prev.map((a) => (a.id === editingId ? updated : a)));
+      setEditingId(null);
+      setEditForm({});
+      showMessage("Addon updated successfully!");
+    } catch (error) {
+      console.error("Failed to update addon:", error);
+      showMessage("Failed to update addon");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAddon = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this addon?")) return;
+
+    try {
+      const res = await fetch(`/api/addons?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete addon");
+
+      setAddons((prev) => prev.filter((a) => a.id !== id));
+      showMessage("Addon deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete addon:", error);
+      showMessage("Failed to delete addon");
+    }
+  };
+
+  const handleToggleStock = async (addon: Addon) => {
+    try {
+      const res = await fetch("/api/addons", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: addon.id,
+          inStock: !addon.inStock,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to toggle stock");
+
+      const updated = await res.json();
+      setAddons((prev) => prev.map((a) => (a.id === addon.id ? updated : a)));
+      showMessage(updated.inStock ? "Addon is now available!" : "Addon is now unavailable");
+    } catch (error) {
+      console.error("Failed to toggle stock:", error);
+      showMessage("Failed to update stock");
+    }
+  };
+
+  return (
+    <div>
+      {/* Add Addon Button */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-[#7a4f2e] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#5c3a1e] transition-colors"
+        >
+          {showAddForm ? "Cancel" : "+ Add Add-on"}
+        </button>
+      </div>
+
+      {/* Add Form */}
+      {showAddForm && (
+        <form onSubmit={handleAddAddon} className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] p-6 mb-6">
+          <h3 className="text-[#f5ede0] font-bold mb-4">Add New Add-on</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Name *
+              </label>
+              <input
+                type="text"
+                value={newAddon.name}
+                onChange={(e) => setNewAddon((a) => ({ ...a, name: e.target.value }))}
+                placeholder="e.g. Greeting Card"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Type
+              </label>
+              <select
+                value={newAddon.type}
+                onChange={(e) => setNewAddon((a) => ({ ...a, type: e.target.value }))}
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              >
+                <option value="addon">Add-on</option>
+                <option value="letter">Letter</option>
+                <option value="wrapper">Premium Wrapper</option>
+                <option value="card">Greeting Card</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Price *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={newAddon.price}
+                onChange={(e) => setNewAddon((a) => ({ ...a, price: e.target.value }))}
+                placeholder="0.00"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Description
+              </label>
+              <input
+                type="text"
+                value={newAddon.description}
+                onChange={(e) => setNewAddon((a) => ({ ...a, description: e.target.value }))}
+                placeholder="Optional description"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Image URL
+              </label>
+              <input
+                type="url"
+                value={newAddon.imageUrl}
+                onChange={(e) => setNewAddon((a) => ({ ...a, imageUrl: e.target.value }))}
+                placeholder="https://example.com/image.jpg"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              />
+              {isValidImageUrl(newAddon.imageUrl) && (
+                <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-[#5c3a1e]">
+                  <Image
+                    src={newAddon.imageUrl}
+                    alt="Preview"
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="mt-4 bg-[#7a4f2e] text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-[#5c3a1e] transition-colors disabled:opacity-50"
+          >
+            {saving ? "Adding..." : "Add Add-on"}
+          </button>
+        </form>
+      )}
+
+      {/* Addons Table */}
+      <div className="bg-[#2d1f14] rounded-2xl border border-[#5c3a1e] overflow-hidden">
+        {addons.length === 0 ? (
+          <div className="p-8 text-center text-[#7a5c3e]">
+            No add-ons yet. Click &quot;+ Add Add-on&quot; to create one.
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#5c3a1e]">
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Image
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Name
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Type
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Price
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Status
+                </th>
+                <th className="text-right px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {addons.map((addon) => (
+                <tr key={addon.id} className="border-b border-[#5c3a1e] last:border-0">
+                  <td className="px-4 py-3">
+                    {isValidImageUrl(addon.imageUrl) ? (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#5c3a1e]">
+                        <Image
+                          src={addon.imageUrl!}
+                          alt={addon.name}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-[#1e1410] flex items-center justify-center text-2xl">
+                        📦
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {editingId === addon.id ? (
+                      <input
+                        type="text"
+                        value={editForm.name ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                        className="w-32 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                      />
+                    ) : (
+                      <span className="text-[#f5ede0] font-medium">{addon.name}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {editingId === addon.id ? (
+                      <select
+                        value={editForm.type ?? "addon"}
+                        onChange={(e) => setEditForm((f) => ({ ...f, type: e.target.value }))}
+                        className="bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                      >
+                        <option value="addon">Add-on</option>
+                        <option value="letter">Letter</option>
+                        <option value="wrapper">Wrapper</option>
+                        <option value="card">Card</option>
+                        <option value="other">Other</option>
+                      </select>
+                    ) : (
+                      <span className="text-[#c4a882] text-sm capitalize">{addon.type}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {editingId === addon.id ? (
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={editForm.price ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, price: parseFloat(e.target.value) }))}
+                        className="w-24 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                      />
+                    ) : (
+                      <span className="text-[#f5ede0]">₱{addon.price.toFixed(2)}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleToggleStock(addon)}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        addon.inStock
+                          ? "bg-green-900/50 text-green-400 hover:bg-green-900/70"
+                          : "bg-red-900/50 text-red-400 hover:bg-red-900/70"
+                      }`}
+                    >
+                      {addon.inStock ? "In Stock" : "Out of Stock"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {editingId === addon.id ? (
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={handleSaveAddon}
+                          disabled={saving}
+                          className="text-green-400 hover:text-green-300 text-sm font-medium disabled:opacity-50"
+                        >
+                          {saving ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditForm({});
+                          }}
+                          className="text-[#c4a882] hover:text-[#f5ede0] text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleEditAddon(addon)}
+                          className="text-[#c4a882] hover:text-[#f5ede0] text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAddon(addon.id)}
+                          className="text-red-400 hover:text-red-300 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

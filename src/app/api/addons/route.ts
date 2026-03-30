@@ -40,3 +40,62 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create addon" }, { status: 500 });
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, name, description, type, price, imageUrl, inStock } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    const updateData: Record<string, any> = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (type !== undefined) updateData.type = type;
+    if (price !== undefined) updateData.price = price;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (inStock !== undefined) updateData.inStock = inStock;
+
+    const result = await getDb()
+      .update(addons)
+      .set(updateData)
+      .where(eq(addons.id, id))
+      .returning();
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "Addon not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(result[0]);
+  } catch (error) {
+    console.error("Failed to update addon:", error);
+    return NextResponse.json({ error: "Failed to update addon" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    const result = await getDb()
+      .delete(addons)
+      .where(eq(addons.id, parseInt(id)))
+      .returning();
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "Addon not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete addon:", error);
+    return NextResponse.json({ error: "Failed to delete addon" }, { status: 500 });
+  }
+}
