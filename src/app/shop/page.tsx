@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useImageLightbox, LightboxImage } from "@/components/Lightbox";
 
 interface Product {
   id: number;
@@ -118,6 +119,17 @@ export default function ShopPage() {
     const price = item.product.salePrice || item.product.price;
     return sum + (price * item.quantity);
   }, 0);
+
+  const allShopImages: LightboxImage[] = useMemo(() => 
+    finishedGoods.filter(p => p.imageUrl).map(p => ({ src: p.imageUrl as string, alt: p.name })),
+    [finishedGoods]
+  );
+  const lightbox = useImageLightbox(allShopImages);
+  
+  const openShopLightbox = (productId: number) => {
+    const idx = finishedGoods.filter(p => p.imageUrl).findIndex(p => p.id === productId);
+    if (idx >= 0) lightbox.openLightbox(idx);
+  };
 
   const handleCheckout = async () => {
     setError("");
@@ -282,6 +294,7 @@ export default function ShopPage() {
                       key={product.id} 
                       product={product} 
                       onAddToCart={() => addToCart(product, true)}
+                      onImageClick={() => openShopLightbox(product.id)}
                     />
                   ))}
                 </div>
@@ -644,10 +657,12 @@ function ProductCard({
   product,
   onAddToCart,
   showCartAfterAdd = false,
+  onImageClick,
 }: {
   product: Product;
   onAddToCart: () => void;
   showCartAfterAdd?: boolean;
+  onImageClick?: () => void;
 }) {
   const isAvailable = product.stockQuantity === null || product.stockQuantity > 0;
   const [imageError, setImageError] = useState(false);
@@ -658,7 +673,7 @@ function ProductCard({
   return (
     <div className="bg-white rounded-2xl border border-[#e8d5be] overflow-hidden hover:shadow-lg transition-shadow">
       {/* Square image */}
-      <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]">
+      <div className="aspect-square w-full overflow-hidden bg-[#f5ede0]" onClick={onImageClick}>
         {hasValidImage && !imageError ? (
           <Image
             src={product.imageUrl}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useImageLightbox, LightboxImage } from "@/components/Lightbox";
 
 type Product = {
   id: number;
@@ -95,6 +96,25 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
     (f) => (quantities[f.id] ?? 0) > 0
   );
   const selectedPotObj = pots.find((p) => p.id === selectedPot);
+
+  const allImages: LightboxImage[] = useMemo(() => {
+    const flowerImgs = fuzzyFlowers.filter(f => f.imageUrl).map(f => ({ src: f.imageUrl as string, alt: f.name }));
+    const potImgs = pots.filter(p => p.imageUrl).map(p => ({ src: p.imageUrl as string, alt: p.name }));
+    return [...flowerImgs, ...potImgs];
+  }, [fuzzyFlowers, pots]);
+  const flowerCount = fuzzyFlowers.filter(f => f.imageUrl).length;
+  const lightbox = useImageLightbox(allImages);
+  
+  const openFlowerLightbox = (flowerId: number) => {
+    const idx = fuzzyFlowers.filter(f => f.imageUrl).findIndex(f => f.id === flowerId);
+    if (idx >= 0) lightbox.openLightbox(idx);
+  };
+  
+  const openPotLightbox = (potId: number) => {
+    const potImgs = pots.filter(p => p.imageUrl);
+    const idx = potImgs.findIndex(p => p.id === potId);
+    if (idx >= 0) lightbox.openLightbox(flowerCount + idx);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,7 +268,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
                       >
                         <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 border border-[#e8d5be]">
                           {isValidImageUrl(pot.imageUrl) && !imageErrors[`pot-${pot.id}`] ? (
-                            <div className="w-full h-full">
+                            <div className="w-full h-full cursor-pointer" onClick={() => openPotLightbox(pot.id)}>
                               <Image
                                 src={pot.imageUrl!}
                                 alt={pot.name}
@@ -669,6 +689,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
           </div>
         </div>
       </form>
+      {lightbox.LightboxComponent()}
     </div>
   );
 }
