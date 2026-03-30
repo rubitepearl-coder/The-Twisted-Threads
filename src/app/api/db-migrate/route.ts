@@ -59,8 +59,8 @@ export async function GET(request: NextRequest) {
             imageUrl text DEFAULT '',
             inStock integer DEFAULT 1 NOT NULL,
             availableFor text DEFAULT 'both' NOT NULL,
-            created_at integer,
-            updated_at integer
+            createdAt integer,
+            updatedAt integer
           )
         `);
         migrations.push("Created addons table");
@@ -69,15 +69,41 @@ export async function GET(request: NextRequest) {
         console.error("[db-migrate] Failed to create addons:", e);
       }
     } else {
-      // Table exists, add availableFor column if it doesn't exist
+      // Table exists - check and fix column names
       const addonTableInfo = await client.execute("PRAGMA table_info(addons)");
       const addonColumns = addonTableInfo.rows.map((row: any) => row.name);
       
-      if (!addonColumns.includes("availableFor")) {
+      // Drop and recreate if columns are wrong (snake_case instead of camelCase)
+      const hasWrongColumns = addonColumns.includes("image_url") || addonColumns.includes("in_stock");
+      
+      if (hasWrongColumns) {
+        try {
+          // Drop the table and recreate
+          await client.execute("DROP TABLE addons");
+          await client.execute(`
+            CREATE TABLE addons (
+              id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+              name text NOT NULL,
+              description text DEFAULT '' NOT NULL,
+              type text DEFAULT 'addon' NOT NULL,
+              price real NOT NULL,
+              imageUrl text DEFAULT '',
+              inStock integer DEFAULT 1 NOT NULL,
+              availableFor text DEFAULT 'both' NOT NULL,
+              createdAt integer,
+              updatedAt integer
+            )
+          `);
+          migrations.push("Recreated addons table with correct columns");
+          console.log("[db-migrate] Recreated addons table");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to recreate addons:", e);
+        }
+      } else if (!addonColumns.includes("availableFor")) {
+        // Just add the missing column
         try {
           await client.execute("ALTER TABLE addons ADD COLUMN availableFor text DEFAULT 'both'");
           migrations.push("Added availableFor column to addons");
-          console.log("[db-migrate] Added availableFor column to addons");
         } catch (e: any) {
           console.error("[db-migrate] Failed to add availableFor:", e);
         }
