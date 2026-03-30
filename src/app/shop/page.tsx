@@ -120,16 +120,7 @@ export default function ShopPage() {
     return sum + (price * item.quantity);
   }, 0);
 
-  const allShopImages: LightboxImage[] = useMemo(() => 
-    finishedGoods.filter(p => p.imageUrl).map(p => ({ src: p.imageUrl as string, alt: p.name })),
-    [finishedGoods]
-  );
-  const lightbox = useImageLightbox(allShopImages);
-  
-  const openShopLightbox = (productId: number) => {
-    const idx = finishedGoods.filter(p => p.imageUrl).findIndex(p => p.id === productId);
-    if (idx >= 0) lightbox.openLightbox(idx);
-  };
+  const { openLightbox: openShopLightbox, LightboxComponent } = useImageLightbox();
 
   const handleCheckout = async () => {
     setError("");
@@ -231,19 +222,18 @@ export default function ShopPage() {
             href="/"
             className="inline-block bg-[#7a4f2e] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#5c3a1e] transition-colors"
           >
-            Back to Home
+          Back to Home
           </Link>
         </div>
       </div>
     );
   }
 
-  const allProducts = [...finishedGoods, ...flowers];
-
   return (
-    <div className="min-h-screen bg-[#faf7f2]">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#f5ede0] to-[#ede0d0] py-12 px-4 text-center border-b border-[#d4b896]">
+    <>
+      <div className="min-h-screen bg-[#faf7f2]">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#f5ede0] to-[#ede0d0] py-12 px-4 text-center border-b border-[#d4b896]">
         <div className="text-5xl mb-4">🛍️</div>
         <h1 className="text-4xl font-bold text-[#3d2c1e] mb-3">
           The Twisted Threads Shop
@@ -263,7 +253,7 @@ export default function ShopPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {allProducts.length === 0 ? (
+        {(finishedGoods.length === 0 && flowers.length === 0) ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🌱</div>
             <h2 className="text-2xl font-bold text-[#3d2c1e] mb-3">
@@ -294,7 +284,7 @@ export default function ShopPage() {
                       key={product.id} 
                       product={product} 
                       onAddToCart={() => addToCart(product, true)}
-                      onImageClick={() => openShopLightbox(product.id)}
+                      onImageClick={() => openShopLightbox(product.imageUrl as string, product.name)}
                     />
                   ))}
                 </div>
@@ -650,6 +640,8 @@ export default function ShopPage() {
         </div>
       )}
     </div>
+    <LightboxComponent />
+  </>
   );
 }
 

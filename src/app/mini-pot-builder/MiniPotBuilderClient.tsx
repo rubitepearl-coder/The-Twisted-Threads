@@ -97,23 +97,16 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   );
   const selectedPotObj = pots.find((p) => p.id === selectedPot);
 
-  const allImages: LightboxImage[] = useMemo(() => {
-    const flowerImgs = fuzzyFlowers.filter(f => f.imageUrl).map(f => ({ src: f.imageUrl as string, alt: f.name }));
-    const potImgs = pots.filter(p => p.imageUrl).map(p => ({ src: p.imageUrl as string, alt: p.name }));
-    return [...flowerImgs, ...potImgs];
-  }, [fuzzyFlowers, pots]);
-  const flowerCount = fuzzyFlowers.filter(f => f.imageUrl).length;
-  const lightbox = useImageLightbox(allImages);
+  const { openLightbox, LightboxComponent } = useImageLightbox();
   
   const openFlowerLightbox = (flowerId: number) => {
-    const idx = fuzzyFlowers.filter(f => f.imageUrl).findIndex(f => f.id === flowerId);
-    if (idx >= 0) lightbox.openLightbox(idx);
+    const flower = fuzzyFlowers.find(f => f.id === flowerId && f.imageUrl);
+    if (flower) openLightbox(flower.imageUrl as string, flower.name);
   };
   
   const openPotLightbox = (potId: number) => {
-    const potImgs = pots.filter(p => p.imageUrl);
-    const idx = potImgs.findIndex(p => p.id === potId);
-    if (idx >= 0) lightbox.openLightbox(flowerCount + idx);
+    const pot = pots.find(p => p.id === potId && p.imageUrl);
+    if (pot) openLightbox(pot.imageUrl as string, pot.name);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -689,7 +682,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
           </div>
         </div>
       </form>
-      {lightbox.LightboxComponent()}
+      {LightboxComponent()}
     </div>
   );
 }

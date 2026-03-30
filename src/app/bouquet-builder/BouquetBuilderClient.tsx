@@ -100,18 +100,16 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
     return [...flowerImgs, ...wrapperImgs];
   }, [flowers, wrapperColors]);
   
-  const flowerCount = flowers.filter(f => f.imageUrl).length;
-  const lightbox = useImageLightbox(allFlowerImages);
+  const { openLightbox, LightboxComponent } = useImageLightbox();
   
   const openFlowerLightbox = (flowerId: number) => {
-    const idx = flowers.filter(f => f.imageUrl).findIndex(f => f.id === flowerId);
-    if (idx >= 0) lightbox.openLightbox(idx);
+    const flower = flowers.find(f => f.id === flowerId && f.imageUrl);
+    if (flower) openLightbox(flower.imageUrl as string, flower.name);
   };
   
   const openWrapperLightbox = (colorId: number) => {
-    const wrapperImgs = wrapperColors.filter(c => c.imageUrl);
-    const idx = wrapperImgs.findIndex(c => c.id === colorId);
-    if (idx >= 0) lightbox.openLightbox(flowerCount + idx);
+    const color = wrapperColors.find(c => c.id === colorId && c.imageUrl);
+    if (color) openLightbox(color.imageUrl as string, color.name);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -640,7 +638,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
           </div>
         </div>
       </form>
-      {lightbox.LightboxComponent()}
+      {LightboxComponent()}
     </div>
   );
 }
