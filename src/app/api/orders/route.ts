@@ -25,6 +25,8 @@ const COLUMN_NAME_MAP: Record<string, string> = {
   wrapperColorName: "wrapper_color_name",
   wrapperColorHex: "wrapper_color_hex",
   wrapperColorImageUrl: "wrapper_color_image_url",
+  addonItems: "addon_items",
+  addonMessage: "addon_message",
   totalPrice: "total_price",
   createdAt: "created_at",
   updatedAt: "updated_at"
@@ -109,6 +111,8 @@ export async function POST(request: NextRequest) {
       potImageUrl,
       // wrapperColor fields are no longer used in new orders
       totalPrice,
+      addonItems,
+      addonMessage,
     } = body;
 
     // Validate required fields

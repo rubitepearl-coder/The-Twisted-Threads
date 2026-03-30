@@ -17,12 +17,23 @@ type Product = {
   description: string;
 };
 
+type Addon = {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  price: number;
+  imageUrl: string | null;
+  inStock: boolean;
+};
+
 type Props = {
   pots: Product[];
   fuzzyFlowers: Product[];
+  addons: Addon[];
 };
 
-export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
+export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Props) {
   const router = useRouter();
   const [selectedPot, setSelectedPot] = useState<number | null>(
     pots.find((p) => p.stockQuantity === null || p.stockQuantity > 0)?.id ?? null
@@ -36,6 +47,8 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
+  const [addonMessage, setAddonMessage] = useState("");
 
   // Helper function to validate image URL
   const isValidImageUrl = (url: string | null | undefined): boolean => {
@@ -75,7 +88,10 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
     return sum + (quantities[flower.id] ?? 0) * effectivePrice;
   }, 0);
 
-  const totalPrice = potPrice + flowersPrice;
+  const selectedAddonItems = addons.filter(a => selectedAddons.includes(a.id));
+  const addonPrice = selectedAddonItems.reduce((sum, a) => sum + a.price, 0);
+
+  const totalPrice = potPrice + flowersPrice + addonPrice;
 
   // Calculate delivery fee:
   // - ₱10 for Anini-y
@@ -178,6 +194,8 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
           potName: selectedPotObj?.name,
           potImageUrl: selectedPotObj?.imageUrl ?? "",
           totalPrice: finalTotal,
+          addonItems: selectedAddons.length > 0 ? JSON.stringify(selectedAddonItems) : null,
+          addonMessage: addonMessage.trim() || null,
         }),
       });
 
@@ -419,11 +437,78 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               )}
             </div>
 
-            {/* Step 3: Delivery Option */}
+            {/* Step 3: Add-ons */}
+            {addons.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
+                  <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    3
+                  </span>
+                  Add-ons
+                </h2>
+                <p className="text-[#6b4c30] text-sm mb-5 ml-10">
+                  Customize your mini pot with extras.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-10">
+                  {addons.map((addon) => {
+                    const isSelected = selectedAddons.includes(addon.id);
+                    return (
+                      <label
+                        key={addon.id}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-[#7a4f2e] bg-[#f5ede0]"
+                            : "border-[#e8d5be] hover:border-[#c4a882]"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAddons(prev => [...prev, addon.id]);
+                            } else {
+                              setSelectedAddons(prev => prev.filter(id => id !== addon.id));
+                            }
+                          }}
+                          className="w-4 h-4 text-[#7a4f2e] rounded"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-[#3d2c1e]">{addon.name}</p>
+                          {addon.description && (
+                            <p className="text-xs text-[#6b4c30]">{addon.description}</p>
+                          )}
+                        </div>
+                        <span className="text-[#7a4f2e] font-medium">
+                          +₱{addon.price.toFixed(2)}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                {selectedAddons.length > 0 && (
+                  <div className="ml-10 mt-4">
+                    <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
+                      Add a message ({selectedAddonItems.length} addon{selectedAddonItems.length > 1 ? 's' : ''} selected)
+                    </label>
+                    <textarea
+                      value={addonMessage}
+                      onChange={(e) => setAddonMessage(e.target.value)}
+                      placeholder="Write your message here..."
+                      rows={3}
+                      className="w-full sm:w-[400px] border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent resize-none"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 4: Delivery Option */}
             <div>
               <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  3
+                  {addons.length > 0 ? "4" : "3"}
                 </span>
                 Delivery Option
               </h2>
@@ -485,11 +570,11 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers }: Props) {
               )}
             </div>
 
-            {/* Step 4: Contact Info */}
+            {/* Step 5: Contact Info */}
             <div>
               <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  {deliveryType === "home" ? "5" : "4"}
+                  {addons.length > 0 ? (deliveryType === "home" ? "6" : "5") : (deliveryType === "home" ? "5" : "4")}
                 </span>
                 Your Details
               </h2>

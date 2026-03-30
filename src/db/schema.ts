@@ -24,6 +24,18 @@ export const wrapperColors = sqliteTable("wrapper_colors", {
   inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
 });
 
+export const addons = sqliteTable("addons", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  type: text("type").notNull().default("addon"), // 'letter' | 'wrapper' | 'card' | 'other'
+  price: real("price").notNull(),
+  imageUrl: text("image_url").default(""),
+  inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+});
+
 export const orders = sqliteTable("orders", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: text("user_id"), // For logged-in users - now optional
@@ -46,6 +58,8 @@ export const orders = sqliteTable("orders", {
   wrapperColorName: text("wrapper_color_name"),
   wrapperColorHex: text("wrapper_color_hex"),
   wrapperColorImageUrl: text("wrapper_color_image_url"),
+  addonItems: text("addon_items"),
+  addonMessage: text("addon_message"),
   totalPrice: real("total_price").notNull(),
   status: text("status").notNull().default("pending"), // 'pending' | 'in_progress' | 'completed' | 'cancelled'
   notes: text("notes"), // Optional notes

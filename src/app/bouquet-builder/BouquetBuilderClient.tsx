@@ -26,12 +26,23 @@ type WrapperColor = {
   price: number | null;
 };
 
+type Addon = {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  price: number;
+  imageUrl: string | null;
+  inStock: boolean;
+};
+
 type Props = {
   flowers: Flower[];
   wrapperColors: WrapperColor[];
+  addons: Addon[];
 };
 
-export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) {
+export default function BouquetBuilderClient({ flowers, wrapperColors, addons }: Props) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [selectedWrapper, setSelectedWrapper] = useState<number | null>(
@@ -45,6 +56,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
+  const [addonMessage, setAddonMessage] = useState("");
 
   // Helper function to validate image URL
   const isValidImageUrl = (url: string | null | undefined): boolean => {
@@ -92,7 +105,9 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
   const selectedItems = flowers.filter((f) => (quantities[f.id] ?? 0) > 0);
   const selectedWrapperObj = wrapperColors.find((c) => c.id === selectedWrapper);
   const wrapperPrice = selectedWrapperObj?.price ?? 0;
-  const finalTotal = totalPrice + wrapperPrice + deliveryFee;
+  const selectedAddonItems = addons.filter(a => selectedAddons.includes(a.id));
+  const addonPrice = selectedAddonItems.reduce((sum, a) => sum + a.price, 0);
+  const finalTotal = totalPrice + wrapperPrice + deliveryFee + addonPrice;
 
   const allFlowerImages: LightboxImage[] = useMemo(() => {
     const flowerImgs = flowers.filter(f => f.imageUrl).map(f => ({ src: f.imageUrl as string, alt: f.name }));
@@ -177,6 +192,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
           wrapperColorName: selectedWrapperObj?.name,
           wrapperColorHex: selectedWrapperObj?.colorHex,
           wrapperColorImageUrl: selectedWrapperObj?.imageUrl ?? "",
+          addonItems: selectedAddons.length > 0 ? JSON.stringify(selectedAddonItems) : null,
+          addonMessage: addonMessage.trim() || null,
           totalPrice: finalTotal,
         }),
       });
@@ -385,11 +402,82 @@ export default function BouquetBuilderClient({ flowers, wrapperColors }: Props) 
               )}
             </div>
 
-            {/* Step 3: Delivery Type */}
+            {/* Step 3: Add-ons */}
+            {addons.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
+                  <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    3
+                  </span>
+                  Add-ons
+                </h2>
+                <p className="text-[#6b4c30] text-sm mb-5 ml-10">
+                  Make your bouquet extra special with these add-ons.
+                </p>
+                <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {addons.map((addon) => {
+                    const isSelected = selectedAddons.includes(addon.id);
+                    return (
+                      <div
+                        key={addon.id}
+                        className={`bg-white rounded-2xl p-4 border-2 cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-[#7a4f2e] shadow-md"
+                            : "border-[#e8d5be] hover:border-[#c4a882]"
+                        }`}
+                        onClick={() => {
+                          setSelectedAddons(prev =>
+                            isSelected
+                              ? prev.filter(id => id !== addon.id)
+                              : [...prev, addon.id]
+                          );
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#f5ede0] flex items-center justify-center text-xl">
+                              {addon.type === 'letter' && '✉️'}
+                              {addon.type === 'card' && '💌'}
+                              {addon.type === 'wrapper' && '🎁'}
+                              {addon.type === 'other' && '✨'}
+                              {!addon.type && '✨'}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-[#3d2c1e]">{addon.name}</p>
+                              <p className="text-xs text-[#a07850]">{addon.description}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-[#7a4f2e]">₱{addon.price.toFixed(2)}</p>
+                            {isSelected && <span className="text-green-600 text-xs">✓ Selected</span>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {selectedAddons.length > 0 && (
+                  <div className="ml-10 mt-4">
+                    <label className="block text-[#3d2c1e] font-medium mb-2">
+                      Add a message for your add-ons (optional)
+                    </label>
+                    <textarea
+                      value={addonMessage}
+                      onChange={(e) => setAddonMessage(e.target.value)}
+                      placeholder="e.g., Message for the greeting card..."
+                      className="w-full px-4 py-2 border border-[#d4b896] rounded-xl focus:outline-none focus:border-[#7a4f2e] text-[#3d2c1e]"
+                      rows={2}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 4: Delivery Type */}
             <div>
               <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 bg-[#7a4f2e] text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  3
+                  4
                 </span>
                 Delivery Option
               </h2>

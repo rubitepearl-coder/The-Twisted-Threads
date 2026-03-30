@@ -8,6 +8,15 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 ## Recently Completed
 
+- [x] **FEATURE: Add-ons for bouquet and mini pot builders** - Customers can now add items like letters, premium wrappers, and greeting cards to their orders:
+  - Database: Added `addons` table with name, description, type, price, imageUrl, inStock
+  - Database: Added `addon_items` and `addon_message` columns to orders table
+  - API: Created `/api/addons` endpoint for GET/POST addons
+  - API: Updated orders API to accept and store addonItems and addonMessage
+  - Bouquet Builder: Integrated addons UI with checkbox selection and message textarea
+  - Mini Pot Builder: Integrated addons UI with checkbox selection and message textarea
+  - Order Confirmation: Displays selected addons and custom message
+
 - [x] **FIX: Sold-Out Logic** - Removed `inStock` dependency from sold-out checks. Now products are ONLY marked as sold out when `stockQuantity` is explicitly set AND <= 0. Products with NULL stockQuantity are available (unlimited). Fixed in:
   - MiniPotBuilderClient.tsx: Removed `!pot.inStock` check
   - BouquetBuilderClient.tsx: Removed `!flower.inStock` check
@@ -126,6 +135,7 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-03-01 | Fixed admin dashboard data filtering: Removed email filter, customer orders now match by customerName OR facebookName
 | 2026-03-01 | Fixed deployment error: Added column name mapping (camelCase to snake_case) for raw SQL inserts in orders API
 | 2026-03-01 | Fixed stock quantity handling: NULL stockQuantity means unlimited (available), not sold out
+| 2026-03-30 | Added Add-ons feature for bouquet and mini pot builders |
 
 - [x] **FIX: Stock quantity handling** - Changed stockQuantity to allow NULL (unlimited) instead of defaulting to 0. Products with NULL stockQuantity are now treated as available (unlimited stock). Only products with explicit stockQuantity > 0 are limited. Products with stockQuantity <= 0 are sold out. Fixed in:
   - Schema: Removed `.default(0)` from stockQuantity
@@ -134,3 +144,9 @@ After deployment, call `POST /api/seed` to populate the database with:
   - Frontend: Treats NULL stockQuantity as available (not sold out)
 
 - [x] **FIX: Production database schema** - Added `/api/db-check` and `/api/db-migrate` endpoints. The db-check endpoint verifies current schema, and db-migrate endpoint runs missing ALTER TABLE commands to add facebook_name and stock_quantity columns if they don't exist. This fixes the error where production database was missing the facebook_name column.
+
+- [x] **FEATURE: Add-ons** - Customers can add items like letters, premium wrappers, and greeting cards to orders:
+  - Database: Added `addons` table and `addon_items`/`addon_message` columns to orders
+  - API: Created `/api/addons` endpoint, updated orders API for addon data
+  - UI: Integrated addons in both bouquet and mini pot builders with checkbox selection and message textarea
+  - Confirmation: Displays selected addons and custom message

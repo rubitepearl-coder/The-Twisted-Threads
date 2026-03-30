@@ -71,6 +71,13 @@
       "when": 1772800000000,
       "tag": "0011_wrapper_colors_price_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1772900000000,
+      "tag": "0012_add_addons_table",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { products, wrapperColors } from "@/db/schema";
+import { products, wrapperColors, addons } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import BouquetBuilderClient from "./BouquetBuilderClient";
 
@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function BouquetBuilderPage() {
   let flowers: typeof products.$inferSelect[] = [];
   let colors: typeof wrapperColors.$inferSelect[] = [];
+  let addonItems: typeof addons.$inferSelect[] = [];
 
   try {
     flowers = await db
@@ -16,6 +17,7 @@ export default async function BouquetBuilderPage() {
       .from(products)
       .where(eq(products.category, "flower"));
     colors = await db.select().from(wrapperColors);
+    addonItems = await db.select().from(addons).where(eq(addons.inStock, true));
   } catch {
     // DB not yet seeded
   }
@@ -34,7 +36,7 @@ export default async function BouquetBuilderPage() {
         </p>
       </div>
 
-      <BouquetBuilderClient flowers={flowers} wrapperColors={colors} />
+      <BouquetBuilderClient flowers={flowers} wrapperColors={colors} addons={addonItems} />
     </div>
   );
 }

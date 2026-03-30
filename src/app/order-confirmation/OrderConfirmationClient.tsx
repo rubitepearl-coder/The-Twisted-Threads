@@ -185,6 +185,26 @@ export default function OrderConfirmationClient({
             </div>
           )}
 
+          {order.addonItems && order.addonItems.length > 0 && (
+            <div className="pt-3 border-t border-[#e8d5be]">
+              <h4 className="font-medium text-[#3d2c1e] mb-2">Add-ons</h4>
+              <div className="space-y-2">
+                {order.addonItems.map((addon: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <span className="text-[#6b4c30]">{addon.name}</span>
+                    <span className="text-[#7a4f2e] font-medium">+₱{addon.price.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+              {order.addonMessage && (
+                <div className="mt-3 p-3 bg-[#f5ede0] rounded-xl">
+                  <p className="text-xs text-[#6b4c30] font-medium mb-1">Your Message:</p>
+                  <p className="text-sm text-[#3d2c1e] italic">{order.addonMessage}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="pt-3 border-t border-[#e8d5be]">
             <div className="flex justify-between items-center text-sm mb-1">
               <span className="text-[#6b4c30]">Subtotal</span>
