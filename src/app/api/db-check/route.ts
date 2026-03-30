@@ -1,44 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { orders, products, wrapperColors, adminSessions } from "@/db/schema";
-import { eq, sql, count } from "drizzle-orm";
+import { orders, products, addons, wrapperColors, adminSessions } from "@/db/schema";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  let db;
   try {
-    const db = getDb();
-    
-    // Get table info to check current schema
-    const tableInfo = await db.$client.execute("PRAGMA table_info(orders)");
-    const columns = tableInfo.rows.map((row: any) => ({
-      name: row.name,
-      notnull: row.notnull,
-      type: row.type
-    }));
-    
-    // Check if facebook_name column exists
-    const hasFacebookName = columns.some((c: any) => c.name === "facebook_name");
-    const hasStockQuantity = columns.some((c: any) => c.name === "stock_quantity");
-    
-    // Check customer_email NOT NULL status
-    const emailColumn = columns.find((c: any) => c.name === "customer_email");
-    const emailNotNull = emailColumn?.notnull === 1;
-    
+    db = getDb();
+  } catch (dbError: any) {
+    console.error("[db-check] Database initialization failed:", dbError?.message || dbError);
     return NextResponse.json({
-      success: true,
-      table: "orders",
-      columns,
-      hasFacebookName,
-      hasStockQuantity,
-      emailNotNull,
-      message: hasFacebookName 
-        ? "Database schema is up to date" 
-        : "Missing facebook_name column - migrations may not have run"
+      status: "error",
+      message: "Database not available",
+      error: dbError?.message || String(dbError),
+      tursoConfigured: !!process.env.TURSO_DATABASE_URL
+    }, { status: 500 });
+  }
+
+  try {
+    const results: any = {
+      status: "ok",
+      tursoConfigured: !!process.env.TURSO_DATABASE_URL,
+      tables: {}
+    };
+
+    // Check each table
+    try {
+      results.tables.orders = await db.select().from(orders);
+      results.tables.products = await db.select().from(products);
+      results.tables.addons = await db.select().from(addons);
+      results.tables.wrapperColors = await db.select().from(wrapperColors);
+      results.tables.adminSessions = await db.select().from(adminSessions);
+    } catch (queryError: any) {
+      results.queryError = queryError?.message || String(queryError);
+    }
+
+    return NextResponse.json({
+      status: "success",
+      message: "Database connected successfully",
+      counts: {
+        orders: results.tables.orders?.length || 0,
+        products: results.tables.products?.length || 0,
+        addons: results.tables.addons?.length || 0,
+        wrapperColors: results.tables.wrapperColors?.length || 0,
+        adminSessions: results.tables.adminSessions?.length || 0
+      }
     });
-  } catch (error) {
-    console.error("Schema check failed:", error);
-    return NextResponse.json(
-      { error: "Failed to check schema", details: String(error) },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("[db-check] Error:", error);
+    return NextResponse.json({
+      status: "error",
+      message: "Database query failed",
+      error: error?.message || String(error)
+    }, { status: 500 });
   }
 }
