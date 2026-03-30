@@ -2,13 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 
 // This endpoint creates tables if they don't exist and runs missing migrations
-// It's a fallback in case the automatic migrations on startup don't work
 
 export async function GET(request: NextRequest) {
   // This endpoint runs migrations and returns schema info
   console.log("[db-migrate] GET request received - running migrations");
+  
+  let db;
   try {
-    const db = getDb();
+    db = getDb();
+  } catch (dbError) {
+    console.error("[db-migrate] Database initialization failed:", dbError);
+    return NextResponse.json({
+      error: "Database not available",
+      tursoConfigured: !!process.env.TURSO_DATABASE_URL
+    }, { status: 500 });
+  }
+  
+  try {
     const client = db.$client;
     const migrations: string[] = [];
     
