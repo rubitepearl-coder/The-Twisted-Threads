@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { addons } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const allAddons = await getDb().select().from(addons).where(eq(addons.inStock, true));
+    const db = getDb();
+    const allAddons = await db
+      .select()
+      .from(addons)
+      .where(or(eq(addons.inStock, true), eq(addons.availableFor, "both")));
     return NextResponse.json(allAddons);
   } catch (error) {
     console.error("Failed to fetch addons:", error);
@@ -14,6 +18,14 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  let db;
+  try {
+    db = getDb();
+  } catch (dbError) {
+    console.error("Database initialization failed:", dbError);
+    return NextResponse.json({ error: "Database not available" }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
     const { name, description, type, price, imageUrl, availableFor } = body;
@@ -22,7 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and price are required" }, { status: 400 });
     }
 
-    const result = await getDb()
+    const result = await db
       .insert(addons)
       .values({ 
         name, 
@@ -43,6 +55,14 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  let db;
+  try {
+    db = getDb();
+  } catch (dbError) {
+    console.error("Database initialization failed:", dbError);
+    return NextResponse.json({ error: "Database not available" }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
     const { id, name, description, type, price, imageUrl, inStock, availableFor } = body;
@@ -60,7 +80,7 @@ export async function PUT(request: NextRequest) {
     if (inStock !== undefined) updateData.inStock = inStock;
     if (availableFor !== undefined) updateData.availableFor = availableFor;
 
-    const result = await getDb()
+    const result = await db
       .update(addons)
       .set(updateData)
       .where(eq(addons.id, id))
@@ -78,6 +98,14 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  let db;
+  try {
+    db = getDb();
+  } catch (dbError) {
+    console.error("Database initialization failed:", dbError);
+    return NextResponse.json({ error: "Database not available" }, { status: 500 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -86,7 +114,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    const result = await getDb()
+    const result = await db
       .delete(addons)
       .where(eq(addons.id, parseInt(id)))
       .returning();

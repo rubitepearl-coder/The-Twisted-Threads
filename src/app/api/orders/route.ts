@@ -70,7 +70,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const db = getDb();
+    let db;
+    try {
+      db = getDb();
+    } catch (dbError) {
+      console.error("[Orders API] Database initialization failed:", dbError);
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
     
     // Admin: fetch all orders sorted by date (newest first)
     const allOrders = await db
@@ -88,8 +94,15 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  let db;
   try {
-    const db = getDb();
+    db = getDb();
+  } catch (dbError) {
+    console.error("[Orders API] Database initialization failed:", dbError);
+    return NextResponse.json({ error: "Database not available" }, { status: 500 });
+  }
+
+  try {
     const body = await request.json();
     
     // Debug: Log the incoming request body
