@@ -89,6 +89,7 @@ export async function GET(request: NextRequest) {
               price real NOT NULL,
               image_url text DEFAULT '',
               in_stock integer DEFAULT 1 NOT NULL,
+              stock_quantity integer,
               available_for text DEFAULT 'both' NOT NULL,
               created_at integer,
               updated_at integer
@@ -99,23 +100,23 @@ export async function GET(request: NextRequest) {
         } catch (e: any) {
           console.error("[db-migrate] Failed to recreate addons:", e);
         }
-      } else if (!addonColumns.includes("available_for")) {
-        // Just add the missing column
-        try {
-          await client.execute("ALTER TABLE addons ADD COLUMN available_for text DEFAULT 'both'");
-          migrations.push("Added available_for column to addons");
-        } catch (e: any) {
-          console.error("[db-migrate] Failed to add available_for:", e);
+      } else {
+        // Table has correct columns but might be missing stock_quantity
+        if (!addonColumns.includes("stock_quantity")) {
+          try {
+            await client.execute("ALTER TABLE addons ADD COLUMN stock_quantity integer");
+            migrations.push("Added stock_quantity column to addons");
+          } catch (e: any) {
+            console.error("[db-migrate] Failed to add stock_quantity:", e);
+          }
         }
-      }
-
-      // Add stock_quantity column if missing
-      if (addonColumns.length > 0 && !addonColumns.includes("stock_quantity")) {
-        try {
-          await client.execute("ALTER TABLE addons ADD COLUMN stock_quantity integer");
-          migrations.push("Added stock_quantity column to addons");
-        } catch (e: any) {
-          console.error("[db-migrate] Failed to add stock_quantity:", e);
+        if (!addonColumns.includes("available_for")) {
+          try {
+            await client.execute("ALTER TABLE addons ADD COLUMN available_for text DEFAULT 'both'");
+            migrations.push("Added available_for column to addons");
+          } catch (e: any) {
+            console.error("[db-migrate] Failed to add available_for:", e);
+          }
         }
       }
     }
