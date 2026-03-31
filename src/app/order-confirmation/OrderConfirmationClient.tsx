@@ -55,12 +55,13 @@ function LightboxGallery({ images, children, title }: { images: { src: string; a
 }
 
 export default function OrderConfirmationClient({
-  order, bouquetItems, miniPotItems, shopItems
+  order, bouquetItems, miniPotItems, shopItems, addonItems
 }: {
   order: any;
   bouquetItems: OrderItem[];
   miniPotItems: OrderItem[];
   shopItems: OrderItem[];
+  addonItems?: any[];
 }) {
   const isBouquetOrder = order.orderType === "bouquet";
   const isMiniPotOrder = order.orderType === "mini_pot";
@@ -185,11 +186,11 @@ export default function OrderConfirmationClient({
             </div>
           )}
 
-          {order.addonItems && order.addonItems.length > 0 && (
+          {addonItems && addonItems.length > 0 && (
             <div className="pt-3 border-t border-[#e8d5be]">
               <h4 className="font-medium text-[#3d2c1e] mb-2">Add-ons</h4>
               <div className="space-y-2">
-                {order.addonItems.map((addon: any, i: number) => (
+                {addonItems.map((addon: any, i: number) => (
                   <div key={i} className="flex justify-between items-center text-sm">
                     <span className="text-[#6b4c30]">{addon.name}</span>
                     <span className="text-[#7a4f2e] font-medium">+₱{addon.price.toFixed(2)}</span>

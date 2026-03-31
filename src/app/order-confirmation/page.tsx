@@ -49,6 +49,7 @@ export default async function OrderConfirmationPage({
   let bouquetItems: OrderItem[] = [];
   let miniPotItems: OrderItem[] = [];
   let shopItems: OrderItem[] = [];
+  let addonItems: any[] = [];
 
   try {
     bouquetItems = order?.bouquetItems
@@ -74,12 +75,21 @@ export default async function OrderConfirmationPage({
     console.error("Failed to parse shopItems:", e);
   }
 
+  try {
+    addonItems = order?.addonItems
+      ? (JSON.parse(order.addonItems) as any[])
+      : [];
+  } catch (e) {
+    console.error("Failed to parse addonItems:", e);
+  }
+
   return (
     <OrderConfirmationClient
       order={order}
       bouquetItems={bouquetItems}
       miniPotItems={miniPotItems}
       shopItems={shopItems}
+      addonItems={addonItems}
     />
   );
 }
