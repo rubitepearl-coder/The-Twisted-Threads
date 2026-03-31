@@ -33,6 +33,7 @@ type Addon = {
   price: number;
   imageUrl: string | null;
   inStock: boolean;
+  stockQuantity: number | null;
   availableFor: string;
 };
 
@@ -77,6 +78,7 @@ export default function InventoryClient({
     price: "",
     imageUrl: "",
     availableFor: "both",
+    stockQuantity: "",
   });
 
   const showMessage = (msg: string) => {
@@ -1351,8 +1353,8 @@ function AddonsTab({
   showMessage: (msg: string) => void;
   showAddForm: boolean;
   setShowAddForm: (show: boolean) => void;
-  newAddon: { name: string; description: string; type: string; price: string; imageUrl: string; availableFor: string };
-  setNewAddon: React.Dispatch<React.SetStateAction<{ name: string; description: string; type: string; price: string; imageUrl: string; availableFor: string }>>;
+  newAddon: { name: string; description: string; type: string; price: string; imageUrl: string; availableFor: string; stockQuantity: string };
+  setNewAddon: React.Dispatch<React.SetStateAction<{ name: string; description: string; type: string; price: string; imageUrl: string; availableFor: string; stockQuantity: string }>>;
   editingId: number | null;
   setEditingId: (id: number | null) => void;
   editForm: Partial<Addon>;
@@ -1384,6 +1386,7 @@ function AddonsTab({
           price: parseFloat(newAddon.price),
           imageUrl: newAddon.imageUrl,
           availableFor: newAddon.availableFor,
+          stockQuantity: newAddon.stockQuantity || null,
         }),
       });
 
@@ -1391,7 +1394,7 @@ function AddonsTab({
 
       const created = await res.json();
       setAddons((prev) => [...prev, created]);
-      setNewAddon({ name: "", description: "", type: "addon", price: "", imageUrl: "", availableFor: "both" });
+      setNewAddon({ name: "", description: "", type: "addon", price: "", imageUrl: "", availableFor: "both", stockQuantity: "" });
       setShowAddForm(false);
       showMessage("Addon added successfully!");
     } catch (error) {
@@ -1427,6 +1430,7 @@ function AddonsTab({
           imageUrl: editForm.imageUrl,
           inStock: editForm.inStock,
           availableFor: editForm.availableFor,
+          stockQuantity: editForm.stockQuantity,
         }),
       });
 
@@ -1569,6 +1573,19 @@ function AddonsTab({
                 <option value="mini_pot">Mini Pot Only</option>
               </select>
             </div>
+            <div>
+              <label className="block text-xs text-[#c4a882] mb-1">
+                Stock Quantity (leave empty for unlimited)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={newAddon.stockQuantity}
+                onChange={(e) => setNewAddon((a) => ({ ...a, stockQuantity: e.target.value }))}
+                placeholder="e.g. 10"
+                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+              />
+            </div>
             <div className="sm:col-span-2">
               <label className="block text-xs text-[#c4a882] mb-1">
                 Image URL
@@ -1628,6 +1645,9 @@ function AddonsTab({
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
                   Price
+                </th>
+                <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
+                  Stock
                 </th>
                 <th className="text-left px-4 py-3 text-[#c4a882] text-xs font-medium uppercase">
                   Status
@@ -1716,6 +1736,22 @@ function AddonsTab({
                       />
                     ) : (
                       <span className="text-[#f5ede0]">₱{addon.price.toFixed(2)}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {editingId === addon.id ? (
+                      <input
+                        type="number"
+                        min="0"
+                        value={editForm.stockQuantity ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, stockQuantity: e.target.value ? parseInt(e.target.value) : null }))}
+                        placeholder="Unlimited"
+                        className="w-20 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                      />
+                    ) : (
+                      <span className="text-[#c4a882] text-sm">
+                        {addon.stockQuantity === null || addon.stockQuantity === undefined ? "∞" : addon.stockQuantity}
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3">

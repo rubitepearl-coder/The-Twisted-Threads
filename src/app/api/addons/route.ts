@@ -18,17 +18,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  let db;
-  try {
-    db = getDb();
-  } catch (dbError) {
-    console.error("Database initialization failed:", dbError);
-    return NextResponse.json({ error: "Database not available" }, { status: 500 });
-  }
+  const db = getDb();
 
   try {
     const body = await request.json();
-    const { name, description, type, price, imageUrl, availableFor } = body;
+    const { name, description, type, price, imageUrl, availableFor, stockQuantity } = body;
 
     if (!name || price === undefined) {
       return NextResponse.json({ error: "Name and price are required" }, { status: 400 });
@@ -43,6 +37,7 @@ export async function POST(request: NextRequest) {
         price, 
         imageUrl: imageUrl ?? "",
         inStock: true,
+        stockQuantity: stockQuantity ? parseInt(stockQuantity) : null,
         availableFor: availableFor ?? "both"
       })
       .returning();
@@ -55,17 +50,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  let db;
-  try {
-    db = getDb();
-  } catch (dbError) {
-    console.error("Database initialization failed:", dbError);
-    return NextResponse.json({ error: "Database not available" }, { status: 500 });
-  }
+  const db = getDb();
 
   try {
     const body = await request.json();
-    const { id, name, description, type, price, imageUrl, inStock, availableFor } = body;
+    const { id, name, description, type, price, imageUrl, inStock, availableFor, stockQuantity } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -79,6 +68,7 @@ export async function PUT(request: NextRequest) {
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
     if (inStock !== undefined) updateData.inStock = inStock;
     if (availableFor !== undefined) updateData.availableFor = availableFor;
+    if (stockQuantity !== undefined) updateData.stockQuantity = stockQuantity === "" ? null : parseInt(stockQuantity);
 
     const result = await db
       .update(addons)
@@ -98,13 +88,7 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  let db;
-  try {
-    db = getDb();
-  } catch (dbError) {
-    console.error("Database initialization failed:", dbError);
-    return NextResponse.json({ error: "Database not available" }, { status: 500 });
-  }
+  const db = getDb();
 
   try {
     const { searchParams } = new URL(request.url);

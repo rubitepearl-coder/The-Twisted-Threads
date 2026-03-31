@@ -15,26 +15,19 @@ export default async function AdminOrdersPage() {
     redirect("/admin/login");
   }
 
-  let db;
-  try {
-    db = getDb();
-  } catch (dbError) {
-    console.error("[Orders] Database initialization failed:", dbError);
-  }
+  const db = getDb();
 
   let allOrders: typeof orders.$inferSelect[] = [];
 
-  if (db) {
-    try {
-      console.log("[Orders] Fetching orders from database...");
-      allOrders = await db
-        .select()
-        .from(orders)
-        .orderBy(desc(orders.createdAt));
-      console.log("[Orders] Found orders:", allOrders.length);
-    } catch (error) {
-      console.error("[Orders] Error fetching data:", error);
-    }
+  try {
+    console.log("[Orders] Fetching orders from database...");
+    allOrders = await db
+      .select()
+      .from(orders)
+      .orderBy(desc(orders.createdAt));
+    console.log("[Orders] Found orders:", allOrders.length);
+  } catch (error) {
+    console.error("[Orders] Error fetching data:", error);
   }
 
   return (

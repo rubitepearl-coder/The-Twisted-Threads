@@ -14,37 +14,30 @@ export default async function AdminDashboardPage() {
     redirect("/admin/login");
   }
 
-  let db;
-  try {
-    db = getDb();
-  } catch (dbError) {
-    console.error("[AdminDashboard] Database initialization failed:", dbError);
-  }
+  const db = getDb();
 
   let totalOrders = 0;
   let pendingOrders = 0;
   let totalProducts = 0;
   let recentOrders: typeof orders.$inferSelect[] = [];
 
-  if (db) {
-    try {
-      const allOrders = await db.select().from(orders);
-      console.log("[AdminDashboard] Total orders from DB:", allOrders.length);
-      totalOrders = allOrders.length;
-      pendingOrders = allOrders.filter((o) => o.status === "pending").length;
+  try {
+    const allOrders = await db.select().from(orders);
+    console.log("[AdminDashboard] Total orders from DB:", allOrders.length);
+    totalOrders = allOrders.length;
+    pendingOrders = allOrders.filter((o) => o.status === "pending").length;
 
-      const allProducts = await db.select().from(products);
-      console.log("[AdminDashboard] Total products from DB:", allProducts.length);
-      totalProducts = allProducts.length;
+    const allProducts = await db.select().from(products);
+    console.log("[AdminDashboard] Total products from DB:", allProducts.length);
+    totalProducts = allProducts.length;
 
-      recentOrders = await db
-        .select()
-        .from(orders)
-        .orderBy(desc(orders.createdAt))
-        .limit(5);
-    } catch (error) {
-      console.error("[AdminDashboard] Error fetching data:", error);
-    }
+    recentOrders = await db
+      .select()
+      .from(orders)
+      .orderBy(desc(orders.createdAt))
+      .limit(5);
+  } catch (error) {
+    console.error("[AdminDashboard] Error fetching data:", error);
   }
 
   return (
