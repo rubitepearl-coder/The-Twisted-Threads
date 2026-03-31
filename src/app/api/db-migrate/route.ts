@@ -108,6 +108,16 @@ export async function GET(request: NextRequest) {
           console.error("[db-migrate] Failed to add available_for:", e);
         }
       }
+
+      // Add stock_quantity column if missing
+      if (addonColumns.length > 0 && !addonColumns.includes("stock_quantity")) {
+        try {
+          await client.execute("ALTER TABLE addons ADD COLUMN stock_quantity integer");
+          migrations.push("Added stock_quantity column to addons");
+        } catch (e: any) {
+          console.error("[db-migrate] Failed to add stock_quantity:", e);
+        }
+      }
     }
     
     // Create orders table if it doesn't exist
@@ -376,10 +386,12 @@ export async function POST(request: NextRequest) {
         { name: "pot_id", type: "integer" },
         { name: "pot_name", type: "text" },
         { name: "pot_image_url", type: "text" },
+        { name: "pot_price", type: "real" },
         { name: "wrapper_color_id", type: "integer" },
         { name: "wrapper_color_name", type: "text" },
         { name: "wrapper_color_hex", type: "text" },
         { name: "wrapper_color_image_url", type: "text" },
+        { name: "wrapper_color_price", type: "real" },
         { name: "addon_items", type: "text DEFAULT '[]'" },
         { name: "addon_message", type: "text DEFAULT ''" },
       ];
