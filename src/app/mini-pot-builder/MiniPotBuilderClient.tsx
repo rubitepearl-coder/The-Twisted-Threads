@@ -93,16 +93,10 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
   const totalPrice = potPrice + flowersPrice + addonPrice;
 
   // Calculate delivery fee:
-  // - ₱10 for Anini-y
-  // - FREE for San Francisco area (STHS, SFES, nearby houses)
-  // - ₱10 for other locations
+  // - ₱10 for home delivery
+  // - FREE for pickup
   const deliveryFee = deliveryType === "home" && deliveryLocation 
-    ? (() => {
-        const loc = deliveryLocation.toLowerCase();
-        if (loc.includes("aniniy") || loc.includes("anini-y")) return 10; // Anini-y
-        if (loc.includes("san francisco") || loc.includes("sths") || loc.includes("sfes")) return 0; // Free
-        return 10; // Other locations
-      })()
+    ? 10
     : 0;
 
   const finalTotal = totalPrice + deliveryFee;
@@ -540,14 +534,14 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                     type="text"
                     value={deliveryLocation}
                     onChange={(e) => setDeliveryLocation(e.target.value)}
-                    placeholder="e.g., Anini-y, Sibalom, San Jose"
+                    placeholder="e.g., [Barangay Name], [Municipality]"
                     className="w-full sm:w-80 border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required={deliveryType === "home"}
                   />
                   <p className="text-xs text-[#a07850] mt-1">
                     Enter your municipality to calculate delivery fee.
                     Free delivery for STHS, SFES, and San Francisco nearby.
-                    ₱10 for Anini-y and other areas.
+                    ₱10 delivery fee for home delivery.
                   </p>
                 </div>
               )}
@@ -599,7 +593,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                     <textarea
                       value={customerAddress}
                       onChange={(e) => setCustomerAddress(e.target.value)}
-                      placeholder="123 Main St, Apt 4B&#10;Anini-y, Antique 5715"
+                      placeholder="123 Main St, Apt 4B&#10;[Barangay], [Municipality] 5700"
                       rows={3}
                       className="w-full border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent resize-none"
                       required={deliveryType === "home"}
