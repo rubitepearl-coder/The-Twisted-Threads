@@ -56,11 +56,11 @@ export async function GET(request: NextRequest) {
             description text DEFAULT '' NOT NULL,
             type text DEFAULT 'addon' NOT NULL,
             price real NOT NULL,
-            imageUrl text DEFAULT '',
-            inStock integer DEFAULT 1 NOT NULL,
-            availableFor text DEFAULT 'both' NOT NULL,
-            createdAt integer,
-            updatedAt integer
+            image_url text DEFAULT '',
+            in_stock integer DEFAULT 1 NOT NULL,
+            available_for text DEFAULT 'both' NOT NULL,
+            created_at integer,
+            updated_at integer
           )
         `);
         migrations.push("Created addons table");
@@ -73,12 +73,12 @@ export async function GET(request: NextRequest) {
       const addonTableInfo = await client.execute("PRAGMA table_info(addons)");
       const addonColumns = addonTableInfo.rows.map((row: any) => row.name);
       
-      // Drop and recreate if columns are wrong (snake_case instead of camelCase)
-      const hasWrongColumns = addonColumns.includes("image_url") || addonColumns.includes("in_stock");
+      // Check if columns are wrong (camelCase instead of snake_case)
+      const hasWrongColumns = addonColumns.includes("imageUrl") || addonColumns.includes("inStock");
       
       if (hasWrongColumns) {
         try {
-          // Drop the table and recreate
+          // Drop the table and recreate with correct snake_case columns
           await client.execute("DROP TABLE addons");
           await client.execute(`
             CREATE TABLE addons (
@@ -87,11 +87,11 @@ export async function GET(request: NextRequest) {
               description text DEFAULT '' NOT NULL,
               type text DEFAULT 'addon' NOT NULL,
               price real NOT NULL,
-              imageUrl text DEFAULT '',
-              inStock integer DEFAULT 1 NOT NULL,
-              availableFor text DEFAULT 'both' NOT NULL,
-              createdAt integer,
-              updatedAt integer
+              image_url text DEFAULT '',
+              in_stock integer DEFAULT 1 NOT NULL,
+              available_for text DEFAULT 'both' NOT NULL,
+              created_at integer,
+              updated_at integer
             )
           `);
           migrations.push("Recreated addons table with correct columns");
@@ -99,13 +99,13 @@ export async function GET(request: NextRequest) {
         } catch (e: any) {
           console.error("[db-migrate] Failed to recreate addons:", e);
         }
-      } else if (!addonColumns.includes("availableFor")) {
+      } else if (!addonColumns.includes("available_for")) {
         // Just add the missing column
         try {
-          await client.execute("ALTER TABLE addons ADD COLUMN availableFor text DEFAULT 'both'");
-          migrations.push("Added availableFor column to addons");
+          await client.execute("ALTER TABLE addons ADD COLUMN available_for text DEFAULT 'both'");
+          migrations.push("Added available_for column to addons");
         } catch (e: any) {
-          console.error("[db-migrate] Failed to add availableFor:", e);
+          console.error("[db-migrate] Failed to add available_for:", e);
         }
       }
     }
