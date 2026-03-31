@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDb } from "@/db";
+import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import OrderConfirmationClient from "./OrderConfirmationClient";
@@ -21,7 +21,6 @@ export default async function OrderConfirmationPage({
   const params = await searchParams;
   const orderId = params.id ? parseInt(params.id) : null;
 
-  const db = getDb();
   let order: typeof orders.$inferSelect | null = null;
   if (orderId) {
     try {
@@ -31,8 +30,8 @@ export default async function OrderConfirmationPage({
         .where(eq(orders.id, orderId))
         .limit(1);
       order = result[0] ?? null;
-    } catch {
-      // ignore
+    } catch (e) {
+      console.error("Failed to fetch order:", e);
     }
   }
 
@@ -47,17 +46,33 @@ export default async function OrderConfirmationPage({
     );
   }
 
-  const bouquetItems: OrderItem[] = order?.bouquetItems
-    ? (JSON.parse(order.bouquetItems) as OrderItem[])
-    : [];
+  let bouquetItems: OrderItem[] = [];
+  let miniPotItems: OrderItem[] = [];
+  let shopItems: OrderItem[] = [];
 
-  const miniPotItems: OrderItem[] = order?.miniPotItems
-    ? (JSON.parse(order.miniPotItems) as OrderItem[])
-    : [];
+  try {
+    bouquetItems = order?.bouquetItems
+      ? (JSON.parse(order.bouquetItems) as OrderItem[])
+      : [];
+  } catch (e) {
+    console.error("Failed to parse bouquetItems:", e);
+  }
 
-  const shopItems: OrderItem[] = order?.shopItems
-    ? (JSON.parse(order.shopItems) as OrderItem[])
-    : [];
+  try {
+    miniPotItems = order?.miniPotItems
+      ? (JSON.parse(order.miniPotItems) as OrderItem[])
+      : [];
+  } catch (e) {
+    console.error("Failed to parse miniPotItems:", e);
+  }
+
+  try {
+    shopItems = order?.shopItems
+      ? (JSON.parse(order.shopItems) as OrderItem[])
+      : [];
+  } catch (e) {
+    console.error("Failed to parse shopItems:", e);
+  }
 
   return (
     <OrderConfirmationClient

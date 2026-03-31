@@ -253,16 +253,82 @@ export default function OrdersClient({
                           </div>
                         )}
 
-                        {/* Then show items */}
-                        {(isMiniPotOrder ? miniPotItems : items).length === 0 ? (
-                          <p className="text-[#7a5c3e] text-sm">
-                            No items recorded
-                          </p>
-                        ) : (
+                        {/* Then show items based on order type */}
+                        {isShopOrder && shopItems.length > 0 && (
                           <div className="space-y-2">
-                            {(isMiniPotOrder ? miniPotItems : items).map((item, i) => (
+                            {shopItems.map((item, i) => (
                               <div key={i} className="flex items-center gap-3">
-                                {/* Square thumbnail */}
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
+                                  {isValidImageUrl(item.imageUrl) && !imageErrors[`${order.id}-shop-${i}`] ? (
+                                    <Image
+                                      src={item.imageUrl!}
+                                      alt={item.name}
+                                      width={40}
+                                      height={40}
+                                      className="w-full h-full object-cover"
+                                      unoptimized
+                                      onError={() => handleImageError(`${order.id}-shop-${i}`)}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                      {item.imageEmoji ?? "🛍️"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <span className="text-[#e8d5be] text-sm font-medium">
+                                    {item.name}
+                                  </span>
+                                  <span className="text-[#7a5c3e] text-xs ml-2">
+                                    × {item.quantity}
+                                  </span>
+                                </div>
+                                <span className="text-[#c4a882] text-sm flex-shrink-0">
+                                  ₱{(item.price * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {isMiniPotOrder && miniPotItems.length > 0 && (
+                          <div className="space-y-2">
+                            {miniPotItems.map((item, i) => (
+                              <div key={i} className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
+                                  {isValidImageUrl(item.imageUrl) && !imageErrors[`${order.id}-item-${i}`] ? (
+                                    <Image
+                                      src={item.imageUrl!}
+                                      alt={item.name}
+                                      width={40}
+                                      height={40}
+                                      className="w-full h-full object-cover"
+                                      unoptimized
+                                      onError={() => handleImageError(`${order.id}-item-${i}`)}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                      {item.imageEmoji ?? "🪴"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <span className="text-[#e8d5be] text-sm font-medium">
+                                    {item.name}
+                                  </span>
+                                  <span className="text-[#7a5c3e] text-xs ml-2">
+                                    × {item.quantity}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {!isShopOrder && !isMiniPotOrder && items.length > 0 && (
+                          <div className="space-y-2">
+                            {items.map((item, i) => (
+                              <div key={i} className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#5c3a1e] bg-[#1e1410]">
                                   {isValidImageUrl(item.imageUrl) && !imageErrors[`${order.id}-item-${i}`] ? (
                                     <Image
@@ -288,12 +354,15 @@ export default function OrdersClient({
                                     × {item.quantity}
                                   </span>
                                 </div>
-                                <span className="text-[#c4a882] text-sm flex-shrink-0">
-                                  ₱{(item.price * item.quantity).toFixed(2)}
-                                </span>
                               </div>
                             ))}
                           </div>
+                        )}
+
+                        {(isShopOrder ? shopItems.length : (isMiniPotOrder ? miniPotItems.length : items.length)) === 0 && (
+                          <p className="text-[#7a5c3e] text-sm">
+                            No items recorded
+                          </p>
                         )}
 
                         {/* Wrapper color for bouquets */}
