@@ -123,7 +123,10 @@ export async function POST(request: NextRequest) {
       potId,
       potName,
       potImageUrl,
-      // wrapperColor fields are no longer used in new orders
+      wrapperColorId,
+      wrapperColorName,
+      wrapperColorHex,
+      wrapperColorImageUrl,
       totalPrice,
       addonItems,
       addonMessage,
@@ -462,10 +465,25 @@ export async function POST(request: NextRequest) {
         orderData.potImageUrl = potImageUrl;
       }
 
-      // NOTE: wrapperColor fields are NO LONGER INSERTED
-      // They are kept in schema for backward compatibility but not used in new orders
-      // Also NOT inserting: userId, facebookId, customerAddress
-      
+      // Wrapper color for bouquets
+      if (wrapperColorId) {
+        orderData.wrapperColorId = wrapperColorId;
+      }
+      if (wrapperColorName) {
+        orderData.wrapperColorName = wrapperColorName;
+      }
+      if (wrapperColorHex) {
+        orderData.wrapperColorHex = wrapperColorHex;
+      }
+      if (wrapperColorImageUrl) {
+        orderData.wrapperColorImageUrl = wrapperColorImageUrl;
+      }
+
+      // Add-ons
+      if (addonItems) {
+        orderData.addonItems = typeof addonItems === 'string' ? addonItems : JSON.stringify(addonItems);
+      }
+
       console.log("[Orders API] Final order data keys:", Object.keys(orderData));
       console.log("[Orders API] Final order data:", JSON.stringify(orderData));
       
