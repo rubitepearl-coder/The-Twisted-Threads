@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import OrderConfirmationClient from "./OrderConfirmationClient";
@@ -21,6 +21,7 @@ export default async function OrderConfirmationPage({
   const params = await searchParams;
   const orderId = params.id ? parseInt(params.id) : null;
 
+  const db = getDb();
   let order: typeof orders.$inferSelect | null = null;
   if (orderId) {
     try {

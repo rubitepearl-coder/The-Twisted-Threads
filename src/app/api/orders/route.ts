@@ -314,6 +314,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check and decrement stock for pot in mini pot orders
+    if (orderType === "mini_pot" && potId) {
+      const potIdNum = parseInt(potId);
+      const [potProduct] = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, potIdNum))
+        .limit(1);
+
+      if (potProduct) {
+        const currentStock = potProduct.stockQuantity;
+        if (currentStock !== null && currentStock < 1) {
+          throw new Error(`Insufficient stock for ${potProduct.name}`);
+        }
+        if (currentStock !== null) {
+          await db
+            .update(products)
+            .set({ 
+              stockQuantity: currentStock - 1,
+              inStock: (currentStock - 1) > 0,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, potIdNum));
+        } else {
+          await db
+            .update(products)
+            .set({ 
+              stockQuantity: 0,
+              inStock: false,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, potIdNum));
+        }
+      }
+    }
+
     // Check and decrement stock for shop items (finished goods)
     const shopItemsArray = typeof shopItems === 'string' ? JSON.parse(shopItems) : shopItems;
     if (shopItemsArray && shopItemsArray.length > 0) {
