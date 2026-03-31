@@ -25,6 +25,7 @@ type Order = {
   wrapperColorName: string | null;
   wrapperColorHex: string | null;
   wrapperColorImageUrl: string | null;
+  addonItems: string | null;
   totalPrice: number;
   status: string;
   notes: string | null;
@@ -141,7 +142,9 @@ export default function OrdersClient({
           {filteredOrders.map((order) => {
             const items: OrderItem[] = JSON.parse(order.bouquetItems || "[]");
             const miniPotItems: OrderItem[] = JSON.parse(order.miniPotItems || "[]");
+            const shopItems: OrderItem[] = JSON.parse(order.shopItems || "[]");
             const isMiniPotOrder = order.orderType === "mini_pot";
+            const isShopOrder = order.orderType === "shop";
             const isExpanded = expandedId === order.id;
             const date = order.createdAt
               ? new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -219,7 +222,7 @@ export default function OrdersClient({
                       {/* Order Recipe with thumbnails */}
                       <div className="md:col-span-2">
                         <h4 className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-3">
-                          {isMiniPotOrder ? "🪴 Mini Pot Order" : "🌸 Bouquet Recipe"}
+                          {isShopOrder ? "🛍️ Shop Order" : isMiniPotOrder ? "🪴 Mini Pot Order" : "🌸 Bouquet Order"}
                         </h4>
                         
                         {/* Mini Pot: Show pot first */}
@@ -321,6 +324,33 @@ export default function OrdersClient({
                             </div>
                           </div>
                         )}
+
+                        {/* Add-ons */}
+                        {order.addonItems && (() => {
+                          try {
+                            const addons = JSON.parse(order.addonItems);
+                            if (addons && addons.length > 0) {
+                              return (
+                                <div className="mt-3 pt-3 border-t border-[#3d2c1e]">
+                                  <p className="text-[#c4a882] text-xs font-medium uppercase tracking-wider mb-2">
+                                    Add-ons
+                                  </p>
+                                  <div className="space-y-2">
+                                    {addons.map((addon: any, idx: number) => (
+                                      <div key={idx} className="flex justify-between items-center text-sm">
+                                        <span className="text-[#e8d5be]">{addon.name}</span>
+                                        <span className="text-[#c4a882]">+₱{addon.price.toFixed(2)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
 
                         {/* Total */}
                         <div className="mt-3 pt-3 border-t border-[#3d2c1e] flex justify-between">

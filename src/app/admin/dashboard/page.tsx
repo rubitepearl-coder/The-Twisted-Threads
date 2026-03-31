@@ -177,6 +177,12 @@ export default async function AdminDashboardPage() {
                     >
                       <td className="px-4 py-3 text-[#f5ede0] text-sm">
                         #{order.id}
+                        {order.orderType === "mini_pot" && (
+                          <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-green-900/40 text-green-300">🪴</span>
+                        )}
+                        {order.orderType === "shop" && (
+                          <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-purple-900/40 text-purple-300">🛍️</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-[#e8d5be] text-sm">
                         {order.customerName}

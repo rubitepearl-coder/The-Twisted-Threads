@@ -207,7 +207,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
       }
 
       const data = await res.json();
-      router.push(`/order-confirmation?id=${data.orderId}`);
+      window.location.href = `/order-confirmation?id=${data.orderId}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
