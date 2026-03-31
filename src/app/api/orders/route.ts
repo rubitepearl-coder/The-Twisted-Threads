@@ -159,27 +159,13 @@ export async function POST(request: NextRequest) {
     // Determine delivery type - default to pickup
     const finalDeliveryType = (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "pickup";
     
-    // Calculate delivery fee and location based on delivery type
+    // Calculate delivery fee - ₱10 for home delivery, free for pickup
     let finalDeliveryFee = 0;
     let finalDeliveryLocation: string | undefined = undefined;
     
     if (finalDeliveryType === "home" && deliveryLocation) {
-      // Calculate delivery fee for home delivery
-      const locationLower = deliveryLocation.toLowerCase();
-      if (locationLower.includes("aniniy") || locationLower.includes("anini-y")) {
-        // Anini-y area: ₱10 delivery fee
-        finalDeliveryFee = 10;
-      } else if (
-        locationLower.includes("san francisco") ||
-        locationLower.includes("sths") ||
-        locationLower.includes("sfes")
-      ) {
-        // San Francisco area (STHS, SFES, nearby): FREE delivery
-        finalDeliveryFee = 0;
-      } else {
-        // Other locations: ₱10 delivery fee
-        finalDeliveryFee = 10;
-      }
+      // ₱10 delivery fee for home delivery
+      finalDeliveryFee = 10;
       finalDeliveryLocation = deliveryLocation.toString().trim();
     }
     // For pickup: no delivery fee, no location needed

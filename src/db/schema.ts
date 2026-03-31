@@ -47,7 +47,7 @@ export const orders = sqliteTable("orders", {
   customerAddress: text("customer_address"), // Optional - not required for pickup
   deliveryType: text("delivery_type").notNull().default("pickup"), // 'home' | 'pickup' - default to pickup
   deliveryLocation: text("delivery_location"), // Location for delivery fee calculation - optional
-  deliveryFee: real("delivery_fee").default(0), // ₱10 for Anini-y home delivery - default 0
+  deliveryFee: real("delivery_fee").default(0), // ₱10 for home delivery - default 0
   orderType: text("order_type").notNull().default("bouquet"), // 'bouquet' | 'mini_pot' | 'shop'
   bouquetItems: text("bouquet_items"), // JSON array of {productId, name, quantity, imageUrl}
   miniPotItems: text("mini_pot_items"), // JSON array of {productId, name, quantity, imageUrl} for fuzzy wire flowers

@@ -142,8 +142,8 @@ export default function ShopPage() {
     setOrdering(true);
 
     try {
-      // Calculate delivery fee (₱10 for home delivery to Anini-y area)
-      const deliveryFee = deliveryType === "home" && deliveryLocation.toLowerCase().includes("anini") ? 10 : 0;
+      // Calculate delivery fee - ₱10 for home delivery
+      const deliveryFee = deliveryType === "home" ? 10 : 0;
 
       // Create shop items array
       const shopItems = cart.map(item => ({
@@ -587,7 +587,7 @@ export default function ShopPage() {
                       placeholder="Enter your address / barangay"
                     />
                     <p className="text-xs text-[#a07850] mt-1">
-                      ₱10 delivery fee for Anini-y area
+                      ₱10 delivery fee for home delivery
                     </p>
                   </div>
                 )}
