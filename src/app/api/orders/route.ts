@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
       customerAddress,
       deliveryType,
       deliveryLocation,
+      deliveryFee,
       orderType,
       bouquetItems,
       miniPotItems,
@@ -159,13 +160,16 @@ export async function POST(request: NextRequest) {
     // Determine delivery type - default to pickup
     const finalDeliveryType = (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "pickup";
     
-    // Calculate delivery fee - ₱10 for home delivery, free for pickup
-    let finalDeliveryFee = 0;
+    // Use delivery fee from client if provided, otherwise calculate
+    // Shop page sends deliveryFee, bouquet/mini-pot calculate on client but don't send
+    let finalDeliveryFee = deliveryFee ?? 0;
     let finalDeliveryLocation: string | undefined = undefined;
     
-    if (finalDeliveryType === "home" && deliveryLocation) {
-      // ₱10 delivery fee for home delivery
+    // Only add delivery fee if not already provided by client AND it's home delivery with location
+    if (finalDeliveryType === "home" && deliveryLocation && !deliveryFee) {
       finalDeliveryFee = 10;
+      finalDeliveryLocation = deliveryLocation.toString().trim();
+    } else if (deliveryLocation) {
       finalDeliveryLocation = deliveryLocation.toString().trim();
     }
     // For pickup: no delivery fee, no location needed
@@ -189,9 +193,10 @@ export async function POST(request: NextRequest) {
     // Stock updates still use Drizzle ORM
     
     // Check and decrement stock for bouquet items
-    if (bouquetItems && bouquetItems.length > 0) {
+    const bouquetItemsArray = typeof bouquetItems === 'string' ? JSON.parse(bouquetItems) : bouquetItems;
+    if (bouquetItemsArray && bouquetItemsArray.length > 0) {
       // Group items by productId and sum quantities
-      const groupedItems = bouquetItems.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
+      const groupedItems = bouquetItemsArray.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
         if (!acc[item.productId]) {
           acc[item.productId] = { name: item.name || '', quantity: 0 };
         }
@@ -250,8 +255,9 @@ export async function POST(request: NextRequest) {
 
     // Check and decrement stock for mini pot items
     // Check and decrement stock for mini pot items
-    if (miniPotItems && miniPotItems.length > 0) {
-      const groupedItems = miniPotItems.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
+    const miniPotItemsArray = typeof miniPotItems === 'string' ? JSON.parse(miniPotItems) : miniPotItems;
+    if (miniPotItemsArray && miniPotItemsArray.length > 0) {
+      const groupedItems = miniPotItemsArray.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
         if (!acc[item.productId]) {
           acc[item.productId] = { name: item.name || '', quantity: 0 };
         }
@@ -309,8 +315,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check and decrement stock for shop items (finished goods)
-    if (shopItems && shopItems.length > 0) {
-      const groupedItems = shopItems.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
+    const shopItemsArray = typeof shopItems === 'string' ? JSON.parse(shopItems) : shopItems;
+    if (shopItemsArray && shopItemsArray.length > 0) {
+      const groupedItems = shopItemsArray.reduce((acc: Record<number, {name: string, quantity: number}>, item: any) => {
         if (!acc[item.productId]) {
           acc[item.productId] = { name: item.name || '', quantity: 0 };
         }
