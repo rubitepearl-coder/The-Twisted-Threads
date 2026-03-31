@@ -21,10 +21,12 @@ const COLUMN_NAME_MAP: Record<string, string> = {
   potId: "pot_id",
   potName: "pot_name",
   potImageUrl: "pot_image_url",
+  potPrice: "pot_price",
   wrapperColorId: "wrapper_color_id",
   wrapperColorName: "wrapper_color_name",
   wrapperColorHex: "wrapper_color_hex",
   wrapperColorImageUrl: "wrapper_color_image_url",
+  wrapperColorPrice: "wrapper_color_price",
   addonItems: "addon_items",
   addonMessage: "addon_message",
   totalPrice: "total_price",
@@ -123,10 +125,12 @@ export async function POST(request: NextRequest) {
       potId,
       potName,
       potImageUrl,
+      potPrice,
       wrapperColorId,
       wrapperColorName,
       wrapperColorHex,
       wrapperColorImageUrl,
+      wrapperColorPrice,
       totalPrice,
       addonItems,
       addonMessage,
@@ -412,7 +416,47 @@ export async function POST(request: NextRequest) {
       }
     }
 
-      // Build order data with EXPLICIT column specification only
+    // Check and decrement stock for addons
+    const addonItemsArray = typeof addonItems === 'string' ? JSON.parse(addonItems) : addonItems;
+    if (addonItemsArray && addonItemsArray.length > 0) {
+      for (const addon of addonItemsArray) {
+        if (addon.id) {
+          const [addonProduct] = await db
+            .select()
+            .from(products)
+            .where(eq(products.id, addon.id))
+            .limit(1);
+
+          if (addonProduct) {
+            const currentStock = addonProduct.stockQuantity;
+            if (currentStock !== null && currentStock < 1) {
+              throw new Error(`Insufficient stock for ${addonProduct.name}`);
+            }
+            if (currentStock !== null) {
+              await db
+                .update(products)
+                .set({ 
+                  stockQuantity: currentStock - 1,
+                  inStock: (currentStock - 1) > 0,
+                  updatedAt: new Date()
+                })
+                .where(eq(products.id, addon.id));
+            } else {
+              await db
+                .update(products)
+                .set({ 
+                  stockQuantity: 0,
+                  inStock: false,
+                  updatedAt: new Date()
+                })
+                .where(eq(products.id, addon.id));
+            }
+          }
+        }
+      }
+    }
+
+    // Build order data with EXPLICIT column specification only
       // Only include fields that are actually provided - no undefined/null values
       const orderData: any = {
         // Required fields - always included
@@ -464,6 +508,9 @@ export async function POST(request: NextRequest) {
       if (potImageUrl) {
         orderData.potImageUrl = potImageUrl;
       }
+      if (potPrice) {
+        orderData.potPrice = potPrice;
+      }
 
       // Wrapper color for bouquets
       if (wrapperColorId) {
@@ -477,6 +524,9 @@ export async function POST(request: NextRequest) {
       }
       if (wrapperColorImageUrl) {
         orderData.wrapperColorImageUrl = wrapperColorImageUrl;
+      }
+      if (wrapperColorPrice) {
+        orderData.wrapperColorPrice = wrapperColorPrice;
       }
 
       // Add-ons

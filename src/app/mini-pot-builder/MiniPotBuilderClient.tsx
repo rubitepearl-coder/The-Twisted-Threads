@@ -186,6 +186,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
           potId: selectedPot,
           potName: selectedPotObj?.name,
           potImageUrl: selectedPotObj?.imageUrl ?? "",
+          potPrice: selectedPotObj?.price ?? 0,
           totalPrice: finalTotal,
           addonItems: selectedAddons.length > 0 ? JSON.stringify(selectedAddonItems) : null,
         }),

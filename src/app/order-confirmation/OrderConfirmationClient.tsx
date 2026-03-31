@@ -120,8 +120,9 @@ export default function OrderConfirmationClient({
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-[#3d2c1e]">{order.potName}</p>
-                <p className="text-sm text-[#a07850]">Mini Pot</p>
+                <p className="text-xs text-[#a07850]">Mini Pot × 1</p>
               </div>
+              <p className="text-[#3d2c1e] font-medium">₱{order.potPrice ? order.potPrice.toFixed(2) : "0.00"}</p>
             </div>
           )}
 
@@ -166,8 +167,9 @@ export default function OrderConfirmationClient({
               </div>
               <div className="flex-1">
                 <p className="font-medium text-[#3d2c1e]">{order.wrapperColorName}</p>
-                <p className="text-sm text-[#a07850]">Wrapper</p>
+                <p className="text-xs text-[#a07850]">Wrapper × 1</p>
               </div>
+              <p className="text-[#3d2c1e] font-medium">₱{order.wrapperColorPrice ? order.wrapperColorPrice.toFixed(2) : "0.00"}</p>
             </div>
           )}
 

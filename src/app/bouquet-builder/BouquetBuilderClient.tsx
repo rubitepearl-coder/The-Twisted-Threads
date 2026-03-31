@@ -185,6 +185,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
           wrapperColorName: selectedWrapperObj?.name,
           wrapperColorHex: selectedWrapperObj?.colorHex,
           wrapperColorImageUrl: selectedWrapperObj?.imageUrl ?? "",
+          wrapperColorPrice: selectedWrapperObj?.price ?? 0,
           addonItems: selectedAddons.length > 0 ? JSON.stringify(selectedAddonItems) : null,
           totalPrice: finalTotal,
         }),

@@ -55,10 +55,12 @@ export const orders = sqliteTable("orders", {
   potId: integer("pot_id"), // Selected pot product ID
   potName: text("pot_name"),
   potImageUrl: text("pot_image_url"),
+  potPrice: real("pot_price"),
   wrapperColorId: integer("wrapper_color_id"),
   wrapperColorName: text("wrapper_color_name"),
   wrapperColorHex: text("wrapper_color_hex"),
   wrapperColorImageUrl: text("wrapper_color_image_url"),
+  wrapperColorPrice: real("wrapper_color_price"),
   addonItems: text("addon_items"),
   addonMessage: text("addon_message"),
   totalPrice: real("total_price").notNull(),
