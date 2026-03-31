@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { orders, products, addons } from "@/db/schema";
+import { orders, products } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
 import { isAdminAuthenticated } from "@/lib/auth";
@@ -421,35 +421,35 @@ export async function POST(request: NextRequest) {
     if (addonItemsArray && addonItemsArray.length > 0) {
       for (const addon of addonItemsArray) {
         if (addon.id) {
-          const [addonRecord] = await db
+          const [addonProduct] = await db
             .select()
-            .from(addons)
-            .where(eq(addons.id, addon.id))
+            .from(products)
+            .where(eq(products.id, addon.id))
             .limit(1);
 
-          if (addonRecord) {
-            const currentStock = addonRecord.stockQuantity;
+          if (addonProduct) {
+            const currentStock = addonProduct.stockQuantity;
             if (currentStock !== null && currentStock < 1) {
-              throw new Error(`Insufficient stock for ${addonRecord.name}`);
+              throw new Error(`Insufficient stock for ${addonProduct.name}`);
             }
             if (currentStock !== null) {
               await db
-                .update(addons)
+                .update(products)
                 .set({ 
                   stockQuantity: currentStock - 1,
                   inStock: (currentStock - 1) > 0,
                   updatedAt: new Date()
                 })
-                .where(eq(addons.id, addon.id));
+                .where(eq(products.id, addon.id));
             } else {
               await db
-                .update(addons)
+                .update(products)
                 .set({ 
                   stockQuantity: 0,
                   inStock: false,
                   updatedAt: new Date()
                 })
-                .where(eq(addons.id, addon.id));
+                .where(eq(products.id, addon.id));
             }
           }
         }
