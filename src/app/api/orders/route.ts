@@ -354,7 +354,7 @@ export async function POST(request: NextRequest) {
         }
         if (currentStock !== null) {
           const newStock = currentStock - 1;
-          console.log(`[Orders API] Pot stock: ${currentStock} -> ${newStock} for product ID ${potIdNum}`);
+          console.log(`>>>> POT STOCK DECREMENT >>>> ${potProduct.name} (ID: ${potIdNum}): ${currentStock} -> ${newStock}`);
           await db
             .update(products)
             .set({ 
@@ -364,6 +364,7 @@ export async function POST(request: NextRequest) {
             })
             .where(eq(products.id, potIdNum));
         } else {
+          console.log(`>>>> POT STOCK INITIAL >>>> ${potProduct.name} (ID: ${potIdNum}): NULL -> 0`);
           await db
             .update(products)
             .set({ 
