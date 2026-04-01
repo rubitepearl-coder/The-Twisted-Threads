@@ -230,14 +230,15 @@ export async function POST(request: NextRequest) {
         
         // If stockQuantity is NULL, treat as unlimited - don't check stock
         // If stockQuantity is set, check and decrement
+        // Allow ordering even if stock is 0 (admin can restock later)
         if (currentStock !== null && currentStock < quantity) {
           throw new Error(`Insufficient stock for ${name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        // Always decrement stock when order is placed (even for unlimited/NULL stock)
+        // Decrement stock when order is placed (even for 0 stock - allows admin to track orders)
         if (currentStock !== null) {
           // Explicit stock tracking - decrement
-          const newStock = currentStock - quantity;
+          const newStock = Math.max(0, currentStock - quantity);
           await db
             .update(products)
             .set({ 
@@ -332,6 +333,7 @@ export async function POST(request: NextRequest) {
 
       if (potProduct) {
         const currentStock = potProduct.stockQuantity;
+        // Allow ordering even if stock is 0 (admin can restock later)
         if (currentStock !== null && currentStock < 1) {
           throw new Error(`Insufficient stock for ${potProduct.name}`);
         }
@@ -339,8 +341,8 @@ export async function POST(request: NextRequest) {
           await db
             .update(products)
             .set({ 
-              stockQuantity: currentStock - 1,
-              inStock: (currentStock - 1) > 0,
+              stockQuantity: Math.max(0, currentStock - 1),
+              inStock: (Math.max(0, currentStock - 1)) > 0,
               updatedAt: new Date()
             })
             .where(eq(products.id, potIdNum));
@@ -387,13 +389,14 @@ export async function POST(request: NextRequest) {
         
         // If stockQuantity is NULL, treat as unlimited - don't check stock
         // If stockQuantity is set, check and decrement
+        // Allow ordering even if stock is 0 (admin can restock later)
         if (currentStock !== null && currentStock < quantity) {
           throw new Error(`Insufficient stock for ${name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
-        // Always decrement stock when order is placed (even for unlimited/NULL stock)
+        // Decrement stock when order is placed (even for 0 stock - allows admin to track orders)
         if (currentStock !== null) {
-          const newStock = currentStock - quantity;
+          const newStock = Math.max(0, currentStock - quantity);
           await db
             .update(products)
             .set({ 
@@ -429,6 +432,7 @@ export async function POST(request: NextRequest) {
 
           if (addonProduct) {
             const currentStock = addonProduct.stockQuantity;
+            // Allow ordering even if stock is 0 (admin can restock later)
             if (currentStock !== null && currentStock < 1) {
               throw new Error(`Insufficient stock for ${addonProduct.name}`);
             }
@@ -436,8 +440,8 @@ export async function POST(request: NextRequest) {
               await db
                 .update(products)
                 .set({ 
-                  stockQuantity: currentStock - 1,
-                  inStock: (currentStock - 1) > 0,
+                  stockQuantity: Math.max(0, currentStock - 1),
+                  inStock: (Math.max(0, currentStock - 1)) > 0,
                   updatedAt: new Date()
                 })
                 .where(eq(products.id, addon.id));
