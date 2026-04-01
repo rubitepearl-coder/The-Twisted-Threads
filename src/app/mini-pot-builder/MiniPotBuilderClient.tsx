@@ -25,6 +25,7 @@ type Addon = {
   price: number;
   imageUrl: string | null;
   inStock: boolean;
+  stockQuantity: number | null;
 };
 
 type Props = {
@@ -449,23 +450,29 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-10">
                   {addons.map((addon) => {
                     const isSelected = selectedAddons.includes(addon.id);
+                    const isOutOfStock = addon.stockQuantity !== null && addon.stockQuantity <= 0;
                     return (
                       <label
                         key={addon.id}
                         className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all ${
                           isSelected
                             ? "border-[#7a4f2e] bg-[#f5ede0]"
+                            : isOutOfStock
+                            ? "border-gray-200 opacity-60 cursor-not-allowed"
                             : "border-[#e8d5be] hover:border-[#c4a882]"
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={isSelected}
+                          disabled={isOutOfStock}
                           onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedAddons(prev => [...prev, addon.id]);
-                            } else {
-                              setSelectedAddons(prev => prev.filter(id => id !== addon.id));
+                            if (!isOutOfStock) {
+                              if (e.target.checked) {
+                                setSelectedAddons(prev => [...prev, addon.id]);
+                              } else {
+                                setSelectedAddons(prev => prev.filter(id => id !== addon.id));
+                              }
                             }
                           }}
                           className="w-4 h-4 text-[#7a4f2e] rounded"
@@ -474,6 +481,9 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                           <p className="font-medium text-[#3d2c1e]">{addon.name}</p>
                           {addon.description && (
                             <p className="text-xs text-[#6b4c30]">{addon.description}</p>
+                          )}
+                          {isOutOfStock && (
+                            <span className="text-red-500 text-xs font-medium">Out of Stock</span>
                           )}
                         </div>
                         <span className="text-[#7a4f2e] font-medium">

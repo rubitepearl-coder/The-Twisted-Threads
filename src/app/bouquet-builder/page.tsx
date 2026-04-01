@@ -25,9 +25,9 @@ export default async function BouquetBuilderPage() {
     // DB not yet seeded
   }
 
-  // Filter addons: available for bouquet AND has stock (stockQuantity > 0 or NULL = unlimited)
+  // Filter addons: available for bouquet (but keep all - show out of stock with label)
   const filteredAddons = addonItems.filter(
-    (a) => (a.availableFor === "both" || a.availableFor === "bouquet") && (a.stockQuantity === null || a.stockQuantity > 0)
+    (a) => a.availableFor === "both" || a.availableFor === "bouquet"
   );
 
   return (

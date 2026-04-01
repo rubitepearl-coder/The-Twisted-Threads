@@ -28,9 +28,9 @@ export default async function MiniPotBuilderPage() {
     // DB not yet seeded
   }
 
-  // Filter addons: available for mini_pot AND has stock (stockQuantity > 0 or NULL = unlimited)
+  // Filter addons: available for mini_pot (but keep all - show out of stock with label)
   const filteredAddons = addonItems.filter(
-    (a) => (a.availableFor === "both" || a.availableFor === "mini_pot") && (a.stockQuantity === null || a.stockQuantity > 0)
+    (a) => a.availableFor === "both" || a.availableFor === "mini_pot"
   );
 
   return (

@@ -34,6 +34,7 @@ type Addon = {
   price: number;
   imageUrl: string | null;
   inStock: boolean;
+  stockQuantity: number | null;
 };
 
 type Props = {
@@ -410,20 +411,25 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                 <div className="ml-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {addons.map((addon) => {
                     const isSelected = selectedAddons.includes(addon.id);
+                    const isOutOfStock = addon.stockQuantity !== null && addon.stockQuantity <= 0;
                     return (
                       <div
                         key={addon.id}
                         className={`bg-white rounded-2xl p-4 border-2 cursor-pointer transition-all ${
                           isSelected
                             ? "border-[#7a4f2e] shadow-md"
+                            : isOutOfStock
+                            ? "border-gray-200 opacity-60 cursor-not-allowed"
                             : "border-[#e8d5be] hover:border-[#c4a882]"
                         }`}
                         onClick={() => {
-                          setSelectedAddons(prev =>
-                            isSelected
-                              ? prev.filter(id => id !== addon.id)
-                              : [...prev, addon.id]
-                          );
+                          if (!isOutOfStock) {
+                            setSelectedAddons(prev =>
+                              isSelected
+                                ? prev.filter(id => id !== addon.id)
+                                : [...prev, addon.id]
+                            );
+                          }
                         }}
                       >
                         <div className="flex items-center justify-between">
@@ -442,7 +448,9 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-[#7a4f2e]">₱{addon.price.toFixed(2)}</p>
-                            {isSelected && <span className="text-green-600 text-xs">✓ Selected</span>}
+                            {isOutOfStock ? (
+                              <span className="text-red-500 text-xs font-medium">Out of Stock</span>
+                            ) : isSelected && <span className="text-green-600 text-xs">✓ Selected</span>}
                           </div>
                         </div>
                       </div>
