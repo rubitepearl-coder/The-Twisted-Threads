@@ -238,6 +238,7 @@ export async function POST(request: NextRequest) {
         if (currentStock !== null) {
           // Explicit stock tracking - decrement
           const newStock = currentStock - quantity;
+          console.log(`[Orders API] Flower stock: ${currentStock} -> ${newStock} for ${name} (ID: ${productIdNum})`);
           await db
             .update(products)
             .set({ 
@@ -332,16 +333,18 @@ export async function POST(request: NextRequest) {
 
       if (potProduct) {
         const currentStock = potProduct.stockQuantity;
-        // Allow ordering even if stock is 0 (admin can restock later)
+        // Only block if stock is explicitly 0
         if (currentStock !== null && currentStock < 1) {
           throw new Error(`Insufficient stock for ${potProduct.name}`);
         }
         if (currentStock !== null) {
+          const newStock = currentStock - 1;
+          console.log(`[Orders API] Pot stock: ${currentStock} -> ${newStock} for product ID ${potIdNum}`);
           await db
             .update(products)
             .set({ 
-              stockQuantity: currentStock - 1,
-              inStock: (currentStock - 1) > 0,
+              stockQuantity: newStock,
+              inStock: newStock > 0,
               updatedAt: new Date()
             })
             .where(eq(products.id, potIdNum));
