@@ -194,10 +194,13 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
 
       console.log("[MiniPotBuilder] Order submission data:", {
         customerName: customerName.trim(),
-        customerAddress: customerAddress.trim() || undefined,
+        facebookName: facebookName.trim(),
         deliveryType,
         deliveryLocation: deliveryLocation.trim() || null,
         orderType: "mini_pot",
+        potId: selectedPot,
+        potName: selectedPotObj?.name,
+        miniPotItems: miniPotItems.length,
         totalPrice: finalTotal,
       });
 
