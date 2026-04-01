@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { orders, products } from "@/db/schema";
+import { orders, products, addons } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { sendOrderToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/googleSheets";
 import { isAdminAuthenticated } from "@/lib/auth";
@@ -437,20 +437,52 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check and decrement stock for addons
-    // Note: Add-ons have their own stock management in the addons table, 
-    // so we don't need to decrement product stock here
-    // (The addon.id might conflict with product IDs, so we skip this)
-    /*
+    // Check and decrement stock for addons in the addons table
     const addonItemsArray = typeof addonItems === 'string' ? JSON.parse(addonItems) : addonItems;
     if (addonItemsArray && addonItemsArray.length > 0) {
       for (const addon of addonItemsArray) {
         if (addon.id) {
-          // Addons have their own stock in addons table - handled separately
+          // Get addon from addons table (not products table to avoid ID conflicts)
+          const [addonRecord] = await db
+            .select()
+            .from(addons)
+            .where(eq(addons.id, addon.id))
+            .limit(1);
+
+          if (addonRecord) {
+            const currentStock = addonRecord.stockQuantity;
+            // If stockQuantity is NULL, treat as unlimited - don't check stock
+            // If stockQuantity is set, check and block if 0
+            if (currentStock !== null && currentStock < 1) {
+              throw new Error(`Insufficient stock for ${addonRecord.name}`);
+            }
+            // Decrement stock if tracking
+            if (currentStock !== null) {
+              const newStock = currentStock - 1;
+              console.log(`[Orders API] Addon stock: ${currentStock} -> ${newStock} for ${addonRecord.name} (ID: ${addon.id})`);
+              await db
+                .update(addons)
+                .set({ 
+                  stockQuantity: newStock,
+                  inStock: newStock > 0,
+                  updatedAt: new Date()
+                })
+                .where(eq(addons.id, addon.id));
+            } else {
+              // NULL stockQuantity - set to 0 to start tracking
+              await db
+                .update(addons)
+                .set({ 
+                  stockQuantity: 0,
+                  inStock: false,
+                  updatedAt: new Date()
+                })
+                .where(eq(addons.id, addon.id));
+            }
+          }
         }
       }
     }
-    */
 
     // Build order data with EXPLICIT column specification only
       // Only include fields that are actually provided - no undefined/null values
