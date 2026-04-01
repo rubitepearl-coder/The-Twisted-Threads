@@ -438,45 +438,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Check and decrement stock for addons
+    // Note: Add-ons have their own stock management in the addons table, 
+    // so we don't need to decrement product stock here
+    // (The addon.id might conflict with product IDs, so we skip this)
+    /*
     const addonItemsArray = typeof addonItems === 'string' ? JSON.parse(addonItems) : addonItems;
     if (addonItemsArray && addonItemsArray.length > 0) {
       for (const addon of addonItemsArray) {
         if (addon.id) {
-          const [addonProduct] = await db
-            .select()
-            .from(products)
-            .where(eq(products.id, addon.id))
-            .limit(1);
-
-          if (addonProduct) {
-            const currentStock = addonProduct.stockQuantity;
-            // Allow ordering even if stock is 0 (admin can restock later)
-            if (currentStock !== null && currentStock < 1) {
-              throw new Error(`Insufficient stock for ${addonProduct.name}`);
-            }
-            if (currentStock !== null) {
-              await db
-                .update(products)
-                .set({ 
-                  stockQuantity: Math.max(0, currentStock - 1),
-                  inStock: (Math.max(0, currentStock - 1)) > 0,
-                  updatedAt: new Date()
-                })
-                .where(eq(products.id, addon.id));
-            } else {
-              await db
-                .update(products)
-                .set({ 
-                  stockQuantity: 0,
-                  inStock: false,
-                  updatedAt: new Date()
-                })
-                .where(eq(products.id, addon.id));
-            }
-          }
+          // Addons have their own stock in addons table - handled separately
         }
       }
     }
+    */
 
     // Build order data with EXPLICIT column specification only
       // Only include fields that are actually provided - no undefined/null values
