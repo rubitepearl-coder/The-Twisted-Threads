@@ -238,6 +238,7 @@ export async function POST(request: NextRequest) {
         // If stockQuantity is NULL, treat as unlimited - don't check stock
         // If stockQuantity is set, must have enough stock
         if (currentStock !== null && currentStock < quantity) {
+          console.log(`[Orders API] Stock check FAILED for ${name}: stock=${currentStock}, requested=${quantity}`);
           throw new Error(`Insufficient stock for ${name}. Available: ${currentStock}, Requested: ${quantity}`);
         }
 
@@ -344,8 +345,10 @@ export async function POST(request: NextRequest) {
 
       if (potProduct) {
         const currentStock = potProduct.stockQuantity;
+        console.log(`[Orders API] Pot stock check: ${potProduct.name} (ID: ${potIdNum}) has stock: ${currentStock}`);
         // Only block if stock is explicitly 0
         if (currentStock !== null && currentStock < 1) {
+          console.log(`[Orders API] Pot stock check FAILED for ${potProduct.name}: stock=${currentStock}`);
           throw new Error(`Insufficient stock for ${potProduct.name}`);
         }
         if (currentStock !== null) {
