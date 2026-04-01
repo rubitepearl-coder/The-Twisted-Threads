@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
         if (currentStock !== null) {
           // Explicit stock tracking - decrement
           const newStock = currentStock - quantity;
-          console.log(`[Orders API] Flower stock: ${currentStock} -> ${newStock} for ${name} (ID: ${productIdNum})`);
+          console.log(`[Orders API] Bouquet flower stock: ${currentStock} -> ${newStock} for ${name} (ID: ${productIdNum})`);
           await db
             .update(products)
             .set({ 
@@ -308,6 +308,7 @@ export async function POST(request: NextRequest) {
         if (currentStock !== null) {
           // Explicit stock tracking - decrement
           const newStock = currentStock - quantity;
+          console.log(`[Orders API] Mini pot item stock: ${currentStock} -> ${newStock} for ${name} (ID: ${productIdNum})`);
           await db
             .update(products)
             .set({ 
