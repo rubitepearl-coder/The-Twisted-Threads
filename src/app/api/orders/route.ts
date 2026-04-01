@@ -136,6 +136,13 @@ export async function POST(request: NextRequest) {
       addonMessage,
     } = body;
 
+    console.log("[Orders API] Full request body:", JSON.stringify({ 
+      orderType, 
+      potId: typeof potId !== 'undefined' ? potId : 'undefined',
+      potName,
+      miniPotItemsCount: miniPotItems?.length 
+    }));
+
     // Validate required fields
     // customerName (Full Name) is required for shipping records
     console.log("[Orders API] Validation check:", { customerName, facebookName, deliveryType, deliveryLocation });
