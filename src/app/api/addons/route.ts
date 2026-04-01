@@ -10,7 +10,10 @@ export async function GET() {
       .select()
       .from(addons)
       .where(or(eq(addons.inStock, true), eq(addons.availableFor, "both")));
-    return NextResponse.json(allAddons);
+    
+    // Filter out addons with stockQuantity = 0 (out of stock)
+    const availableAddons = allAddons.filter(a => a.stockQuantity === null || a.stockQuantity > 0);
+    return NextResponse.json(availableAddons);
   } catch (error) {
     console.error("Failed to fetch addons:", error);
     return NextResponse.json({ error: "Failed to fetch addons" }, { status: 500 });
