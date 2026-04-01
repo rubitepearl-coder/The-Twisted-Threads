@@ -174,22 +174,18 @@ export async function POST(request: NextRequest) {
     // Determine delivery type - default to pickup
     const finalDeliveryType = (deliveryType === "pickup" || deliveryType === "home") ? deliveryType : "pickup";
     
-    // Use delivery fee from client if provided, otherwise calculate
-    // Shop page sends deliveryFee, bouquet/mini-pot calculate on client but don't send
-    let finalDeliveryFee = deliveryFee ?? 0;
+    // Delivery fee is already included in totalPrice by the client
+    // Shop page sends deliveryFee separately, bouquet/mini-pot include it in finalTotal
+    // Either way, totalPrice already has delivery fee - DO NOT add again
+    let finalDeliveryFee = 0;
     let finalDeliveryLocation: string | undefined = undefined;
     
-    // Only add delivery fee if not already provided by client AND it's home delivery with location
-    if (finalDeliveryType === "home" && deliveryLocation && !deliveryFee) {
-      finalDeliveryFee = 10;
-      finalDeliveryLocation = deliveryLocation.toString().trim();
-    } else if (deliveryLocation) {
+    if (deliveryLocation) {
       finalDeliveryLocation = deliveryLocation.toString().trim();
     }
-    // For pickup: no delivery fee, no location needed
     
-    // Calculate final total with delivery fee
-    const finalTotal = totalPrice + finalDeliveryFee;
+    // Final total - delivery fee already in totalPrice from client
+    const finalTotal = totalPrice;
     
     // Debug: Log the validated and processed values
     console.log("[Orders API] Validated values:", {
@@ -197,7 +193,7 @@ export async function POST(request: NextRequest) {
       customerAddress: customerAddress ?? "",
       deliveryType: finalDeliveryType,
       deliveryLocation: finalDeliveryLocation,
-      deliveryFee: finalDeliveryFee,
+      deliveryFee: deliveryFee,
       orderType,
       totalPrice,
       finalTotal
@@ -510,9 +506,9 @@ export async function POST(request: NextRequest) {
         orderData.deliveryLocation = finalDeliveryLocation;
       }
 
-      // Delivery fee - only if > 0
-      if (finalDeliveryFee > 0) {
-        orderData.deliveryFee = finalDeliveryFee;
+      // Delivery fee - store what client sent (already included in totalPrice)
+      if (deliveryFee && deliveryFee > 0) {
+        orderData.deliveryFee = deliveryFee;
       }
 
       // Items - only include if provided
