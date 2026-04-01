@@ -200,6 +200,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
         orderType: "mini_pot",
         potId: selectedPot,
         potName: selectedPotObj?.name,
+        potStock: selectedPotObj?.stockQuantity,
         miniPotItems: miniPotItems.length,
         totalPrice: finalTotal,
       });

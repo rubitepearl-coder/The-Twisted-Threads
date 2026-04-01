@@ -324,12 +324,16 @@ export async function POST(request: NextRequest) {
 
     // Check and decrement stock for pot in mini pot orders
     if (orderType === "mini_pot" && potId) {
+      console.log("[Orders API] Processing pot order:", { potId, potIdType: typeof potId, potName });
       const potIdNum = parseInt(potId);
+      console.log("[Orders API] Parsed potId:", potIdNum);
       const [potProduct] = await db
         .select()
         .from(products)
         .where(eq(products.id, potIdNum))
         .limit(1);
+
+      console.log("[Orders API] Pot product found:", potProduct ? { id: potProduct.id, name: potProduct.name, stock: potProduct.stockQuantity } : "NOT FOUND");
 
       if (potProduct) {
         const currentStock = potProduct.stockQuantity;
