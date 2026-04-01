@@ -28,10 +28,6 @@ export default async function MiniPotBuilderPage() {
     // DB not yet seeded
   }
 
-  // Filter out out-of-stock items (stockQuantity = 0)
-  const availablePots = pots.filter((p) => p.stockQuantity === null || p.stockQuantity > 0);
-  const availableFlowers = fuzzyFlowers.filter((f) => f.stockQuantity === null || f.stockQuantity > 0);
-
   const filteredAddons = addonItems.filter(
     (a) => a.availableFor === "both" || a.availableFor === "mini_pot"
   );
@@ -50,7 +46,7 @@ export default async function MiniPotBuilderPage() {
         </p>
       </div>
 
-      <MiniPotBuilderClient pots={availablePots} fuzzyFlowers={availableFlowers} addons={filteredAddons} />
+      <MiniPotBuilderClient pots={pots} fuzzyFlowers={fuzzyFlowers} addons={filteredAddons} />
     </div>
   );
 }
