@@ -25,6 +25,9 @@ export default async function BouquetBuilderPage() {
     // DB not yet seeded
   }
 
+  // Filter out out-of-stock flowers (stockQuantity = 0)
+  const availableFlowers = flowers.filter((f) => f.stockQuantity === null || f.stockQuantity > 0);
+
   const filteredAddons = addonItems.filter(
     (a) => a.availableFor === "both" || a.availableFor === "bouquet"
   );
@@ -43,7 +46,7 @@ export default async function BouquetBuilderPage() {
         </p>
       </div>
 
-      <BouquetBuilderClient flowers={flowers} wrapperColors={colors} addons={filteredAddons} />
+      <BouquetBuilderClient flowers={availableFlowers} wrapperColors={colors} addons={filteredAddons} />
     </div>
   );
 }
