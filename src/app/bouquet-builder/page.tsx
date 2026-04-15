@@ -40,7 +40,7 @@ export default async function BouquetBuilderPage() {
         </h1>
         <p className="text-[#6b4c30] text-lg max-w-xl mx-auto">
           Choose your flowers, pick a wrapper, and we&apos;ll craft your custom
-          crochet bouquet with love.
+          bouquet with love.
         </p>
       </div>
 

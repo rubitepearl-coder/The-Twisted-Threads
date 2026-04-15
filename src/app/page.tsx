@@ -67,7 +67,7 @@ export default async function HomePage() {
                 step: "1",
                 emoji: "🌸",
                 title: "Choose Your Flowers",
-                desc: "Pick from our collection of handcrafted yarn and fuzzy wire flowers — roses, tulips, sunflowers, and more.",
+                desc: "Pick from our collection of handcrafted yarn and fuzzy wire flowers — tulips, lily, carnation, and more.",
               },
               {
                 step: "2",
@@ -110,7 +110,7 @@ export default async function HomePage() {
               Our Flowers
             </h2>
             <p className="text-center text-[#6b4c30] mb-10">
-              Each stem is hand-crocheted with premium yarn
+              Each stem is handcrafted with premium yarn and fuzzy wire
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {featuredFlowers.map((flower) => (
