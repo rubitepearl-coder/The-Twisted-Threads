@@ -8,6 +8,14 @@ The template has been fully expanded into "The Twisted Threads" — a custom cro
 
 ## Recently Completed
 
+- [x] **TEXT UPDATE: Clarified materials (yarn/crochet and fuzzy wire)** - Updated frontend text to clarify that the shop uses both yarn (crochet flowers) AND fuzzy wire materials, not only crochet:
+  - Homepage: Updated hero description to mention "yarn and fuzzy wire flowers"
+  - Homepage: Updated "How It Works" step 1 description
+  - Homepage: Changed "Why Crochet Flowers?" to "Why Handcrafted Flowers?"
+  - Shop page: Updated shop description, "Individual Stems" to "Individual Flowers" with "yarn (crochet) and fuzzy wire" clarification
+  - Bouquet Builder: Updated flower selection description to mention both materials
+  - Mini Pot Builder: Enhanced fuzzy wire descriptions to be more descriptive
+
 - [x] **FEATURE: Add-ons for bouquet and mini pot builders** - Customers can now add items like letters, premium wrappers, and greeting cards to their orders:
   - Database: Added `addons` table with name, description, type, price, imageUrl, inStock
   - Database: Added `addon_items` column to orders table (removed addon_message)
@@ -137,6 +145,7 @@ After deployment, call `POST /api/seed` to populate the database with:
 | 2026-03-01 | Fixed deployment error: Added column name mapping (camelCase to snake_case) for raw SQL inserts in orders API
 | 2026-03-01 | Fixed stock quantity handling: NULL stockQuantity means unlimited (available), not sold out
 | 2026-03-30 | Added Add-ons feature for bouquet and mini pot builders |
+| 2026-04-15 | Updated frontend text to clarify both yarn (crochet) and fuzzy wire materials are used |
 
 - [x] **FIX: Stock quantity handling** - Changed stockQuantity to allow NULL (unlimited) instead of defaulting to 0. Products with NULL stockQuantity are now treated as available (unlimited stock). Only products with explicit stockQuantity > 0 are limited. Products with stockQuantity <= 0 are sold out. Fixed in:
   - Schema: Removed `.default(0)` from stockQuantity

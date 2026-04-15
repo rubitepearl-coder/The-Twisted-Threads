@@ -126,7 +126,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
       return;
     }
     if (totalFlowers === 0) {
-      setError("Please add at least one fuzzy wire flower to your pot.");
+      setError("Please select at least one flower for your pot.");
       return;
     }
     if (!customerName.trim()) {
@@ -250,7 +250,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                 Choose Your Mini Pot
               </h2>
               <p className="text-[#6b4c30] text-sm mb-5 ml-10">
-                Pick the perfect pot for your fuzzy wire flowers.
+                Pick the perfect pot for your fuzzy wire flowers. Each flower is handcrafted with soft fuzzy wire.
               </p>
 
               {availablePots.length === 0 ? (
@@ -335,7 +335,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                 Plant Your Flowers
               </h2>
               <p className="text-[#6b4c30] text-sm mb-5 ml-10">
-                Choose how many of each fuzzy wire flower to add to your pot.
+                Choose how many fuzzy wire flowers to add to your pot. Each is handcrafted with fuzzy wire for a soft, realistic look.
               </p>
 
               {availableFlowers.length === 0 ? (
@@ -712,7 +712,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-[#6b4c30] text-sm">
-                    {totalFlowers} flower{totalFlowers !== 1 ? "s" : ""}
+                    {totalFlowers} fuzzy wire flower{totalFlowers !== 1 ? "s" : ""}
                   </span>
                   <span className="text-[#3d2c1e]">
                     ₱{totalPrice.toFixed(2)}

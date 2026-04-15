@@ -239,7 +239,7 @@ export default function ShopPage() {
           The Twisted Threads Shop
         </h1>
         <p className="text-[#6b4c30] text-lg max-w-xl mx-auto">
-          Browse our handcrafted crochet goods — from individual stems to
+          Browse our handcrafted flowers — from individual yarn and fuzzy wire stems to
           finished bouquets and more.
         </p>
         {cart.length > 0 && (
@@ -295,10 +295,10 @@ export default function ShopPage() {
             {flowers.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-2xl font-bold text-[#3d2c1e] mb-2 flex items-center gap-2">
-                  🌸 Individual Stems
+                  🌸 Individual Flowers
                 </h2>
                 <p className="text-[#6b4c30] text-sm mb-6">
-                  Want to mix and match?{" "}
+                  Want to mix and match? Choose from yarn (crochet) and fuzzy wire stems.{" "}
                   <Link
                     href="/bouquet-builder"
                     className="text-[#7a4f2e] underline hover:text-[#5c3a1e]"
@@ -352,7 +352,7 @@ export default function ShopPage() {
                           )}
                           <span className="text-xs font-normal text-[#a07850]">
                             {" "}
-                            / stem
+                            / flower
                           </span>
                         </p>
                         {flower.stockQuantity !== null && flower.stockQuantity === 0 ? (

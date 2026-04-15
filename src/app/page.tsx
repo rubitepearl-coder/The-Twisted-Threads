@@ -29,8 +29,8 @@ export default async function HomePage() {
             <span className="text-[#7a4f2e]">Forever</span>
           </h1>
           <p className="text-lg sm:text-xl text-[#6b4c30] mb-8 max-w-2xl mx-auto leading-relaxed">
-            Design your own custom crochet bouquet or shop our handcrafted
-            collection. Each petal is lovingly stitched — no watering required.
+            Design your own custom bouquet with our handcrafted yarn and fuzzy wire flowers.
+            Each petal is lovingly made — no watering required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -67,7 +67,7 @@ export default async function HomePage() {
                 step: "1",
                 emoji: "🌸",
                 title: "Choose Your Flowers",
-                desc: "Pick from our collection of handcrafted crochet flowers — roses, tulips, sunflowers, and more.",
+                desc: "Pick from our collection of handcrafted yarn and fuzzy wire flowers — roses, tulips, sunflowers, and more.",
               },
               {
                 step: "2",
@@ -147,7 +147,7 @@ export default async function HomePage() {
       <section className="py-16 px-4 bg-[#f5ede0]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-[#3d2c1e] mb-6">
-            Why Crochet Flowers?
+            Why Handcrafted Flowers?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -188,7 +188,7 @@ export default async function HomePage() {
             Ready to Create Something Beautiful?
           </h2>
           <p className="text-[#e8d5be] mb-8 text-lg">
-            Design your perfect crochet bouquet today — a gift that truly lasts
+            Design your perfect bouquet today — a gift that truly lasts
             forever.
           </p>
           <Link

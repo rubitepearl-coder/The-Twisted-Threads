@@ -235,7 +235,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                 Choose Your Flowers
               </h2>
               <p className="text-[#6b4c30] text-sm mb-5 ml-10">
-                Use the + and − buttons to set how many of each flower you want.
+                Select from our yarn (crochet) and fuzzy wire flowers. Use the + and − buttons to set quantities.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -291,7 +291,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                             ) : (
                               <span>₱{flower.price.toFixed(2)}</span>
                             )}
-                            <span className="text-xs font-normal text-[#a07850]"> / stem</span>
+                            <span className="text-xs font-normal text-[#a07850]"> / flower</span>
                           </p>
                           {flower.stockQuantity !== null && flower.stockQuantity <= 5 && flower.stockQuantity > 0 && (
                             <p className="text-xs text-orange-600 font-medium">
