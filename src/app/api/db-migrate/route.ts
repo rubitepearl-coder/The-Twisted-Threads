@@ -68,6 +68,26 @@ export async function GET(request: NextRequest) {
       } catch (e: any) {
         console.error("[db-migrate] Failed to create addons:", e);
       }
+    }
+    
+    // Create delivery_settings table if it doesn't exist
+    if (!tableNames.includes("delivery_settings")) {
+      try {
+        await client.execute(`
+          CREATE TABLE delivery_settings (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            location_name text NOT NULL,
+            delivery_fee real NOT NULL DEFAULT 0,
+            in_stock integer DEFAULT 1 NOT NULL,
+            created_at integer,
+            updated_at integer
+          )
+        `);
+        migrations.push("Created delivery_settings table");
+        console.log("[db-migrate] Created delivery_settings table");
+      } catch (e: any) {
+        console.error("[db-migrate] Failed to create delivery_settings:", e);
+      }
     } else {
       // Table exists - check and fix column names
       const addonTableInfo = await client.execute("PRAGMA table_info(addons)");
@@ -317,6 +337,26 @@ export async function POST(request: NextRequest) {
         console.log("[db-migrate] Created wrapper_colors table");
       } catch (e: any) {
         console.error("[db-migrate] Failed to create wrapper_colors:", e);
+      }
+    }
+    
+    // Create delivery_settings table if it doesn't exist
+    if (!tableNames.includes("delivery_settings")) {
+      try {
+        await client.execute(`
+          CREATE TABLE delivery_settings (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            location_name text NOT NULL,
+            delivery_fee real NOT NULL DEFAULT 0,
+            in_stock integer DEFAULT 1 NOT NULL,
+            created_at integer,
+            updated_at integer
+          )
+        `);
+        migrations.push("Created delivery_settings table");
+        console.log("[db-migrate] Created delivery_settings table");
+      } catch (e: any) {
+        console.error("[db-migrate] Failed to create delivery_settings:", e);
       }
     } else {
       // Table exists, check for price column
