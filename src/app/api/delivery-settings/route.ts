@@ -22,19 +22,32 @@ export async function POST(request: NextRequest) {
     const { locationName, deliveryFee, action, toggleOther } = body;
 
     if (action === "toggleOther") {
-      const result = await getDb()
-        .insert(deliverySettings)
-        .values({
-          locationName: "__OTHER__",
-          deliveryFee: 10,
-          inStock: !toggleOther,
-        })
-        .onConflictDoUpdate({
-          target: deliverySettings.locationName,
-          set: { inStock: !toggleOther },
-        })
-        .returning();
-      return NextResponse.json(result[0]);
+      // Check if __OTHER__ already exists
+      const existing = await getDb()
+        .select()
+        .from(deliverySettings)
+        .where(eq(deliverySettings.locationName, "__OTHER__"));
+      
+      if (existing.length > 0) {
+        // Update existing
+        const result = await getDb()
+          .update(deliverySettings)
+          .set({ inStock: !toggleOther })
+          .where(eq(deliverySettings.id, existing[0].id))
+          .returning();
+        return NextResponse.json(result[0]);
+      } else {
+        // Insert new
+        const result = await getDb()
+          .insert(deliverySettings)
+          .values({
+            locationName: "__OTHER__",
+            deliveryFee: 10,
+            inStock: !toggleOther,
+          })
+          .returning();
+        return NextResponse.json(result[0]);
+      }
     }
 
     if (!locationName) {
