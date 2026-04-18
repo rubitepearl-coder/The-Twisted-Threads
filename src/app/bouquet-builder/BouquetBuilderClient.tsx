@@ -53,7 +53,19 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
   const [facebookName, setFacebookName] = useState(""); // Facebook name for contact
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
-  const [deliveryLocation, setDeliveryLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const deliveryLocations: Record<string, number> = {
+    "San Francisco (Talisayan)": 0,
+    "San Jose (Balangcan)": 0,
+    "San Juan (Labnay)": 0,
+    "Anini-y": 0,
+    "Culasi": 10,
+    "Calbayog City": 15,
+    "Catbalogan": 20,
+    "Tacloban": 25,
+    "_other": 10,
+  };
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -89,12 +101,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
     return sum + (quantities[flower.id] ?? 0) * (flower.salePrice || flower.price);
   }, 0);
 
-  // Calculate delivery fee:
-  // - ₱10 for home delivery
-  // - FREE for pickup
-  const deliveryFee = deliveryType === "home" && deliveryLocation 
-    ? 10
-    : 0;
+  // Calculate delivery fee based on selected location
+  const getDeliveryFee = (): number => {
+    if (deliveryType !== "home" || !selectedLocation) return 0;
+    if (selectedLocation === "_other") return 0; // "Other" shows message but fee is 0 until they choose pickup
+    return deliveryLocations[selectedLocation] ?? 10;
+  };
+  const deliveryFee = getDeliveryFee();
 
   const selectedItems = flowers.filter((f) => (quantities[f.id] ?? 0) > 0);
   const selectedWrapperObj = wrapperColors.find((c) => c.id === selectedWrapper);
@@ -143,8 +156,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
       setError("Please enter your delivery address.");
       return;
     }
-    if (deliveryType === "home" && !deliveryLocation.trim()) {
-      setError("Please enter your location (municipality/barangay) for delivery fee calculation.");
+    if (deliveryType === "home" && !selectedLocation) {
+      setError("Please select a delivery location.");
       return;
     }
 
@@ -179,7 +192,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
           facebookName: facebookName.trim(),
           customerAddress: customerAddress.trim() || undefined,
           deliveryType,
-          deliveryLocation: deliveryLocation.trim() || null,
+          deliveryLocation: selectedLocation === "_other" ? null : selectedLocation,
           orderType: "bouquet",
           bouquetItems,
           wrapperColorId: selectedWrapper,
@@ -504,25 +517,47 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                 </label>
               </div>
               
-              {/* Show location field for delivery fee calculation */}
+              {/* Show location dropdown for delivery fee calculation */}
               {deliveryType === "home" && (
                 <div className="ml-10 mt-4">
                   <label className="block text-sm font-medium text-[#3d2c1e] mb-1">
-                    Location (Municipality/Barangay) *
+                    Delivery Location *
                   </label>
-                  <input
-                    type="text"
-                    value={deliveryLocation}
-                    onChange={(e) => setDeliveryLocation(e.target.value)}
-                    placeholder="e.g., [Barangay Name], [Municipality]"
+                  <select
+                    value={selectedLocation}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedLocation(value);
+                      if (value === "_other") {
+                        setDeliveryType("pickup");
+                      }
+                    }}
                     className="w-full sm:w-80 border border-[#d4b896] rounded-xl px-4 py-2.5 text-[#3d2c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a4f2e] focus:border-transparent"
                     required={deliveryType === "home"}
-                  />
-                  <p className="text-xs text-[#a07850] mt-1">
-                    Enter your municipality to calculate delivery fee.
-                    Free delivery for STHS, SFES, and San Francisco nearby.
-                    ₱10 delivery fee for home delivery.
-                  </p>
+                  >
+                    <option value="">Select location...</option>
+                    {Object.keys(deliveryLocations)
+                      .filter((loc) => loc !== "_other")
+                      .map((loc) => (
+                        <option key={loc} value={loc}>
+                          {loc} (₱{deliveryLocations[loc]})
+                        </option>
+                      ))}
+                    <option value="_other">Other (Not Listed)</option>
+                  </select>
+                  {selectedLocation === "_other" && (
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-700">
+                        Home delivery is not available for that address. Please choose pickup.
+                      </p>
+                    </div>
+                  )}
+                  {selectedLocation && selectedLocation !== "_other" && (
+                    <p className="text-xs text-[#a07850] mt-1">
+                      Delivery fee: ₱{deliveryLocations[selectedLocation]}
+                      {deliveryLocations[selectedLocation] === 0 && " (Free)"}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -673,10 +708,10 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                   </div>
                 )}
                 
-                {deliveryType === "home" && (
+                {deliveryType === "home" && selectedLocation && (
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-[#6b4c30]">
-                      Delivery to {deliveryLocation}
+                      Delivery to {selectedLocation}
                     </span>
                     <span className={deliveryFee > 0 ? "text-[#7a4f2e]" : "text-green-600"}>
                       {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Free"}
