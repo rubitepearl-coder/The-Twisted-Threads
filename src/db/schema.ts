@@ -76,3 +76,12 @@ export const adminSessions = sqliteTable("admin_sessions", {
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
 });
+
+export const deliverySettings = sqliteTable("delivery_settings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  locationName: text("location_name").notNull(),
+  deliveryFee: real("delivery_fee").notNull().default(0),
+  inStock: integer("in_stock", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+});

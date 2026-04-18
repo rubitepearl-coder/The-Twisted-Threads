@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useImageLightbox, LightboxImage } from "@/components/Lightbox";
@@ -49,18 +49,9 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
-
-  const deliveryLocations: Record<string, number> = {
-    "San Francisco (Talisayan)": 0,
-    "San Jose (Balangcan)": 0,
-    "San Juan (Labnay)": 0,
-    "Anini-y": 0,
-    "Culasi": 10,
-    "Calbayog City": 15,
-    "Catbalogan": 20,
-    "Tacloban": 25,
-    "_other": 10,
-  };
+  const [deliveryLocationsMap, setDeliveryLocationsMap] = useState<Record<string, number>>({});
+  const [showOtherOption, setShowOtherOption] = useState(true);
+  const [loadingLocations, setLoadingLocations] = useState(true);
 
   // Helper function to validate image URL
   const isValidImageUrl = (url: string | null | undefined): boolean => {
@@ -72,6 +63,32 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
   const handleImageError = (key: string) => {
     setImageErrors(prev => ({ ...prev, [key]: true }));
   };
+
+  // Fetch delivery locations from database
+  useEffect(() => {
+    async function fetchDeliveryLocations() {
+      try {
+        const res = await fetch("/api/delivery-settings");
+        if (res.ok) {
+          const data = await res.json();
+          const map: Record<string, number> = {};
+          data.forEach((loc: { locationName: string; deliveryFee: number; inStock: boolean }) => {
+            if (loc.locationName === "__OTHER__") {
+              setShowOtherOption(loc.inStock);
+            } else if (loc.inStock) {
+              map[loc.locationName] = loc.deliveryFee;
+            }
+          });
+          setDeliveryLocationsMap(map);
+        }
+      } catch (e) {
+        console.error("Failed to fetch delivery locations:", e);
+      } finally {
+        setLoadingLocations(false);
+      }
+    }
+    fetchDeliveryLocations();
+  }, []);
 
   const availablePots = pots;
   const availableFlowers = fuzzyFlowers;
@@ -109,7 +126,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
   // - ₱10 for home delivery
   // - FREE for pickup
   const deliveryFee = deliveryType === "home" && selectedLocation && selectedLocation !== "_other" 
-    ? deliveryLocations[selectedLocation] ?? 10 
+    ? deliveryLocationsMap[selectedLocation] ?? 10 
     : 0;
 
   const finalTotal = totalPrice + deliveryFee;
@@ -570,14 +587,13 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                     required={deliveryType === "home"}
                   >
                     <option value="">Select location...</option>
-                    {Object.keys(deliveryLocations)
-                      .filter((loc) => loc !== "_other")
+                    {Object.keys(deliveryLocationsMap)
                       .map((loc) => (
                         <option key={loc} value={loc}>
-                          {loc} (₱{deliveryLocations[loc]})
+                          {loc} (₱{deliveryLocationsMap[loc]})
                         </option>
                       ))}
-                    <option value="_other">Other (Not Listed)</option>
+                    {showOtherOption && <option value="_other">Other (Not Listed)</option>}
                   </select>
                   {selectedLocation === "_other" && (
                     <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -588,8 +604,8 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                   )}
                   {selectedLocation && selectedLocation !== "_other" && (
                     <p className="text-xs text-[#a07850] mt-1">
-                      Delivery fee: ₱{deliveryLocations[selectedLocation]}
-                      {deliveryLocations[selectedLocation] === 0 && " (Free)"}
+                      Delivery fee: ₱{deliveryLocationsMap[selectedLocation]}
+                      {deliveryLocationsMap[selectedLocation] === 0 && " (Free)"}
                     </p>
                   )}
                 </div>

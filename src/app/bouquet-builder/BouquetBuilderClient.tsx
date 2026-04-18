@@ -54,18 +54,9 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "pickup">("home");
   const [selectedLocation, setSelectedLocation] = useState("");
-
-  const deliveryLocations: Record<string, number> = {
-    "San Francisco (Talisayan)": 0,
-    "San Jose (Balangcan)": 0,
-    "San Juan (Labnay)": 0,
-    "Anini-y": 0,
-    "Culasi": 10,
-    "Calbayog City": 15,
-    "Catbalogan": 20,
-    "Tacloban": 25,
-    "_other": 10,
-  };
+  const [deliveryLocationsMap, setDeliveryLocationsMap] = useState<Record<string, number>>({});
+  const [showOtherOption, setShowOtherOption] = useState(true);
+  const [loadingLocations, setLoadingLocations] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -81,6 +72,32 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
   const handleImageError = (key: string) => {
     setImageErrors(prev => ({ ...prev, [key]: true }));
   };
+
+  // Fetch delivery locations from database
+  useEffect(() => {
+    async function fetchDeliveryLocations() {
+      try {
+        const res = await fetch("/api/delivery-settings");
+        if (res.ok) {
+          const data = await res.json();
+          const map: Record<string, number> = {};
+          data.forEach((loc: { locationName: string; deliveryFee: number; inStock: boolean }) => {
+            if (loc.locationName === "__OTHER__") {
+              setShowOtherOption(loc.inStock);
+            } else if (loc.inStock) {
+              map[loc.locationName] = loc.deliveryFee;
+            }
+          });
+          setDeliveryLocationsMap(map);
+        }
+      } catch (e) {
+        console.error("Failed to fetch delivery locations:", e);
+      } finally {
+        setLoadingLocations(false);
+      }
+    }
+    fetchDeliveryLocations();
+  }, []);
 
   // Show all flowers, but mark out-of-stock ones
   // const availableFlowers = flowers.filter((f) => f.inStock && f.stockQuantity > 0);
@@ -105,7 +122,7 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
   const getDeliveryFee = (): number => {
     if (deliveryType !== "home" || !selectedLocation) return 0;
     if (selectedLocation === "_other") return 0; // "Other" shows message but fee is 0 until they choose pickup
-    return deliveryLocations[selectedLocation] ?? 10;
+    return deliveryLocationsMap[selectedLocation] ?? 10;
   };
   const deliveryFee = getDeliveryFee();
 
@@ -536,14 +553,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                     required={deliveryType === "home"}
                   >
                     <option value="">Select location...</option>
-                    {Object.keys(deliveryLocations)
-                      .filter((loc) => loc !== "_other")
+                    {Object.keys(deliveryLocationsMap)
                       .map((loc) => (
                         <option key={loc} value={loc}>
-                          {loc} (₱{deliveryLocations[loc]})
+                          {loc} (₱{deliveryLocationsMap[loc]})
                         </option>
                       ))}
-                    <option value="_other">Other (Not Listed)</option>
+                    {showOtherOption && <option value="_other">Other (Not Listed)</option>}
                   </select>
                   {selectedLocation === "_other" && (
                     <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -554,8 +570,8 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                   )}
                   {selectedLocation && selectedLocation !== "_other" && (
                     <p className="text-xs text-[#a07850] mt-1">
-                      Delivery fee: ₱{deliveryLocations[selectedLocation]}
-                      {deliveryLocations[selectedLocation] === 0 && " (Free)"}
+                      Delivery fee: ₱{deliveryLocationsMap[selectedLocation]}
+                      {deliveryLocationsMap[selectedLocation] === 0 && " (Free)"}
                     </p>
                   )}
                 </div>
