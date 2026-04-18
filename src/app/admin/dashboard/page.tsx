@@ -24,7 +24,7 @@ export default async function AdminDashboardPage() {
   try {
     const allOrders = await db.select().from(orders);
     console.log("[AdminDashboard] Total orders from DB:", allOrders.length);
-    totalOrders = allOrders.length;
+    totalOrders = allOrders.length; // Ensure exact count from DB
     pendingOrders = allOrders.filter((o) => o.status === "pending").length;
 
     const allProducts = await db.select().from(products);
