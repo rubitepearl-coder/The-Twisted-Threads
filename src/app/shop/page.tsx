@@ -54,6 +54,8 @@ export default function ShopPage() {
   const [ordering, setOrdering] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [finalOrderTotal, setFinalOrderTotal] = useState(0);
+  const [finalDeliveryFee, setFinalDeliveryFee] = useState(0);
   const [deliveryLocationsMap, setDeliveryLocationsMap] = useState<Record<string, number>>({});
   const [showOtherOption, setShowOtherOption] = useState(true);
   const [loadingLocations, setLoadingLocations] = useState(true);
@@ -206,6 +208,8 @@ export default function ShopPage() {
 
       const data = await response.json();
       setOrderId(data.orderId);
+      setFinalOrderTotal(cartTotal);
+      setFinalDeliveryFee(deliveryFee);
       setOrderSuccess(true);
       setCart([]);
     } catch (err: any) {
@@ -237,21 +241,42 @@ export default function ShopPage() {
           <p className="text-[#6b4c30] mb-4">
             Order ID: <span className="font-bold">#{orderId}</span>
           </p>
-          {deliveryType === "home" ? (
-            <p className="text-[#6b4c30] mb-6">
-              Your order will be delivered to: <strong>{selectedLocation}</strong>
-            </p>
-          ) : (
-            <p className="text-[#6b4c30] mb-6">
-              Your order will be available for pickup!
-            </p>
-          )}
-          <Link
-            href="/"
-            className="inline-block bg-[#7a4f2e] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#5c3a1e] transition-colors"
-          >
-          Back to Home
-          </Link>
+           {deliveryType === "home" ? (
+             <p className="text-[#6b4c30] mb-4">
+               Your order will be delivered to: <strong>{selectedLocation}</strong>
+             </p>
+           ) : (
+             <p className="text-[#6b4c30] mb-4">
+               Your order will be available for pickup!
+             </p>
+           )}
+
+           {/* Receipt Section */}
+           <div className="bg-[#f5ede0] rounded-lg p-4 mb-6 border border-[#e8d5be]">
+             <h3 className="font-semibold text-[#3d2c1e] mb-3 text-center">Order Receipt</h3>
+             <div className="space-y-2 text-sm">
+               <div className="flex justify-between">
+                 <span className="text-[#6b4c30]">Order Total:</span>
+                 <span className="font-medium text-[#3d2c1e]">₱{finalOrderTotal.toFixed(2)}</span>
+               </div>
+               <div className="flex justify-between">
+                 <span className="text-[#6b4c30]">Delivery Fee:</span>
+                 <span className="font-medium text-[#3d2c1e]">₱{finalDeliveryFee.toFixed(2)}</span>
+               </div>
+               <hr className="border-[#e8d5be] my-2" />
+               <div className="flex justify-between font-bold text-base">
+                 <span className="text-[#3d2c1e]">Total Payment:</span>
+                 <span className="text-[#3d2c1e]">₱{(finalOrderTotal + finalDeliveryFee).toFixed(2)}</span>
+               </div>
+             </div>
+           </div>
+
+           <Link
+             href="/"
+             className="inline-block bg-[#7a4f2e] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#5c3a1e] transition-colors"
+           >
+           Back to Home
+           </Link>
         </div>
       </div>
     );
