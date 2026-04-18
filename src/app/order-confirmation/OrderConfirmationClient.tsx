@@ -207,7 +207,7 @@ export default function OrderConfirmationClient({
               <span className="text-[#6b4c30]">Subtotal</span>
               <span className="text-[#3d2c1e]">₱{order.totalPrice.toFixed(2)}</span>
             </div>
-            {order.deliveryFee > 0 && (
+            {order.orderType !== "shop" && order.deliveryFee > 0 && (
               <div className="flex justify-between items-center text-sm mb-1">
                 <span className="text-[#6b4c30]">Delivery Fee</span>
                 <span className="text-[#3d2c1e]">₱{order.deliveryFee.toFixed(2)}</span>
@@ -215,7 +215,7 @@ export default function OrderConfirmationClient({
             )}
             <div className="flex justify-between items-center text-lg font-bold mt-2 pt-2 border-t border-[#e8d5be]">
               <span className="text-[#3d2c1e]">Total</span>
-              <span className="text-[#3d2c1e]">₱{(order.totalPrice + order.deliveryFee).toFixed(2)}</span>
+              <span className="text-[#3d2c1e]">₱{(order.orderType === "shop" ? order.totalPrice + order.deliveryFee : order.totalPrice).toFixed(2)}</span>
             </div>
           </div>
         </div>
