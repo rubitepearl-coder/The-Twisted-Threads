@@ -185,6 +185,70 @@ export default function OrderConfirmationClient({
                   <p className="text-[#3d2c1e] font-medium">₱{(item.quantity * item.price).toFixed(2)}</p>
                 </div>
               ))}
+              <div className="pt-3 border-t border-[#e8d5be]">
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="text-[#6b4c30]">Subtotal</span>
+                  <span className="text-[#3d2c1e]">₱{shopItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="text-[#6b4c30]">Delivery Fee</span>
+                  <span className="text-[#3d2c1e]">₱{order.deliveryFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-lg font-bold mt-2 pt-2 border-t border-[#e8d5be]">
+                  <span className="text-[#3d2c1e]">Total</span>
+                  <span className="text-[#3d2c1e]">₱{(shopItems.reduce((sum, item) => sum + (item.quantity * item.price), 0) + order.deliveryFee).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {addonItems && addonItems.length > 0 && (
+            <div className="pt-3 border-t border-[#e8d5be]">
+              <h4 className="font-medium text-[#3d2c1e] mb-2">Add-ons</h4>
+              <div className="space-y-2">
+                {addonItems.map((addon: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <span className="text-[#6b4c30]">{addon.name}</span>
+                    <span className="text-[#7a4f2e] font-medium">+₱{addon.price.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="pt-3 border-t border-[#e8d5be]">
+            <div className="flex justify-between items-center text-sm mb-1">
+              <span className="text-[#6b4c30]">Subtotal</span>
+              <span className="text-[#3d2c1e]">₱{order.totalPrice.toFixed(2)}</span>
+            </div>
+            {order.orderType !== "shop" && order.deliveryFee > 0 && (
+              <div className="flex justify-between items-center text-sm mb-1">
+                <span className="text-[#6b4c30]">Delivery Fee</span>
+                <span className="text-[#3d2c1e]">₱{order.deliveryFee.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center text-lg font-bold mt-2 pt-2 border-t border-[#e8d5be]">
+              <span className="text-[#3d2c1e]">Total</span>
+              <span className="text-[#3d2c1e]">₱{(order.orderType === "shop" ? order.totalPrice + order.deliveryFee : order.totalPrice).toFixed(2)}</span>
+            </div>
+          </div>
+                  <p className="text-[#3d2c1e] font-medium">₱{(item.quantity * item.price).toFixed(2)}</p>
+                </div>
+              ))}
+              <div className="pt-3 border-t border-[#e8d5be]">
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="text-[#6b4c30]">Subtotal</span>
+                  <span className="text-[#3d2c1e]">₱{shopItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="text-[#6b4c30]">Delivery Fee</span>
+                  <span className="text-[#3d2c1e]">₱{order.deliveryFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-lg font-bold mt-2 pt-2 border-t border-[#e8d5be]">
+                  <span className="text-[#3d2c1e]">Total</span>
+                  <span className="text-[#3d2c1e]">₱{(shopItems.reduce((sum, item) => sum + (item.quantity * item.price), 0) + order.deliveryFee).toFixed(2)}</span>
+                </div>
+              </div>
             </div>
           )}
 
