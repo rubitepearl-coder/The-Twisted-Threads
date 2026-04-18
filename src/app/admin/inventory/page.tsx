@@ -66,6 +66,12 @@ export default async function AdminInventoryPage() {
               Orders
             </Link>
             <Link
+              href="/admin/delivery-settings"
+              className="text-[#c4a882] hover:text-[#f5ede0] text-sm font-medium transition-colors"
+            >
+              Delivery
+            </Link>
+            <Link
               href="/"
               className="text-[#c4a882] hover:text-[#f5ede0] text-sm transition-colors"
             >
