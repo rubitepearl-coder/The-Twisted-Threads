@@ -34,13 +34,6 @@ export default function DeliverySettingsClient({ initialLocations }: Props) {
     inStock: true,
   });
 
-  useEffect(() => {
-    const otherLoc = locations.find((l) => l.locationName === "__OTHER__");
-    if (otherLoc) {
-      setOtherToggle(!otherLoc.inStock);
-    }
-  }, [locations]);
-
   const showMessage = (msg: string) => {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
@@ -162,27 +155,18 @@ export default function DeliverySettingsClient({ initialLocations }: Props) {
         </div>
       )}
 
-      {/* Other Toggle */}
+      {/* Other Option Info */}
       <div className="bg-[#2d1f14] rounded-2xl p-6 border border-[#7a4f2e] mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-[#f5ede0] font-bold">&quot;Other (Not Listed)&quot; Option</h3>
             <p className="text-[#c4a882] text-sm">
-              Show &quot;Other (Not Listed)&quot; option in checkout dropdown. When selected, customers
-              will be switched to Pickup mode.
+              This option is always shown in checkout. When selected, customers will be switched to Pickup mode.
             </p>
           </div>
-          <button
-            onClick={handleToggleOther}
-            disabled={saving}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              otherToggle
-                ? "bg-green-600 text-white"
-                : "bg-gray-600 text-white"
-            }`}
-          >
-            {otherToggle ? "✓ Enabled" : "✗ Disabled"}
-          </button>
+          <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-900 text-green-200">
+            ✓ Always Enabled
+          </span>
         </div>
       </div>
 

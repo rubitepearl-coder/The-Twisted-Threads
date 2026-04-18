@@ -74,7 +74,7 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
           const map: Record<string, number> = {};
           data.forEach((loc: { locationName: string; deliveryFee: number; inStock: boolean }) => {
             if (loc.locationName === "__OTHER__") {
-              setShowOtherOption(loc.inStock);
+              setShowOtherOption(true); // Always show "Other (Not Listed)" option
             } else if (loc.inStock) {
               map[loc.locationName] = loc.deliveryFee;
             }
