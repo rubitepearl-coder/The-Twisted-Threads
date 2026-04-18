@@ -232,10 +232,7 @@ export default function OrderConfirmationClient({
               <span className="text-[#3d2c1e]">₱{(order.orderType === "shop" ? order.totalPrice + order.deliveryFee : order.totalPrice).toFixed(2)}</span>
             </div>
           </div>
-                  <p className="text-[#3d2c1e] font-medium">₱{(item.quantity * item.price).toFixed(2)}</p>
-                </div>
-              ))}
-              <div className="pt-3 border-t border-[#e8d5be]">
+          <div className="pt-3 border-t border-[#e8d5be]">
                 <div className="flex justify-between items-center text-sm mb-1">
                   <span className="text-[#6b4c30]">Subtotal</span>
                   <span className="text-[#3d2c1e]">₱{shopItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}</span>
