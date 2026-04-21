@@ -647,37 +647,44 @@ function ProductTable({
           </tr>
         </thead>
         <tbody>
-          {/* Group products by subcategory */}
+          {/* Group products by subcategory if available, otherwise show all products */}
           {(() => {
-            const groupedProducts = products.reduce((acc, product) => {
-              const subcategory = product.subcategory || 'Uncategorized';
-              if (!acc[subcategory]) {
-                acc[subcategory] = [];
-              }
-              acc[subcategory].push(product);
-              return acc;
-            }, {} as Record<string, Product[]>);
+            // Check if products have subcategory field
+            const hasSubcategories = products.some(p => p.subcategory !== null && p.subcategory !== undefined);
 
-            const subcategories = ['Crochet', 'Fuzzy Wire', 'Uncategorized'];
+            if (hasSubcategories) {
+              // Group products by subcategory
+              const groupedProducts = products.reduce((acc, product) => {
+                const subcategory = product.subcategory || 'Uncategorized';
+                if (!acc[subcategory]) {
+                  acc[subcategory] = [];
+                }
+                acc[subcategory].push(product);
+                return acc;
+              }, {} as Record<string, Product[]>);
 
-            return subcategories.map(subcategory => {
-              const categoryProducts = groupedProducts[subcategory] || [];
-              if (categoryProducts.length === 0) return null;
+              // Get all unique subcategories from products, ensuring 'Uncategorized' is included
+              const allSubcategories = Array.from(new Set(products.map(p => p.subcategory || 'Uncategorized')));
+              const subcategories = ['Crochet', 'Fuzzy Wire', ...allSubcategories.filter(s => s !== 'Crochet' && s !== 'Fuzzy Wire' && s !== 'Uncategorized'), 'Uncategorized'].filter((v, i, arr) => arr.indexOf(v) === i);
 
-              return (
-                <React.Fragment key={subcategory}>
-                  {/* Category Header */}
-                  <tr className="bg-[#3d2c1e]">
-                    <td colSpan={7} className="px-4 py-2 text-[#f5ede0] font-semibold text-sm">
-                      {subcategory} Flowers ({categoryProducts.length})
-                    </td>
-                  </tr>
-                  {/* Products in this category */}
-                  {categoryProducts.map((product) => (
-                    <tr
-                      key={product.id}
-                      className="border-b border-[#3d2c1e]"
-                    >
+              return subcategories.map(subcategory => {
+                const categoryProducts = groupedProducts[subcategory] || [];
+                if (categoryProducts.length === 0) return null;
+
+                return (
+                  <React.Fragment key={subcategory}>
+                    {/* Category Header */}
+                    <tr className="bg-[#3d2c1e]">
+                      <td colSpan={7} className="px-4 py-2 text-[#f5ede0] font-semibold text-sm">
+                        {subcategory} Flowers ({categoryProducts.length})
+                      </td>
+                    </tr>
+                    {/* Products in this category */}
+                    {categoryProducts.map((product) => (
+                      <tr
+                        key={product.id}
+                        className="border-b border-[#3d2c1e]"
+                      >
               {editingId === product.id ? (
                 <>
                   <td className="px-4 py-3">
@@ -891,6 +898,221 @@ function ProductTable({
                 </React.Fragment>
               );
             });
+            } else {
+              // Fallback: show all products without grouping if subcategories don't exist
+              return products.map((product) => (
+                <tr
+                  key={product.id}
+                  className="border-b border-[#3d2c1e] last:border-0"
+                >
+                  {editingId === product.id ? (
+                    <>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editForm.imageEmoji ?? ""}
+                            onChange={(e) =>
+                              onEditFormChange("imageEmoji", e.target.value)
+                            }
+                            className="w-12 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm text-center"
+                            title="Emoji"
+                          />
+                          <input
+                            type="text"
+                            value={editForm.name ?? ""}
+                            onChange={(e) =>
+                              onEditFormChange("name", e.target.value)
+                            }
+                            className="flex-1 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                          />
+                        </div>
+                        <input
+                          type="text"
+                          value={editForm.description ?? ""}
+                          onChange={(e) =>
+                            onEditFormChange("description", e.target.value)
+                          }
+                          placeholder="Description"
+                          className="mt-1 w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#c4a882] text-xs"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1 items-start">
+                          <input
+                            type="url"
+                            value={editForm.imageUrl ?? ""}
+                            onChange={(e) =>
+                              onEditFormChange("imageUrl", e.target.value)
+                            }
+                            placeholder="https://..."
+                            className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-xs"
+                          />
+                          <label className="bg-[#7a4f2e] text-white px-2 py-1 rounded cursor-pointer hover:bg-[#5c3a1e] text-xs whitespace-nowrap">
+                            {uploading ? '...' : '📤'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => onImageUpload(e, 'edit')}
+                              disabled={uploading}
+                            />
+                          </label>
+                        </div>
+                        {editForm.imageUrl && (
+                          <div className="mt-1 w-10 h-10 rounded overflow-hidden border border-[#5c3a1e]">
+                            <Image
+                              src={editForm.imageUrl}
+                              alt="Preview"
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={editForm.price ?? ""}
+                          onChange={(e) =>
+                            onEditFormChange("price", parseFloat(e.target.value))
+                          }
+                          className="w-24 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={editForm.salePrice ?? ""}
+                          onChange={(e) =>
+
+                            onEditFormChange("salePrice", parseFloat(e.target.value))
+                          }
+                          className="w-24 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={editForm.stockQuantity ?? ""}
+                          onChange={(e) =>
+                            onEditFormChange("stockQuantity", parseInt(e.target.value) || null)
+                          }
+                          placeholder="∞"
+                          className="w-20 bg-[#1e1410] border border-[#5c3a1e] rounded px-2 py-1 text-[#f5ede0] text-sm"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={editForm.inStock ?? true}
+                            onChange={(e) =>
+                              onEditFormChange("inStock", e.target.checked)
+                            }
+                            className="rounded border-[#5c3a1e] bg-[#1e1410] text-[#7a4f2e] focus:ring-[#7a4f2e]"
+                          />
+                          <span className="ml-2 text-[#f5ede0] text-sm">
+                            {editForm.inStock ? "In Stock" : "Out of Stock"}
+                          </span>
+                        </label>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => onSave()}
+                            disabled={saving}
+                            className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {saving ? "..." : "Save"}
+                          </button>
+                          <button
+                            onClick={() => onCancel()}
+                            className="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-700"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{product.imageEmoji}</span>
+                          <div>
+                            <div className="font-medium text-[#f5ede0]">{product.name}</div>
+                            <div className="text-[#c4a882] text-xs">{product.description}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {product.imageUrl ? (
+                          <div className="w-12 h-12 rounded overflow-hidden border border-[#5c3a1e]">
+                            <Image
+                              src={product.imageUrl}
+                              alt={product.name}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-[#c4a882] text-xs">No image</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[#f5ede0]">₱{product.price.toFixed(2)}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[#f5ede0]">
+                          {product.salePrice ? `₱${product.salePrice.toFixed(2)}` : "-"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-[#f5ede0]">
+                          {product.stockQuantity === null ? "∞" : product.stockQuantity}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          product.inStock
+                            ? "bg-green-900 text-green-200"
+                            : "bg-red-900 text-red-200"
+                        }`}>
+                          {product.inStock ? "In Stock" : "Out of Stock"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => onEdit(product)}
+                            className="bg-[#7a4f2e] text-white px-3 py-1 rounded text-xs hover:bg-[#5c3a1e]"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => onDelete(product.id, product.name)}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ));
+            }
           })()}
         </tbody>
       </table>
