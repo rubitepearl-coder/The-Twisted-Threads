@@ -1,82 +1,12 @@
 {
-  "version": "9",
+  "version": "7",
   "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
       "version": "6",
-      "when": 1772116113976,
-      "tag": "0000_spooky_vargas",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1772119042485,
-      "tag": "0001_thin_risque",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1772196292084,
-      "tag": "0002_new_steve_rogers",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1772257474507,
-      "tag": "0003_lovely_preak",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1772300000000,
-      "tag": "0004_white_wolf",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1772400000000,
-      "tag": "0005_email_optional",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1772500000000,
-      "tag": "0006_add_facebook_name",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1772600000000,
-      "tag": "0007_fix_order_constraints",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "6",
-      "when": 1772700000000,
-      "tag": "0009_drop_email_not_null",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "6",
-      "when": 1772800000000,
-      "tag": "0011_wrapper_colors_price_v2",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "6",
-      "when": 1772900000000,
-      "tag": "0012_add_addons_table",
+      "when": 1776736567223,
+      "tag": "0000_flashy_spitfire",
       "breakpoints": true
     }
   ]
