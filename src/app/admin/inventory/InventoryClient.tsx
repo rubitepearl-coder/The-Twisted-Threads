@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 type Product = {
@@ -8,7 +8,6 @@ type Product = {
   name: string;
   description: string;
   category: string;
-  subcategory: string | null;
   price: number;
   salePrice: number | null;
   stockQuantity: number | null;
@@ -647,37 +646,11 @@ function ProductTable({
           </tr>
         </thead>
         <tbody>
-          {/* Group products by subcategory */}
-          {(() => {
-            const groupedProducts = products.reduce((acc, product) => {
-              const subcategory = product.subcategory || 'Uncategorized';
-              if (!acc[subcategory]) {
-                acc[subcategory] = [];
-              }
-              acc[subcategory].push(product);
-              return acc;
-            }, {} as Record<string, Product[]>);
-
-            const subcategories = ['Crochet', 'Fuzzy Wire', 'Uncategorized'];
-
-            return subcategories.map(subcategory => {
-              const categoryProducts = groupedProducts[subcategory] || [];
-              if (categoryProducts.length === 0) return null;
-
-              return (
-                <React.Fragment key={subcategory}>
-                  {/* Category Header */}
-                  <tr className="bg-[#3d2c1e]">
-                    <td colSpan={7} className="px-4 py-2 text-[#f5ede0] font-semibold text-sm">
-                      {subcategory} Flowers ({categoryProducts.length})
-                    </td>
-                  </tr>
-                  {/* Products in this category */}
-                  {categoryProducts.map((product) => (
-                    <tr
-                      key={product.id}
-                      className="border-b border-[#3d2c1e]"
-                    >
+          {products.map((product) => (
+            <tr
+              key={product.id}
+              className="border-b border-[#3d2c1e] last:border-0"
+            >
               {editingId === product.id ? (
                 <>
                   <td className="px-4 py-3">
@@ -887,11 +860,7 @@ function ProductTable({
                 </>
               )}
             </tr>
-                  ))}
-                </React.Fragment>
-              );
-            });
-          })()}
+          ))}
         </tbody>
       </table>
     </div>

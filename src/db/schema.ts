@@ -5,7 +5,6 @@ export const products = sqliteTable("products", {
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
   category: text("category").notNull().default("flower"), // 'flower' | 'finished_good' | 'pot' | 'fuzzy_wire_flower'
-  subcategory: text("subcategory").default("Uncategorized"), // For flowers: 'Crochet' | 'Fuzzy Wire' | 'Uncategorized'
   price: real("price").notNull(),
   salePrice: real("sale_price"),
   stockQuantity: integer("stock_quantity"), // NULL = unlimited/not tracked, number = limited stock
