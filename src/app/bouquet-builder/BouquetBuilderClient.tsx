@@ -15,6 +15,7 @@ type Flower = {
   imageEmoji: string;
   imageUrl: string | null;
   description: string;
+  subcategory: string | null;
 };
 
 type WrapperColor = {
@@ -101,7 +102,13 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
 
   // Show all flowers, but mark out-of-stock ones
   // const availableFlowers = flowers.filter((f) => f.inStock && f.stockQuantity > 0);
-  const availableFlowers = flowers;
+  const availableFlowers = flowers.sort((a, b) => {
+    // Sort by subcategory: Crochet first, then Fuzzy Wire, then Uncategorized
+    const order = { 'Crochet': 0, 'Fuzzy Wire': 1, 'Uncategorized': 2 };
+    const aOrder = order[(a.subcategory || 'Uncategorized') as keyof typeof order] ?? 2;
+    const bOrder = order[(b.subcategory || 'Uncategorized') as keyof typeof order] ?? 2;
+    return aOrder - bOrder;
+  });
 
   const updateQuantity = (id: number, delta: number) => {
     setQuantities((prev) => {
@@ -266,10 +273,10 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                 Choose Your Flowers
               </h2>
               <p className="text-[#6b4c30] text-sm mb-5 ml-10">
-                Select from our yarn (crochet) and fuzzy wire flowers. Use the + and − buttons to set quantities.
+                Select from our Crochet and Fuzzy Wire flowers. Use the + and − buttons to set quantities.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {availableFlowers.map((flower) => {
                   const qty = quantities[flower.id] ?? 0;
                     const isOutOfStock = flower.stockQuantity !== null && flower.stockQuantity <= 0;

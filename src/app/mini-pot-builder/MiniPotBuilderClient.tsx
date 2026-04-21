@@ -15,6 +15,7 @@ type Product = {
   imageEmoji: string;
   imageUrl: string | null;
   description: string;
+  subcategory: string | null;
 };
 
 type Addon = {

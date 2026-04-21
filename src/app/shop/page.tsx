@@ -14,6 +14,7 @@ interface Product {
   name: string;
   description: string;
   category: string;
+  subcategory: string | null;
   price: number;
   salePrice: number | null;
   stockQuantity: number | null;
