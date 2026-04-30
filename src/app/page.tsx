@@ -112,24 +112,29 @@ export default async function HomePage() {
             <p className="text-center text-[#6b4c30] mb-10">
               Each stem is handcrafted with premium yarn and fuzzy wire
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {featuredFlowers.map((flower) => (
-                <div
-                  key={flower.id}
-                  className="bg-white rounded-2xl p-4 text-center border border-[#e8d5be] hover:shadow-md transition-shadow"
-                >
-                  <div className="text-4xl mb-2">{flower.imageEmoji}</div>
-                  <p className="font-semibold text-[#3d2c1e] text-sm">
-                    {flower.name}
-                  </p>
-                  <p className="text-[#7a4f2e] text-sm font-medium">
-                    ₱{flower.price.toFixed(2)}
-                  </p>
-                  {flower.stockQuantity !== null && flower.stockQuantity <= 0 && (
-                    <span className="text-xs text-red-500">Out of stock</span>
-                  )}
-                </div>
-              ))}
+             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+               {featuredFlowers.map((flower) => (
+                 <div
+                   key={flower.id}
+                   className="bg-white rounded-2xl p-4 text-center border border-[#e8d5be] hover:shadow-md transition-shadow"
+                 >
+                   <div className="text-4xl mb-2">{flower.imageEmoji}</div>
+                   <p className="font-semibold text-[#3d2c1e] text-sm">
+                     {flower.name}
+                   </p>
+                   {flower.description && (
+                     <p className="text-xs text-[#a07850] mb-1 line-clamp-2">
+                       {flower.description}
+                     </p>
+                   )}
+                   <p className="text-[#7a4f2e] text-sm font-medium">
+                     ₱{flower.price.toFixed(2)}
+                   </p>
+                   {flower.stockQuantity !== null && flower.stockQuantity <= 0 && (
+                     <span className="text-xs text-red-500">Out of stock</span>
+                   )}
+                 </div>
+               ))}
             </div>
             <div className="text-center mt-8">
               <Link

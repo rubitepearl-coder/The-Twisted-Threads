@@ -407,16 +407,21 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                               {flower.imageEmoji}
                             </span>
                           )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-[#3d2c1e]">
-                              {flower.name}
-                              {isOutOfStock && (
-                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                  Sold Out
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-[#7a4f2e] text-sm font-medium">
+                           <div className="flex-1 min-w-0">
+                             <p className="font-semibold text-[#3d2c1e]">
+                               {flower.name}
+                               {isOutOfStock && (
+                                 <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                   Sold Out
+                                 </span>
+                               )}
+                             </p>
+                             {flower.description && !isOutOfStock && (
+                               <p className="text-xs text-[#a07850] mb-1 line-clamp-1">
+                                 {flower.description}
+                               </p>
+                             )}
+                             <p className="text-[#7a4f2e] text-sm font-medium">
                               {flower.salePrice ? (
                                 <>
                                   <span className="line-through text-[#a07850] text-xs">
