@@ -465,12 +465,26 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#f5ede0] flex items-center justify-center text-xl">
-                              {addon.type === 'letter' && '✉️'}
-                              {addon.type === 'card' && '💌'}
-                              {addon.type === 'wrapper' && '🎁'}
-                              {addon.type === 'other' && '✨'}
-                              {!addon.type && '✨'}
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#f5ede0] flex-shrink-0">
+                              {isValidImageUrl(addon.imageUrl) && !imageErrors[`addon-${addon.id}`] ? (
+                                <Image
+                                  src={addon.imageUrl!}
+                                  alt={addon.name}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                  unoptimized
+                                  onError={() => handleImageError(`addon-${addon.id}`)}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xl">
+                                  {addon.type === 'letter' && '✉️'}
+                                  {addon.type === 'card' && '💌'}
+                                  {addon.type === 'wrapper' && '🎁'}
+                                  {addon.type === 'other' && '✨'}
+                                  {!addon.type && '✨'}
+                                </div>
+                              )}
                             </div>
                             <div>
                               <p className="font-semibold text-[#3d2c1e]">{addon.name}</p>

@@ -510,8 +510,29 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                               }
                             }
                           }}
-                          className="w-4 h-4 text-[#7a4f2e] rounded"
+                          className="w-4 h-4 text-[#7a4f2e] rounded flex-shrink-0"
                         />
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#f5ede0] flex-shrink-0">
+                          {isValidImageUrl(addon.imageUrl) && !imageErrors[`addon-${addon.id}`] ? (
+                            <Image
+                              src={addon.imageUrl!}
+                              alt={addon.name}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                              onError={() => handleImageError(`addon-${addon.id}`)}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xl">
+                              {addon.type === 'letter' && '✉️'}
+                              {addon.type === 'card' && '💌'}
+                              {addon.type === 'wrapper' && '🎁'}
+                              {addon.type === 'other' && '✨'}
+                              {!addon.type && '✨'}
+                            </div>
+                          )}
+                        </div>
                         <div className="flex-1">
                           <p className="font-medium text-[#3d2c1e]">{addon.name}</p>
                           {addon.description && (
