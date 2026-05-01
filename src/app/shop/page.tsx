@@ -387,11 +387,11 @@ export default function ShopPage() {
                         <h3 className="font-semibold text-[#3d2c1e] mb-1 text-sm">
                           {flower.name}
                         </h3>
-                        {flower.description && (
-                          <p className="text-xs text-[#a07850] mb-2 line-clamp-2">
-                            {flower.description}
-                          </p>
-                        )}
+                         {flower.description && (
+                           <p className="text-xs text-[#a07850] mb-2">
+                             {flower.description}
+                           </p>
+                         )}
                         <p className="text-[#7a4f2e] font-bold text-sm">
                           {flower.salePrice ? (
                             <span>

@@ -122,11 +122,11 @@ export default async function HomePage() {
                    <p className="font-semibold text-[#3d2c1e] text-sm">
                      {flower.name}
                    </p>
-                   {flower.description && (
-                     <p className="text-xs text-[#a07850] mb-1 line-clamp-2">
-                       {flower.description}
-                     </p>
-                   )}
+                    {flower.description && (
+                      <p className="text-xs text-[#a07850] mb-1">
+                        {flower.description}
+                      </p>
+                    )}
                    <p className="text-[#7a4f2e] text-sm font-medium">
                      ₱{flower.price.toFixed(2)}
                    </p>

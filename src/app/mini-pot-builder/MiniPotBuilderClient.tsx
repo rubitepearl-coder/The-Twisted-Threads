@@ -416,11 +416,11 @@ export default function MiniPotBuilderClient({ pots, fuzzyFlowers, addons }: Pro
                                  </span>
                                )}
                              </p>
-                             {flower.description && !isOutOfStock && (
-                               <p className="text-xs text-[#a07850] mb-1 line-clamp-1">
-                                 {flower.description}
-                               </p>
-                             )}
+                              {flower.description && !isOutOfStock && (
+                                <p className="text-xs text-[#a07850] mb-1">
+                                  {flower.description}
+                                </p>
+                              )}
                              <p className="text-[#7a4f2e] text-sm font-medium">
                               {flower.salePrice ? (
                                 <>
