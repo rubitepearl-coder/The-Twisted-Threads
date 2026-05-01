@@ -334,11 +334,11 @@ export default function BouquetBuilderClient({ flowers, wrapperColors, addons }:
                               Available in shop
                             </p>
                           )}
-                          {flower.description && !isOutOfStock && (
-                            <p className="text-xs text-[#a07850] mt-0.5 truncate">
-                              {flower.description}
-                            </p>
-                          )}
+                           {flower.description && !isOutOfStock && (
+                             <p className="text-xs text-[#a07850] mt-0.5">
+                               {flower.description}
+                             </p>
+                           )}
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <button
