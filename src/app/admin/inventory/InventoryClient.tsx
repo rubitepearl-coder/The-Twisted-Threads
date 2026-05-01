@@ -86,7 +86,7 @@ export default function InventoryClient({
     setTimeout(() => setMessage(""), 3000);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit') => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit' | 'addon') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -103,11 +103,13 @@ export default function InventoryClient({
       if (!res.ok) throw new Error('Upload failed');
 
       const { url } = await res.json();
-      
+
       if (target === 'new') {
         setNewProduct(p => ({ ...p, imageUrl: url }));
-      } else {
+      } else if (target === 'edit') {
         setEditForm(prev => ({ ...prev, imageUrl: url }));
+      } else if (target === 'addon') {
+        setNewAddon(a => ({ ...a, imageUrl: url }));
       }
       showMessage('✅ Image uploaded!');
     } catch {
@@ -565,9 +567,9 @@ export default function InventoryClient({
       )}
 
       {activeTab === "addons" && (
-        <AddonsTab 
-          addons={addons} 
-          setAddons={setAddons} 
+        <AddonsTab
+          addons={addons}
+          setAddons={setAddons}
           showMessage={showMessage}
           showAddForm={showAddAddonForm}
           setShowAddForm={setShowAddAddonForm}
@@ -579,6 +581,8 @@ export default function InventoryClient({
           setEditForm={setEditAddonForm}
           saving={saving}
           setSaving={setSaving}
+          uploading={uploading}
+          handleImageUpload={handleImageUpload}
         />
       )}
     </div>
@@ -1347,6 +1351,8 @@ function AddonsTab({
   setEditForm,
   saving,
   setSaving,
+  uploading,
+  handleImageUpload,
 }: {
   addons: Addon[];
   setAddons: React.Dispatch<React.SetStateAction<Addon[]>>;
@@ -1361,6 +1367,8 @@ function AddonsTab({
   setEditForm: React.Dispatch<React.SetStateAction<Partial<Addon>>>;
   saving: boolean;
   setSaving: (saving: boolean) => void;
+  uploading: boolean;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>, target: 'new' | 'edit' | 'addon') => void;
 }) {
   const isValidImageUrl = (url: string | null | undefined): boolean => {
     if (!url || typeof url !== 'string') return false;
@@ -1588,15 +1596,29 @@ function AddonsTab({
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs text-[#c4a882] mb-1">
-                Image URL
+                Image
               </label>
-              <input
-                type="url"
-                value={newAddon.imageUrl}
-                onChange={(e) => setNewAddon((a) => ({ ...a, imageUrl: e.target.value }))}
-                placeholder="https://example.com/image.jpg"
-                className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
-              />
+              <div className="flex gap-2 items-start">
+                <div className="flex-1">
+                  <input
+                    type="url"
+                    value={newAddon.imageUrl}
+                    onChange={(e) => setNewAddon((a) => ({ ...a, imageUrl: e.target.value }))}
+                    placeholder="Or paste image URL..."
+                    className="w-full bg-[#1e1410] border border-[#5c3a1e] rounded-lg px-3 py-2 text-[#f5ede0] text-sm focus:outline-none focus:ring-1 focus:ring-[#c4a882]"
+                  />
+                </div>
+                <label className="bg-[#7a4f2e] text-white px-3 py-2 rounded-lg cursor-pointer hover:bg-[#5c3a1e] transition-colors text-sm font-medium">
+                  {uploading ? 'Uploading...' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, 'addon')}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
               {isValidImageUrl(newAddon.imageUrl) && (
                 <div className="mt-2 w-16 h-16 rounded-lg overflow-hidden border border-[#5c3a1e]">
                   <Image
