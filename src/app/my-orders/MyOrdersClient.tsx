@@ -13,6 +13,15 @@ type OrderItem = {
   imageUrl: string;
 };
 
+type AddonItem = {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  price: number;
+  imageUrl: string;
+};
+
 type Order = {
   id: number;
   customerName: string;
@@ -26,6 +35,7 @@ type Order = {
   bouquetItems: string;
   miniPotItems: string;
   shopItems: string;
+  addonItems: string | null;
   potId: number | null;
   potName: string | null;
   potImageUrl: string | null;
@@ -100,6 +110,14 @@ export default function MyOrdersClient() {
   const parseItems = (itemsJson: string): OrderItem[] => {
     try {
       return JSON.parse(itemsJson);
+    } catch {
+      return [];
+    }
+  };
+
+  const parseAddonItems = (addonItemsJson: string | null): AddonItem[] => {
+    try {
+      return addonItemsJson ? JSON.parse(addonItemsJson) : [];
     } catch {
       return [];
     }
@@ -229,6 +247,7 @@ export default function MyOrdersClient() {
               const bouquetItems = parseItems(order.bouquetItems || "[]");
               const miniPotItems = parseItems(order.miniPotItems || "[]");
               const shopItems = parseItems(order.shopItems || "[]");
+              const addonItems = parseAddonItems(order.addonItems);
               const allItems = [...bouquetItems, ...miniPotItems, ...shopItems];
 
               return (
@@ -318,11 +337,56 @@ export default function MyOrdersClient() {
                             <p className="text-xs text-[#a07850]">Quantity: 1</p>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
+                       )}
+                     </div>
+                   </div>
 
-                  {/* Wrapper Color */}
+                   {/* Add-ons */}
+                   {addonItems.length > 0 && (
+                     <div className="mb-4">
+                       <h4 className="font-semibold text-[#3d2c1e] mb-2">Add-ons:</h4>
+                       <div className="space-y-2">
+                         {addonItems.map((addon, idx) => (
+                           <div
+                             key={idx}
+                             className="flex items-center gap-3 p-2 bg-[#faf7f2] rounded-lg"
+                           >
+                             <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#e8d5be]">
+                               {isValidImageUrl(addon.imageUrl) && !imageErrors[`addon-${order.id}-${idx}`] ? (
+                                 <Image
+                                   src={addon.imageUrl}
+                                   alt={addon.name}
+                                   width={40}
+                                   height={40}
+                                   className="w-full h-full object-cover"
+                                   unoptimized
+                                   onError={() => handleImageError(`addon-${order.id}-${idx}`)}
+                                 />
+                               ) : (
+                                 <div className="w-full h-full flex items-center justify-center text-xl">
+                                   {addon.type === 'letter' && '✉️'}
+                                   {addon.type === 'card' && '💌'}
+                                   {addon.type === 'wrapper' && '🎁'}
+                                   {addon.type === 'other' && '✨'}
+                                   {!addon.type && '✨'}
+                                 </div>
+                               )}
+                             </div>
+                             <div className="flex-1">
+                               <p className="font-medium text-[#3d2c1e] text-sm">
+                                 {addon.name}
+                               </p>
+                               <p className="text-xs text-[#a07850]">
+                                 +₱{addon.price.toFixed(2)}
+                               </p>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+
+                   {/* Wrapper Color */}
                   {order.wrapperColorName && (
                     <div className="mb-4">
                       <h4 className="font-semibold text-[#3d2c1e] mb-2">Wrapper:</h4>
